@@ -9,7 +9,6 @@ type Product struct {
 	Price float64 `json:"price"`
 }
 
-var products []Product
 
 var productType = graphql.NewObject(
 	graphql.ObjectConfig{

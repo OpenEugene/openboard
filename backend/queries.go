@@ -6,8 +6,8 @@ var queryType = graphql.NewObject(
 	graphql.ObjectConfig{
 		Name: "Query",
 		Fields: graphql.Fields{
-			/* Get (read) single product by id
-			   http://localhost:8080/product?query={product(id:1){name,info,price}}
+			/* Get (read) single product by id:
+			   	- /api?query={product(id:1){name,info,price}}
 			*/
 			"product": &graphql.Field{
 				Type:        productType,
@@ -30,8 +30,8 @@ var queryType = graphql.NewObject(
 					return nil, nil
 				},
 			},
-			/* Get (read) product list
-			   http://localhost:8080/product?query={list{id,name,info,price}}
+			/* Get (read) product list:
+			   	- /api?query={list{id,name,info,price}}
 			*/
 			"list": &graphql.Field{
 				Type:        graphql.NewList(productType),

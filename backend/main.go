@@ -17,6 +17,8 @@ var schema, _ = graphql.NewSchema(
 	},
 )
 
+var products []Product
+
 func executeQuery(query string, schema graphql.Schema) *graphql.Result {
 	result := graphql.Do(graphql.Params{
 		Schema:        schema,
