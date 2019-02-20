@@ -2,10 +2,8 @@ module Main exposing (Model, Msg(..), init, linkBtn, main, theme, update, view)
 
 import Browser
 import Css exposing (..)
-import Html.Attributes exposing (src)
 import Html.Styled exposing (..)
-import Html.Styled.Attributes exposing (css, href, src)
-import Html.Styled.Events exposing (onClick)
+import Html.Styled.Attributes exposing (..)
 
 
 
