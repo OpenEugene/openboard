@@ -1,7 +1,8 @@
 package main
 
 import "fmt"
+import "github.com/champagneabuelo/openboard/back/pb"
 
 func main() {
-	fmt.Println("go")
+	fmt.Println(pb.UserResp{})
 }
