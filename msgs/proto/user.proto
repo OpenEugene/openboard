@@ -1,0 +1,138 @@
+syntax = "proto3";
+
+// openboard
+//
+// user semantics:
+//
+//  Add{T}(s)    (Add{T}(s)Req)    returns {T}(s)Resp // POST
+//  Ovr{T}(s)    (Ovr{T}(s)Req)    returns {T}(s)Resp // PUT
+//  Mod{T}(s)    (Mod{T}(s)Req)    returns {T}(s)Resp // PATCH
+//  Get{T}       (Get{T}Req)       returns {T}Resp    // GET
+//  Fnd{T}s      (Fnd{T}sReq)      returns {T}sResp   // GET
+//  Rmv{T}(s)    (Rmv{T}(s)Req)    returns EmptyResp  // DELETE
+//  Unr{T}       (Unr{T}Req)       returns {T}Resp    // PATCH
+package pb;
+
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+
+message RoleResp {
+    uint32 id = 1;
+    string name = 2;
+}
+
+message AddRoleReq {
+    string name = 1;
+}
+
+message RolesResp {
+    repeated RoleResp items = 1;
+    uint32 total = 2;
+}
+
+message FndRolesReq {
+    repeated uint32 roleIds = 1;
+    repeated string roleNames = 2;
+    uint32 limit = 3;
+    uint32 lapse = 4;
+}
+
+message UserResp {
+    uint32 id = 1;
+    string username = 2;
+    string email = 3;
+    bool emailHold = 4;
+    string altmail = 5;
+    bool altmailHold = 6;
+    string firstName = 7;
+    string lastName = 8;
+    string avatar = 9;
+    repeated RoleResp roles = 10;
+    google.protobuf.Timestamp lastLogin = 11;
+    google.protobuf.Timestamp created = 12;
+    google.protobuf.Timestamp updated = 13;
+    google.protobuf.Timestamp deleted = 14;
+    google.protobuf.Timestamp blocked = 15;
+}
+
+message AddUserReq {
+    string username = 1;
+    string email = 2;
+    bool emailHold = 3;
+    string altmail = 4;
+    bool altmailHold = 5;
+    string firstName = 6;
+    string lastName = 7;
+    string avatar = 8;
+    string password = 9;
+    repeated uint32 roleIds = 10;
+}
+
+message OvrUserReq {
+    uint32 id = 1;
+    AddUserReq req = 2;
+}
+
+message UsersResp {
+    repeated UserResp items = 1;
+    uint32 total = 2;
+}
+
+message FndUsersReq {
+    repeated uint32 roleIds = 1;
+    repeated string emails = 2;
+    bool emailHold = 3;
+    repeated string altmails = 4;
+    bool altmailHold = 5;
+    google.protobuf.Timestamp createdFirst = 6;
+    google.protobuf.Timestamp createdFinal = 7;
+    bool createdDesc = 8;
+    uint32 limit = 9;
+    uint32 lapse = 10;
+}
+
+message RmvUserResp {
+
+}
+
+message RmvUserReq {
+    uint32 id = 1;
+}
+
+service User {
+    rpc AddRole(AddRoleReq) returns (RoleResp) {
+
+    }
+
+    rpc FndRoles(FndRolesReq) returns (RolesResp) {
+        option(google.api.http) = {
+            get: "/roles"
+        };
+    }
+
+    rpc AddUser(AddUserReq) returns (UserResp) {
+        option(google.api.http) = {
+            post: "/user"
+            body: "*"
+        };
+    }
+
+    rpc OvrUser(OvrUserReq) returns (UserResp) {
+        option(google.api.http) = {
+            put: "/user/{id}"
+            body: "*"
+        };
+    }
+
+    rpc FndUsers(FndUsersReq) returns (UsersResp) {
+        option(google.api.http) = {
+            get: "/users"
+        };
+    }
+
+    rpc RmvUser(RmvUserReq) returns (RmvUserResp) {
+        option(google.api.http) = {
+            delete: "/user/{id}"
+        };
+    }
+}

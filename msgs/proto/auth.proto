@@ -1,0 +1,65 @@
+syntax = "proto3";
+
+// openboard
+//
+// auth semantics:
+//
+//  Add{T}(s)    (Add{T}(s)Req)    returns {T}(s)Resp // POST
+//  Ovr{T}(s)    (Ovr{T}(s)Req)    returns {T}(s)Resp // PUT
+//  Mod{T}(s)    (Mod{T}(s)Req)    returns {T}(s)Resp // PATCH
+//  Get{T}       (Get{T}Req)       returns {T}Resp    // GET
+//  Fnd{T}s      (Fnd{T}sReq)      returns {T}sResp   // GET
+//  Rmv{T}(s)    (Rmv{T}(s)Req)    returns EmptyResp  // DELETE
+//  Unr{T}       (Unr{T}Req)       returns {T}Resp    // PATCH
+package pb;
+
+import "google/api/annotations.proto";
+
+message AuthResp {
+    string token = 1;
+}
+
+message AddAuthReq {
+    string username = 1;
+    string password = 2;
+}
+
+message RmvAuthResp {
+
+}
+
+message RmvAuthReq {
+    string token = 1;
+}
+
+message AddVoucherResp {
+
+}
+
+message AddVoucherReq {
+    bool notify = 1;
+    string email = 2;
+    bool password = 3;
+}
+
+service Auth {
+    rpc AddAuth(AddAuthReq) returns (AuthResp) {
+        option(google.api.http) = {
+            post: "/auth"
+            body: "*"
+        };
+    }
+
+    rpc RmvAuth(RmvAuthReq) returns (RmvAuthResp) {
+        option(google.api.http) = {
+            delete: "/auth/{token}"
+        };
+    }
+
+    rpc AddVoucher(AddVoucherReq) returns (AddVoucherResp) {
+        option(google.api.http) = {
+            post: "/voucher"
+            body: "*"
+        };
+    }
+}
