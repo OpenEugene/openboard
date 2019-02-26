@@ -1,0 +1,8 @@
+{
+  "name": "foobar",
+  "scripts": {
+    "build": "elm-app build",
+    "start": "elm-app start"
+  },
+  "private": true
+}
