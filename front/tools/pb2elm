@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+
+# first arg should be similar to:
+# ../msgs/proto/some.proto
+
+# this script assumes that protoc, elm-protobuf, and elm-format are installed properly
+
+function main {
+    local tmpFile="./Entity.proto"
+    local prtFile=${1}
+    local elmFile=${tmpFile/proto/elm}
+
+    local sedCmd=sed
+    hash gsed 2>/dev/null && sedCmd=gsed
+
+    # filename components/validation
+    local prtBasename=$(basename ${prtFile})
+    local prtExt=${prtBasename##*.}
+    [[ "${prtExt}" != "proto" ]] && echo "first arg must be a proto file" >&2 && exit 1 
+
+    # cleanup
+    function finish {
+        rm ${1}
+    }
+    trap "finish ${tmpFile}" EXIT
+
+    # pre-process proto file
+    cat ${prtFile} | \
+        # delete consecutive empty lines (simplifies multi-line empty message deletion)
+        ${sedCmd} '/^$/N;/^\n$/D' | \
+        # delete service definitions 
+        ${sedCmd} '/^service/,/^}$/d' | \
+        # delete annotations.proto (contains proto2 dependency)
+        ${sedCmd} '/annotations.proto/d' | \
+        # delete empty messages (single line)
+        ${sedCmd} '/^message.*{\s*}/d' | \
+        # delete empty messages (multiple lines)
+        ${sedCmd} '/^message.*/ {N;N; /^message.*{[\s|\n]*\}/d}' | \
+        # delete consecutive empty lines (again, some have likely been created)
+        ${sedCmd} '/^$/N;/^\n$/D' | \
+        # delete last line if empty
+        ${sedCmd} '${/^$/d}' \
+        >> ${tmpFile}
+    
+    protoc -I$(dirname ${tmpFile}) --elm_out=logtostderr=true:. ${tmpFile}
+
+    elm-format --yes ${elmFile}
+}
+
+# ensure first arg is provided
+[[ "${1}" == "" ]] && echo "first arg must not be empty" >&2 && exit 1
+
+main ${1}
