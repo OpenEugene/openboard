@@ -15,6 +15,11 @@ type AuthSvc struct {
 	// TODO: implement AuthSvc
 }
 
+// New returns a pointer to an AuthSvc instance or an error.
+func New() (*AuthSvc, error) {
+	return &AuthSvc{}, nil
+}
+
 // RegisterWithGRPCServer implements the grpcsrv.Registerable interface.
 func (s *AuthSvc) RegisterWithGRPCServer(g *grpc.Server) error {
 	pb.RegisterAuthServer(g, s)
