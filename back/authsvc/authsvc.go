@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/champagneabuelo/openboard/back/pb"
+	"google.golang.org/grpc"
 )
 
 var _ pb.AuthServer = &AuthSvc{}
@@ -12,6 +13,13 @@ var _ pb.AuthServer = &AuthSvc{}
 // pb.AuthServer interface.
 type AuthSvc struct {
 	// TODO: implement AuthSvc
+}
+
+// RegisterWithGRPCServer implements the grpcsrv.Registerable interface.
+func (s *AuthSvc) RegisterWithGRPCServer(g *grpc.Server) error {
+	pb.RegisterAuthServer(g, s)
+
+	return nil
 }
 
 // AddAuth implements part of the pb.AuthServer interface.
