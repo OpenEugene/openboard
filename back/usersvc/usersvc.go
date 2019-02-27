@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/champagneabuelo/openboard/back/pb"
+	"google.golang.org/grpc"
 )
 
 var _ pb.UserServer = &UserSvc{}
@@ -12,6 +13,13 @@ var _ pb.UserServer = &UserSvc{}
 // pb.UserServer interface.
 type UserSvc struct {
 	// TODO: implement UserSvc
+}
+
+// RegisterWithGRPCServer implements the grpcsrv.Registerable interface.
+func (s *UserSvc) RegisterWithGRPCServer(g *grpc.Server) error {
+	pb.RegisterUserServer(g, s)
+
+	return nil
 }
 
 // AddRole implements part of the pb.UserServer interface.
