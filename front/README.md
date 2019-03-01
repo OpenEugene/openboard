@@ -2,9 +2,17 @@
 
 Welcome! Glad you are here.
 
-To start the application:
+### Installation
 
-`elm make src/Main.elm --output=public/app.js && go run tools/front.go`
+First step would be to [install Elm](https://guide.elm-lang.org/install.html).
+
+Then you should have the `elm` command available. To compile the application run:
+
+`elm make src/Main.elm --output=public/app.js`
+
+Then serve up the `public` directory. If you have `go` installed:
+
+`go run tools/front.go`
 
 ### Tests
 
