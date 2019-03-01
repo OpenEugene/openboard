@@ -2,12 +2,30 @@
 
 Welcome! Glad you are here.
 
-Interested in writing tests? `npm i -g elm-test`.
-
 To start the application:
 
 `elm make src/Main.elm --output=public/app.js && go run front.go`
 
-Interested in live reloading? `npm i -g elm-live`
+### Tests
 
-`elm-live src/Main.elm -u --open --dir=public -- --output=public/app.js`
+Check out `tests/Tests.elm`.
+
+```
+npm i -g elm-test
+elm-test
+```
+
+### Live reloading
+
+```
+npm i -g elm-live
+elm-live src/Main.elm -u --open --dir=public -- --output=public/app.js
+```
+
+### Contributing
+
+Read the official [Elm Guide](https://guide.elm-lang.org/). Check out issues tagged with `good first issue` and open a draft PR so the community can gain visibility into the work and offer constructive feedback.
+
+### Protobuf
+
+TODO
