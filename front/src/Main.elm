@@ -40,10 +40,10 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    div []
-        [ img [ src "/img/elm.png" ] []
-        , h1 [] [ text "Your Elm App is working! And hot reloading!" ]
-        , linkBtn [ href "https://github.com/rtfeldman/elm-css" ] [ text "learn more about elm css" ]
+    card []
+        [ heading [] [ text "openboard!" ]
+        , linkBtn [ href "https://github.com/rtfeldman/elm-css" ] [ text "Learn more about elm css" ]
+        , linkBtn [ href "hhttps://github.com/champagneabuelo/openboard" ] [ text "githhub" ]
         ]
 
 
@@ -61,6 +61,34 @@ main =
         }
 
 
+gridUnit =
+    8
+
+
+card =
+    styled div
+        [ borderRadius (px 4)
+        , padding (px (gridUnit * 4))
+        , boxShadow4 (px 1) (px 1) (px 5) theme.dark
+        , margin (px (8 * gridUnit))
+        ]
+
+
+heading =
+    styled h1
+        [ h1Style ]
+
+
+h1Style : Style
+h1Style =
+    Css.batch
+        [ fontFamilies [ "Palatino Linotype", "Georgia", "serif" ]
+        , fontSize (6 * gridUnit |> px)
+        , fontWeight bold
+        , marginTop (px 0)
+        ]
+
+
 {-| A reusable button which has some styles pre-applied to it.
 -}
 linkBtn : List (Attribute msg) -> List (Html msg) -> Html msg
@@ -72,6 +100,8 @@ linkBtn =
             [ backgroundColor theme.hover
             , textDecoration underline
             ]
+        , display block
+        , margin (px 10)
         , backgroundColor theme.primary
         , cursor pointer
         , border (px 0)
@@ -86,4 +116,5 @@ theme =
     { primary = hex "55af6a"
     , secondary = rgb 250 240 230
     , hover = hex "3ebc5b"
+    , dark = hex "999"
     }
