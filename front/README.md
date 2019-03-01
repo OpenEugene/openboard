@@ -4,7 +4,7 @@ Welcome! Glad you are here.
 
 To start the application:
 
-`elm make src/Main.elm --output=public/app.js && go run front.go`
+`elm make src/Main.elm --output=public/app.js && go run tools/front.go`
 
 ### Tests
 
