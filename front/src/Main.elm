@@ -1,4 +1,4 @@
-module Main exposing (Model, Msg(..), init, linkBtn, main, theme, update, view)
+module Main exposing (Model, Msg(..), init, main, update, view)
 
 import Browser
 import Css exposing (..)
