@@ -2,23 +2,12 @@
 
 Welcome! Glad you are here.
 
-We use `elm-app` as a convenience in development. It injects things into the source code for Hot Module Reloading — this can be useful for debugging a deeply nested route/part of the application where you want to recompile while maintaining state.
+Interested in writing tests? `npm i -g elm-test`.
 
-```
-npm i -g elm-app
-npm start
-```
+To start the application:
 
-## Generate Elm Decoders/Encoders from *.proto files
+`elm make src/Main.elm --output=public/app.js && go run front.go`
 
-We will have a type safe backend, frontend and everything in between.
+Interested in live reloading? `npm i -g elm-live`
 
-1. [Install Protobuf Compiler, `protoc`](https://medium.com/@erika_dike/installing-the-protobuf-compiler-on-a-mac-a0d397af46b8)
-
-2. Install `protoc-gen-elm`: 
-
-```
-go get github.com/tiziano88/elm-protobuf/protoc-gen-elm
-```
-
-3. Run `protoc --elm_out=. *.proto -Ivendor-extra/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis/ -I.`
+`elm-live src/Main.elm -u --open --output=public/app.js`
