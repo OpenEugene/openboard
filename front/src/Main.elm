@@ -43,7 +43,7 @@ view model =
     card []
         [ heading [] [ text "openboard!" ]
         , linkBtn [ href "https://github.com/rtfeldman/elm-css" ] [ text "Learn more about elm css" ]
-        , linkBtn [ href "hhttps://github.com/champagneabuelo/openboard" ] [ text "githhub" ]
+        , linkBtn [ href "https://github.com/champagneabuelo/openboard" ] [ text "githhub" ]
         ]
 
 
