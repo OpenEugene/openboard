@@ -10,4 +10,4 @@ To start the application:
 
 Interested in live reloading? `npm i -g elm-live`
 
-`elm-live src/Main.elm -u --open --output=public/app.js`
+`elm-live src/Main.elm -u --open --dir=public -- --output=public/app.js`
