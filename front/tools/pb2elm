@@ -1,40 +1,18 @@
 #!/usr/bin/env bash
 
-# first arg should be similar to:
-# ../msgs/proto/some.proto
+# cmd [dest] [include dirs] [proto files (glob ok)]
+# ${0} . -I../../../includes/dir ../../msgs/proto/*.proto
 
-# this script assumes that protoc, elm-protobuf, and elm-format are installed properly
+# * this script assumes that protoc, elm-protobuf, and elm-format are installed properly
 
-# TODO: pb2elm {dest} {src}
-#     # pb2elm . ../../msgs/proto/*.proto
-# create tmp dir if globbed files > 0 or end
-# setup tear down
-# iterate over globbed files
-# # filter and save in tmp dir
-# protoc elmout tmpdir/* to tmpdir
-# elmfmt new files (tmpdir/*.elm) and save in dest dir
-
-function main {
-    local tmpFile="./Entity.proto"
-    local prtFile=${1}
-    local elmFile=${tmpFile/proto/elm}
+function filterProto {
+    local in="${1}"
+    local out="${2}"
 
     local sedCmd=sed
     hash gsed 2>/dev/null && sedCmd=gsed
 
-    # filename components/validation
-    local prtBasename=$(basename ${prtFile})
-    local prtExt=${prtBasename##*.}
-    [[ "${prtExt}" != "proto" ]] && echo "first arg must be a proto file" >&2 && exit 1 
-
-    # cleanup
-    function finish {
-        rm ${1}
-    }
-    trap "finish ${tmpFile}" EXIT
-
-    # pre-process proto file
-    cat ${prtFile} | \
+    cat ${in} | \
         # delete consecutive empty lines (simplifies multi-line empty message deletion)
         ${sedCmd} '/^$/N;/^\n$/D' | \
         # delete service definitions 
@@ -49,15 +27,78 @@ function main {
         ${sedCmd} '/^$/N;/^\n$/D' | \
         # delete last line if empty
         ${sedCmd} '${/^$/d}' \
-        >> ${tmpFile}
-    
-    #protoc --elm_out=. ${tmpFile}
-    protoc -I$(dirname ${tmpFile}) --elm_out=logtostderr=true:. ${tmpFile}
-
-    elm-format --yes ${elmFile}
+        >> ${out}
 }
 
-# ensure first arg is provided
-[[ "${1}" == "" ]] && echo "first arg must not be empty" >&2 && exit 1
+### main
+function main {
+    local dstDir="${1}"
+    local incs=($(echo ${2}))
+    local files=($(echo ${3}))
+    local tmpDir="$(mktemp -t -d $(basename ${0}).XXXXXX)"
 
-main ${1}
+    function cleanup {
+        [[ ! -d "${1}" || "${1}" == "/" ]] && echo "will not remove '${1}'" >&2 && return
+        rm -rf "${1}"
+    }
+    trap "cleanup ${tmpDir}" EXIT
+
+    for file in ${files[@]}; do
+        filterProto "${file}" "${tmpDir}/$(basename ${file})"
+    done
+
+    protoc ${incs[@]} -I"${tmpDir}" --elm_out="${tmpDir}" "${tmpDir}"/*.proto > /dev/null 2>&1
+
+    find "${tmpDir}" -name "*.elm" -exec elm-format --yes {} \;
+    
+    local foundDir
+    find "${tmpDir}" -name "*.elm" -printf '%P\n' | while read file; do
+        foundDir="$(dirname ${file})"
+        if [[ "${foundDir}" != "." ]]; then
+            mkdir -p "${dstDir}/${foundDir}"
+        fi
+
+        cp "${tmpDir}/${file}" "${dstDir}/${file}"
+    done
+}
+### /main
+
+### args
+elmDestDir="${1}"
+shift
+[[ ! -d "${elmDestDir}" ]] && echo "first arg must be a directory" >&2 && exit 1
+
+pbIncludeArgs=()
+pbFileArgs=()
+
+while test $# -gt 0; do
+    case "${1}" in
+        -I)
+            shift
+            pbIncludeArgs+=("-I${1}")
+            shift
+            ;;
+        *)
+            if [[ "${1}" == "-I"* ]]; then
+                pbIncludeArgs+=("${1}")
+            else
+                pbFileArgs+=("${1}")
+            fi
+            shift
+            ;;
+    esac
+done
+
+for arg in ${pbIncludeArgs[@]}; do
+    a="${arg#"-I"}"
+    [[ ! -d "${a}" ]] && echo "include args must be dirs: non-dir '${a}'" >&2 && exit 1
+done
+
+[[ ${#pbFileArgs[@]} == 0 ]] && echo "additional args must be provided" >&2 && exit 1
+
+for f in ${pbFileArgs}; do
+    [[ ! -f "${f}" ]] && echo "additional args must be files: non-file '${f}'" >&2 && exit 1
+done
+### /args
+
+main "${elmDestDir}" "$(echo ${pbIncludeArgs[@]})" "$(echo ${pbFileArgs[@]})"
