@@ -5,6 +5,15 @@
 
 # this script assumes that protoc, elm-protobuf, and elm-format are installed properly
 
+# TODO: pb2elm {dest} {src}
+#     # pb2elm . ../../msgs/proto/*.proto
+# create tmp dir if globbed files > 0 or end
+# setup tear down
+# iterate over globbed files
+# # filter and save in tmp dir
+# protoc elmout tmpdir/* to tmpdir
+# elmfmt new files (tmpdir/*.elm) and save in dest dir
+
 function main {
     local tmpFile="./Entity.proto"
     local prtFile=${1}
@@ -42,6 +51,7 @@ function main {
         ${sedCmd} '${/^$/d}' \
         >> ${tmpFile}
     
+    #protoc --elm_out=. ${tmpFile}
     protoc -I$(dirname ${tmpFile}) --elm_out=logtostderr=true:. ${tmpFile}
 
     elm-format --yes ${elmFile}
