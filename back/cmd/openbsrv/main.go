@@ -5,10 +5,7 @@ import (
 	"os"
 	"path"
 
-	"github.com/champagneabuelo/openboard/back/authsvc"
-	"github.com/champagneabuelo/openboard/back/grpcsrv"
 	"github.com/champagneabuelo/openboard/back/pb"
-	"github.com/champagneabuelo/openboard/back/usersvc"
 	"github.com/codemodus/sigmon/v2"
 )
 
@@ -25,35 +22,30 @@ func run() error {
 	sm.Start()
 	defer sm.Stop()
 
-	auth, err := authsvc.New()
+	gsrv, err := newGRPCSrv(":4242")
 	if err != nil {
 		return err
 	}
 
-	user, err := usersvc.New()
+	/*fsrv, err := newFrontSrv(":4244")
 	if err != nil {
 		return err
-	}
+	}*/
 
-	srv, err := grpcsrv.New()
-	if err != nil {
-		return err
-	}
-
-	if err = srv.RegisterServices(auth, user); err != nil {
-		return err
-	}
+	m := newServerMgmt(gsrv)
 
 	sm.Set(func(s *sigmon.State) {
-		srv.GracefulStop()
+		if err := m.stop(); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+		}
 	})
 
-	fmt.Println("to gracefully stop the server, send signal like TERM (CTRL-C) or HUP")
-	if err = srv.Serve(":4242"); err != nil {
+	fmt.Println(pb.UserResp{})
+	fmt.Println("to gracefully stop the application, send signal like TERM (CTRL-C) or HUP")
+
+	if err := m.serve(); err != nil {
 		return err
 	}
-
-	fmt.Println(pb.UserResp{})
 
 	return fmt.Errorf("not a real error; demonstrating output")
 }
