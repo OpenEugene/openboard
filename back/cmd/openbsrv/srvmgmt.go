@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"sync"
+	"time"
 )
 
 type server interface {
@@ -34,6 +35,8 @@ func (m *serverMgmt) serve() error {
 				fmt.Fprintln(os.Stderr, "server error:", err)
 			}
 		}(s)
+
+		time.Sleep(time.Millisecond * 200)
 	}
 
 	wg.Wait()
