@@ -3,53 +3,57 @@
 # cmd [destination dir] [include dirs] [source files (glob ok)]
 # ${0} . -I../../../includes/dir ../../msgs/*
 
-# * this script assumes that protoc, elm-protobuf, and elm-format are installed properly
+function checkDeps() {
+    ! hash protoc 2>/dev/null && echo "requires protoc" >&2 && exit 1
+    ! hash protoc-gen-elm 2>/dev/null && echo "requires protoc" >&2 && exit 1
+    ! hash elm-format 2>/dev/null && echo "requires elm-format" >&2 && exit 1
+}
 
-function destinationDir() {
+function getDestinationDir() {
     [[ ! -d "${1}" ]] && echo "arg must be directory '${1}'" >&2 && exit 1
 
     echo "${1}"
 }
 
-function includeDirs() {
-    local ins=("${@}")
-    local rts=()
+function getIncludeDirs() {
+    local args=("${@}")
+    local rets=()
 
-    local i in0 in1
-    for (( i=0; i<${#ins}; i++ )); do
-        in0=${ins[i]}
-        in1=${ins[i+1]}
+    local i arg argv
+    for (( i=0; i<${#args}; i++ )); do
+        arg=${args[i]}
+        argv=${args[i+1]}
 
-        [[ "${in0}" == "-I" ]] && rts+=("${in0}" "${in1}") && ((i++)) && continue
-        [[ "${in0}" == "-I"* ]] && rts+=("${in0}") && continue
+        [[ "${arg}" == "-I" ]] && rets+=("${arg}" "${argv}") && ((i++)) && continue
+        [[ "${arg}" == "-I"* ]] && rets+=("${arg}") && continue
     done
 
-    local rt0
-    for rt0 in ${rts[@]}; do
-        rt0="${rt0#"-I"}"
+    local ret
+    for ret in ${rets[@]}; do
+        ret="${ret#"-I"}"
 
-        [[ "${rt0}" == "" ]] && continue
-        [[ ! -d "${rt0}" ]] && echo "non-dir '${rt0}'" >&2 && exit 1
+        [[ "${ret}" == "" ]] && continue
+        [[ ! -d "${ret}" ]] && echo "non-dir '${ret}'" >&2 && exit 1
     done
 
-    echo "${rts[@]}"
+    echo "${rets[@]}"
 }
 
-function sourceFiles() {
-    local ins=("${@}")
-    local rts=()
+function getSourceFiles() {
+    local args=("${@}")
+    local rets=()
 
-    for in0 in ${ins[@]}; do
-        [[ "${in0}" == "-"* ]] && continue
+    for arg in ${args[@]}; do
+        [[ "${arg}" == "-"* ]] && continue
 
-        [[ ! -f "${in0}" ]] && echo "non-file '${in0}'" >&2 && exit 1
+        [[ ! -f "${arg}" ]] && echo "non-file '${arg}'" >&2 && exit 1
 
-        rts+=("${in0}")
+        rets+=("${arg}")
     done
 
-    [[ ${#rts[@]} == 0 ]] && echo "must provide one or more files" >&2 && exit 1
+    [[ ${#rets[@]} == 0 ]] && echo "must provide one or more files" >&2 && exit 1
 
-    echo "${rts[@]}"
+    echo "${rets[@]}"
 }
 
 function filterProto {
@@ -82,16 +86,18 @@ function trip {
 }
 
 function main {
-    local offset=1
+    checkDeps
+
+    local skip=1
     local dstDir incs files
 
-    dstDir="$(destinationDir "${1}")"; trip $? 
-    ((offset+=1))
+    dstDir="$(getDestinationDir "${1}")"; trip $? 
+    ((skip+=1))
 
-    incs=($(includeDirs ${@:${offset}})); trip $?
-    ((offset+=${#incs[@]}))
+    incs=($(getIncludeDirs ${@:${skip}})); trip $?
+    ((skip+=${#incs[@]}))
 
-    files=($(sourceFiles ${@:$offset})); trip $?
+    files=($(getSourceFiles ${@:$skip})); trip $?
 
     local tmpDir="$(mktemp -t -d $(basename ${0}).XXXXXX)"
 
