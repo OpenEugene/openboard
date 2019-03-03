@@ -3,13 +3,35 @@
 #? {cmd} DEST [-I INCLUDES]... SOURCE...
 #? example: {cmd} . -I../../../includes/dir ../../msgs/*.proto
 
-! hash protoc 2>/dev/null && echo "requires protoc" >&2 && exit 1
-! hash protoc-gen-elm 2>/dev/null && echo "requires protoc" >&2 && exit 1
-! hash elm-format 2>/dev/null && echo "requires elm-format" >&2 && exit 1
+function checkDep() {
+    ! hash "${1}" 2>/dev/null && \
+        echo "requires ${1}" >&2 && exit 1
+}
+
+function checkDepOr() {
+    ! (hash "${1}" 2>/dev/null || hash "${2}" 2>/dev/null) && \
+        echo "requires ${1} or ${2}" >&2 && exit 1
+}
+
+function yudodis() {
+    [[ "$(uname -s)" == "Darwin" && "${1}" == "sed" ]] && \
+        echo "darwin requires gsed" >&2 && exit 1
+}
+
+checkDep "protoc"
+checkDep "protoc-gen-elm"
+checkDep "elm-format"
+checkDepOr "sed" "gsed"
+checkDepOr "realpath" "grealpath"
+
+function getDepOr() {
+    local ret="${1}"
+    hash "${2}" 2>/dev/null && ret="${2}"
+    echo "${ret}"
+}
 
 function getDestinationDir() {
     [[ ! -d "${1}" ]] && echo "arg must be directory '${1}'" >&2 && exit 1
-
     echo "${1}"
 }
 
@@ -17,16 +39,14 @@ function getIncludeDirs() {
     local args=("${@}")
     local rets=()
 
-    local i arg argv
     for (( i=0; i<${#args}; i++ )); do
-        arg=${args[i]}
-        argv=${args[i+1]}
+        local arg=${args[i]}
+        local argv=${args[i+1]}
 
         [[ "${arg}" == "-I" ]] && rets+=("${arg}" "${argv}") && ((i++)) && continue
         [[ "${arg}" == "-I"* ]] && rets+=("${arg}") && continue
     done
 
-    local ret
     for ret in ${rets[@]}; do
         ret="${ret#"-I"}"
 
@@ -58,8 +78,7 @@ function filterProto {
     local in="${1}"
     local out="${2}"
 
-    local sedCmd=sed
-    hash gsed 2>/dev/null && sedCmd=gsed
+    local sedCmd="$(getDepOr "sed" "gsed")"
 
     cat ${in} | \
         # delete consecutive empty lines (simplifies multi-line empty message deletion)
@@ -111,9 +130,10 @@ function main {
 
     find "${tmpDir}" -name "*.elm" -exec elm-format --yes {} \; > /dev/null
     
-    local foundDir
-    find "${tmpDir}" -name "*.elm" -printf '%P\n' | while read file; do
-        foundDir="$(dirname ${file})"
+    find "${tmpDir}" -name "*.elm" | while read file; do
+        file="${file#"${tmpDir}/"}"
+        local foundDir="$(dirname ${file})"
+
         if [[ "${foundDir}" != "." ]]; then
             mkdir -p "${dstDir}/${foundDir}"
         fi
@@ -125,7 +145,8 @@ function main {
 function doc() {
     function show() {
         local cmd="$(basename "${0}")"
-        local docs="$(grep '^#?' $(realpath "${0}"))"
+        local rpCmd="$(getDepOr "realpath" "grealpath")"
+        local docs="$(grep '^#?' $(${rpCmd} "${0}"))"
 
         echo "${docs}" | \
             sed 's/#?\s*//g' | \
@@ -140,5 +161,7 @@ function doc() {
 }
 
 doc ${@}
+
+yudodis "$(getDepOr "sed" "gsed")"
 
 main ${@}
