@@ -1,9 +1,56 @@
 #!/usr/bin/env bash
 
-# cmd [dest] [include dirs] [proto files (glob ok)]
-# ${0} . -I../../../includes/dir ../../msgs/proto/*.proto
+# cmd [destination dir] [include dirs] [source files (glob ok)]
+# ${0} . -I../../../includes/dir ../../msgs/*
 
 # * this script assumes that protoc, elm-protobuf, and elm-format are installed properly
+
+function destinationDir() {
+    [[ ! -d "${1}" ]] && echo "arg must be directory '${1}'" >&2 && exit 1
+
+    echo "${1}"
+}
+
+function includeDirs() {
+    local ins=("${@}")
+    local rts=()
+
+    local i in0 in1
+    for (( i=0; i<${#ins}; i++ )); do
+        in0=${ins[i]}
+        in1=${ins[i+1]}
+
+        [[ "${in0}" == "-I" ]] && rts+=("${in0}" "${in1}") && ((i++)) && continue
+        [[ "${in0}" == "-I"* ]] && rts+=("${in0}") && continue
+    done
+
+    local rt0
+    for rt0 in ${rts[@]}; do
+        rt0="${rt0#"-I"}"
+
+        [[ "${rt0}" == "" ]] && continue
+        [[ ! -d "${rt0}" ]] && echo "non-dir '${rt0}'" >&2 && exit 1
+    done
+
+    echo "${rts[@]}"
+}
+
+function sourceFiles() {
+    local ins=("${@}")
+    local rts=()
+
+    for in0 in ${ins[@]}; do
+        [[ "${in0}" == "-"* ]] && continue
+
+        [[ ! -f "${in0}" ]] && echo "non-file '${in0}'" >&2 && exit 1
+
+        rts+=("${in0}")
+    done
+
+    [[ ${#rts[@]} == 0 ]] && echo "must provide one or more files" >&2 && exit 1
+
+    echo "${rts[@]}"
+}
 
 function filterProto {
     local in="${1}"
@@ -30,11 +77,22 @@ function filterProto {
         >> ${out}
 }
 
-### main
+function trip {
+    [[ ${1} > 0 ]] && exit ${1}
+}
+
 function main {
-    local dstDir="${1}"
-    local incs=($(echo ${2}))
-    local files=($(echo ${3}))
+    local offset=1
+    local dstDir incs files
+
+    dstDir="$(destinationDir "${1}")"; trip $? 
+    ((offset+=1))
+
+    incs=($(includeDirs ${@:${offset}})); trip $?
+    ((offset+=${#incs[@]}))
+
+    files=($(sourceFiles ${@:$offset})); trip $?
+
     local tmpDir="$(mktemp -t -d $(basename ${0}).XXXXXX)"
 
     function cleanup {
@@ -49,7 +107,7 @@ function main {
 
     protoc ${incs[@]} -I"${tmpDir}" --elm_out="${tmpDir}" "${tmpDir}"/*.proto > /dev/null 2>&1
 
-    find "${tmpDir}" -name "*.elm" -exec elm-format --yes {} \;
+    find "${tmpDir}" -name "*.elm" -exec elm-format --yes {} \; > /dev/null
     
     local foundDir
     find "${tmpDir}" -name "*.elm" -printf '%P\n' | while read file; do
@@ -61,44 +119,5 @@ function main {
         cp "${tmpDir}/${file}" "${dstDir}/${file}"
     done
 }
-### /main
 
-### args
-elmDestDir="${1}"
-shift
-[[ ! -d "${elmDestDir}" ]] && echo "first arg must be a directory" >&2 && exit 1
-
-pbIncludeArgs=()
-pbFileArgs=()
-
-while test $# -gt 0; do
-    case "${1}" in
-        -I)
-            shift
-            pbIncludeArgs+=("-I${1}")
-            shift
-            ;;
-        *)
-            if [[ "${1}" == "-I"* ]]; then
-                pbIncludeArgs+=("${1}")
-            else
-                pbFileArgs+=("${1}")
-            fi
-            shift
-            ;;
-    esac
-done
-
-for arg in ${pbIncludeArgs[@]}; do
-    a="${arg#"-I"}"
-    [[ ! -d "${a}" ]] && echo "include args must be dirs: non-dir '${a}'" >&2 && exit 1
-done
-
-[[ ${#pbFileArgs[@]} == 0 ]] && echo "additional args must be provided" >&2 && exit 1
-
-for f in ${pbFileArgs}; do
-    [[ ! -f "${f}" ]] && echo "additional args must be files: non-file '${f}'" >&2 && exit 1
-done
-### /args
-
-main "${elmDestDir}" "$(echo ${pbIncludeArgs[@]})" "$(echo ${pbFileArgs[@]})"
+main ${@}
