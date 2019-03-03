@@ -1,31 +1,67 @@
 #!/usr/bin/env bash
 
-# first arg should be similar to:
-# ../msgs/proto/some.proto
+#? {cmd} DEST [-I INCLUDES]... SOURCE...
+#? example: {cmd} . -I../../../includes/dir ../../msgs/*.proto
 
-# this script assumes that protoc, elm-protobuf, and elm-format are installed properly
+! hash protoc 2>/dev/null && echo "requires protoc" >&2 && exit 1
+! hash protoc-gen-elm 2>/dev/null && echo "requires protoc" >&2 && exit 1
+! hash elm-format 2>/dev/null && echo "requires elm-format" >&2 && exit 1
 
-function main {
-    local tmpFile="./Entity.proto"
-    local prtFile=${1}
-    local elmFile=${tmpFile/proto/elm}
+function getDestinationDir() {
+    [[ ! -d "${1}" ]] && echo "arg must be directory '${1}'" >&2 && exit 1
+
+    echo "${1}"
+}
+
+function getIncludeDirs() {
+    local args=("${@}")
+    local rets=()
+
+    local i arg argv
+    for (( i=0; i<${#args}; i++ )); do
+        arg=${args[i]}
+        argv=${args[i+1]}
+
+        [[ "${arg}" == "-I" ]] && rets+=("${arg}" "${argv}") && ((i++)) && continue
+        [[ "${arg}" == "-I"* ]] && rets+=("${arg}") && continue
+    done
+
+    local ret
+    for ret in ${rets[@]}; do
+        ret="${ret#"-I"}"
+
+        [[ "${ret}" == "" ]] && continue
+        [[ ! -d "${ret}" ]] && echo "non-dir '${ret}'" >&2 && exit 1
+    done
+
+    echo "${rets[@]}"
+}
+
+function getSourceFiles() {
+    local args=("${@}")
+    local rets=()
+
+    for arg in ${args[@]}; do
+        [[ "${arg}" == "-"* ]] && continue
+
+        [[ ! -f "${arg}" ]] && echo "non-file '${arg}'" >&2 && exit 1
+
+        rets+=("${arg}")
+    done
+
+    [[ ${#rets[@]} == 0 ]] && echo "must provide one or more files" >&2 && exit 1
+
+    echo "${rets[@]}"
+}
+
+function filterProto {
+    local in="${1}"
+    local out="${2}"
 
     local sedCmd=sed
     hash gsed 2>/dev/null && sedCmd=gsed
 
-    # filename components/validation
-    local prtBasename=$(basename ${prtFile})
-    local prtExt=${prtBasename##*.}
-    [[ "${prtExt}" != "proto" ]] && echo "first arg must be a proto file" >&2 && exit 1 
-
-    # cleanup
-    function finish {
-        rm ${1}
-    }
-    trap "finish ${tmpFile}" EXIT
-
-    # pre-process proto file
-    cat ${prtFile} | \
+    cat ${in} | \
         # delete consecutive empty lines (simplifies multi-line empty message deletion)
         ${sedCmd} '/^$/N;/^\n$/D' | \
         # delete service definitions 
@@ -40,14 +76,69 @@ function main {
         ${sedCmd} '/^$/N;/^\n$/D' | \
         # delete last line if empty
         ${sedCmd} '${/^$/d}' \
-        >> ${tmpFile}
-    
-    protoc -I$(dirname ${tmpFile}) --elm_out=logtostderr=true:. ${tmpFile}
-
-    elm-format --yes ${elmFile}
+        >> ${out}
 }
 
-# ensure first arg is provided
-[[ "${1}" == "" ]] && echo "first arg must not be empty" >&2 && exit 1
+function trip {
+    [[ ${1} > 0 ]] && exit ${1}
+}
 
-main ${1}
+function main {
+    local skip=1
+    local dstDir incs files
+
+    dstDir="$(getDestinationDir "${1}")"; trip $? 
+    ((skip+=1))
+
+    incs=($(getIncludeDirs ${@:${skip}})); trip $?
+    ((skip+=${#incs[@]}))
+
+    files=($(getSourceFiles ${@:$skip})); trip $?
+
+    local tmpDir="$(mktemp -t -d $(basename ${0}).XXXXXX)"
+
+    function cleanup {
+        [[ ! -d "${1}" || "${1}" == "/" ]] && echo "will not remove '${1}'" >&2 && return
+        rm -rf "${1}"
+    }
+    trap "cleanup ${tmpDir}" EXIT
+
+    for file in ${files[@]}; do
+        filterProto "${file}" "${tmpDir}/$(basename ${file})"
+    done
+
+    protoc ${incs[@]} -I"${tmpDir}" --elm_out="${tmpDir}" "${tmpDir}"/*.proto > /dev/null 2>&1
+
+    find "${tmpDir}" -name "*.elm" -exec elm-format --yes {} \; > /dev/null
+    
+    local foundDir
+    find "${tmpDir}" -name "*.elm" -printf '%P\n' | while read file; do
+        foundDir="$(dirname ${file})"
+        if [[ "${foundDir}" != "." ]]; then
+            mkdir -p "${dstDir}/${foundDir}"
+        fi
+
+        cp "${tmpDir}/${file}" "${dstDir}/${file}"
+    done
+}
+
+function doc() {
+    function show() {
+        local cmd="$(basename "${0}")"
+        local docs="$(grep '^#?' $(realpath "${0}"))"
+
+        echo "${docs}" | \
+            sed 's/#?\s*//g' | \
+            sed 's/{cmd}/'${cmd}'/g'
+    }
+
+    local args=("${@}")
+
+    for arg in ${args[@]}; do
+        [[ "${arg}" == "-h" || "${arg}" == "-help" || "${arg}" == "--help" ]] && show && exit 0
+    done
+}
+
+doc ${@}
+
+main ${@}
