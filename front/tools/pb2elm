@@ -1,13 +1,11 @@
 #!/usr/bin/env bash
 
-# cmd [destination dir] [include dirs] [source files (glob ok)]
-# ${0} . -I../../../includes/dir ../../msgs/*
+#? {cmd} DEST [-I INCLUDES]... SOURCE...
+#? example: {cmd} . -I../../../includes/dir ../../msgs/*.proto
 
-function checkDeps() {
-    ! hash protoc 2>/dev/null && echo "requires protoc" >&2 && exit 1
-    ! hash protoc-gen-elm 2>/dev/null && echo "requires protoc" >&2 && exit 1
-    ! hash elm-format 2>/dev/null && echo "requires elm-format" >&2 && exit 1
-}
+! hash protoc 2>/dev/null && echo "requires protoc" >&2 && exit 1
+! hash protoc-gen-elm 2>/dev/null && echo "requires protoc" >&2 && exit 1
+! hash elm-format 2>/dev/null && echo "requires elm-format" >&2 && exit 1
 
 function getDestinationDir() {
     [[ ! -d "${1}" ]] && echo "arg must be directory '${1}'" >&2 && exit 1
@@ -86,8 +84,6 @@ function trip {
 }
 
 function main {
-    checkDeps
-
     local skip=1
     local dstDir incs files
 
@@ -125,5 +121,24 @@ function main {
         cp "${tmpDir}/${file}" "${dstDir}/${file}"
     done
 }
+
+function doc() {
+    function show() {
+        local cmd="$(basename "${0}")"
+        local docs="$(grep '^#?' $(realpath "${0}"))"
+
+        echo "${docs}" | \
+            sed 's/#?\s*//g' | \
+            sed 's/{cmd}/'${cmd}'/g'
+    }
+
+    local args=("${@}")
+
+    for arg in ${args[@]}; do
+        [[ "${arg}" == "-h" || "${arg}" == "-help" || "${arg}" == "--help" ]] && show && exit 0
+    done
+}
+
+doc ${@}
 
 main ${@}
