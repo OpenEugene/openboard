@@ -117,7 +117,9 @@ function main {
     local tmpDir="$(mktemp -t -d $(basename ${0}).XXXXXX)"
 
     function cleanup {
-        [[ ! -d "${1}" || "${1}" == "/" ]] && echo "will not remove '${1}'" >&2 && return
+        [[ ! -d "${1}" || "${1}" == "/" ]] && \
+            echo "will not remove '${1}'" >&2 && return
+
         rm -rf "${1}"
     }
     trap "cleanup ${tmpDir}" EXIT
@@ -126,9 +128,11 @@ function main {
         filterProto "${file}" "${tmpDir}/$(basename ${file})"
     done
 
-    protoc ${incs[@]} -I"${tmpDir}" --elm_out="${tmpDir}" "${tmpDir}"/*.proto > /dev/null 2>&1
+    protoc ${incs[@]} -I"${tmpDir}" --elm_out="${tmpDir}" "${tmpDir}"/*.proto \
+        > /dev/null 2>&1
 
-    find "${tmpDir}" -name "*.elm" -exec elm-format --yes {} \; > /dev/null
+    find "${tmpDir}" -name "*.elm" -exec elm-format --yes {} \; \
+        > /dev/null
     
     find "${tmpDir}" -name "*.elm" | while read file; do
         file="${file#"${tmpDir}/"}"
@@ -143,7 +147,7 @@ function main {
 }
 
 function doc() {
-    function show() {
+    function display() {
         local cmd="$(basename "${0}")"
         local rpCmd="$(getDepOr "realpath" "grealpath")"
         local docs="$(grep '^#?' $(${rpCmd} "${0}"))"
@@ -156,7 +160,8 @@ function doc() {
     local args=("${@}")
 
     for arg in ${args[@]}; do
-        [[ "${arg}" == "-h" || "${arg}" == "-help" || "${arg}" == "--help" ]] && show && exit 0
+        [[ "${arg}" == "-h" || "${arg}" == "-help" || "${arg}" == "--help" ]] && \
+            display && exit 0
     done
 }
 
