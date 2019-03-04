@@ -1,7 +1,14 @@
 #!/usr/bin/env bash
 
-#? {cmd} DEST [-I INCLUDES]... SOURCE...
-#? example: {cmd} . -I../../../includes/dir ../../msgs/*.proto
+#? {cmd} DEST -I INCLUDES... PROTOS...
+#? example: {cmd} src -I ../../msgs ../../msgs/proto/*.proto
+#? 
+#? DEST is the root of the output source
+#? INCLUDES are the root directories from which to gather proto files
+#? PROTOS are generated in paths relative to the provided includes
+#? 
+#? input: {cmd} src -I ../../msgs ../../msgs/proto/example.proto
+#? output: "Proto/Example.elm" within the "src" directory
 
 function checkDep() {
     ! hash "${1}" 2>/dev/null && \
@@ -18,10 +25,6 @@ function yudodis() {
         echo "darwin requires gsed" >&2 && exit 1
 }
 
-function portableMktemp() {
-    echo "$(mktemp -d 2>/dev/null || mktemp -d -t "compat")"
-}
-
 checkDep "protoc"
 checkDep "protoc-gen-elm"
 checkDep "elm-format"
@@ -35,27 +38,21 @@ function getDepOr() {
 }
 
 function getDestinationDir() {
-    [[ ! -d "${1}" ]] && echo "arg must be directory '${1}'" >&2 && exit 1
+    ! mkdir -p "${1}" 2>/dev/null && echo "cannot make directory '${1}'" >&2 && exit 1
     echo "${1}"
 }
 
 function getIncludeDirs() {
     local args=("${@}")
+    local flag="-I"
     local rets=()
 
     for (( i=0; i<${#args}; i++ )); do
-        local arg=${args[i]}
-        local argv=${args[i+1]}
+        local arg="${args[i]}"
+        local argv="${args[i+1]}"
 
-        [[ "${arg}" == "-I" ]] && rets+=("${arg}" "${argv}") && ((i++)) && continue
-        [[ "${arg}" == "-I"* ]] && rets+=("${arg}") && continue
-    done
-
-    for ret in ${rets[@]}; do
-        ret="${ret#"-I"}"
-
-        [[ "${ret}" == "" ]] && continue
-        [[ ! -d "${ret}" ]] && echo "non-dir '${ret}'" >&2 && exit 1
+        [[ "${arg}" == "${flag}" ]] && rets+=("${arg}" "${argv}") && ((i++)); continue
+        [[ "${arg}" == "${flag}"* ]] && rets+=("${arg}") && continue
     done
 
     echo "${rets[@]}"
@@ -74,14 +71,12 @@ function getSourceFiles() {
     done
 
     [[ ${#rets[@]} == 0 ]] && echo "must provide one or more files" >&2 && exit 1
-
     echo "${rets[@]}"
 }
 
 function filterProto {
     local in="${1}"
     local out="${2}"
-
     local sedCmd="$(getDepOr "sed" "gsed")"
 
     cat "${in}" | \
@@ -100,6 +95,8 @@ function filterProto {
         # delete last line if empty
         ${sedCmd} '${/^$/d}' \
         >> "${out}"
+
+    return $?
 }
 
 function trip {
@@ -107,46 +104,44 @@ function trip {
 }
 
 function main {
+    local cleanups=()
+    function runCleanups() {
+        for cleanup in "${cleanups[@]}"; do
+            eval ${cleanup}
+        done
+    }
+    trap "runCleanups" EXIT RETURN
+
     local skip=1
     local dstDir incs files
-
     dstDir="$(getDestinationDir "${1}")"; trip $? 
     ((skip+=1))
-
     incs=($(getIncludeDirs ${@:${skip}})); trip $?
     ((skip+=${#incs[@]}))
-
     files=($(getSourceFiles ${@:$skip})); trip $?
 
-    local tmpDir="$(portableMktemp)"
-
-    function cleanup {
-        [[ ! -d "${1}" || "${1}" == "/" ]] && \
-            echo "will not remove '${1}'" >&2 && return
-
-        rm -rf "${1}"
-    }
-    trap "cleanup ${tmpDir}" EXIT
+    local token="xxfiltxx"
+    local filtfiles=()
 
     for file in ${files[@]}; do
-        filterProto "${file}" "${tmpDir}/$(basename ${file})"
+        local filtfile="${file/\.proto/${token}.proto}"
+        ! filterProto "${file}" "${filtfile}" && continue
+        filtfiles+=("${filtfile}")
+        cleanups+=("rm ${filtfile}")
     done
 
-    protoc ${incs[@]} -I"${tmpDir}" --elm_out="${tmpDir}" "${tmpDir}"/*.proto \
-        > /dev/null 2>&1
+    local timeref="${dstDir}/time_ref"
+    touch "${timeref}"
+    cleanups+=("rm ${timeref}")
 
-    find "${tmpDir}" -name "*.elm" -exec elm-format --yes {} \; \
-        > /dev/null
-    
-    find "${tmpDir}" -name "*.elm" | while read file; do
-        file="${file#"${tmpDir}/"}"
-        local foundDir="$(dirname ${file})"
+    protoc ${incs[@]} --elm_out="${dstDir}" ${filtfiles[@]} > /dev/null 2>&1
 
-        if [[ "${foundDir}" != "." ]]; then
-            mkdir -p "${dstDir}/${foundDir}"
-        fi
+    find "${dstDir}" -name "*.elm" -newer "${timeref}" | while read file; do
+      elm-format --yes "${file}" > /dev/null
+      sed -i 's/'${token}'//g' ${file}
 
-        cp "${tmpDir}/${file}" "${dstDir}/${file}"
+      local newfile=${file/${token}/}
+      [[ "${file}" != "${newfile}" ]] && mv "${file}" "${newfile}"
     done
 }
 
@@ -154,9 +149,8 @@ function doc() {
     function display() {
         local cmd="$(basename "${0}")"
         local rpCmd="$(getDepOr "realpath" "grealpath")"
-        local docs="$(grep '^#?' $(${rpCmd} "${0}"))"
 
-        echo "${docs}" | \
+        grep '^#?' $(${rpCmd} "${0}") | \
             sed 's/#?\s*//g' | \
             sed 's/{cmd}/'${cmd}'/g'
     }
