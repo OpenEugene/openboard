@@ -27,12 +27,17 @@ func run() error {
 		return err
 	}
 
+	hsrv, err := newHTTPSrv(":4242", ":4243")
+	if err != nil {
+		return err
+	}
+
 	fsrv, err := newFrontSrv("../../../front/public", ":4244")
 	if err != nil {
 		return err
 	}
 
-	m := newServerMgmt(gsrv, fsrv)
+	m := newServerMgmt(gsrv, hsrv, fsrv)
 
 	sm.Set(func(s *sigmon.State) {
 		if err := m.stop(); err != nil {
