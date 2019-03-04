@@ -80,7 +80,7 @@ function filterProto {
 
     local sedCmd="$(getDepOr "sed" "gsed")"
 
-    cat ${in} | \
+    cat "${in}" | \
         # delete consecutive empty lines (simplifies multi-line empty message deletion)
         ${sedCmd} '/^$/N;/^\n$/D' | \
         # delete service definitions 
@@ -95,7 +95,7 @@ function filterProto {
         ${sedCmd} '/^$/N;/^\n$/D' | \
         # delete last line if empty
         ${sedCmd} '${/^$/d}' \
-        >> ${out}
+        >> "${out}"
 }
 
 function trip {
