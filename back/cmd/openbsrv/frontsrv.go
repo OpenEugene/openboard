@@ -8,12 +8,12 @@ import (
 )
 
 type frontSrv struct {
-	*http.Server
+	s *http.Server
 }
 
 func newFrontSrv(dir, port string) (*frontSrv, error) {
 	s := frontSrv{
-		Server: &http.Server{
+		s: &http.Server{
 			Addr:    port,
 			Handler: alfred.New(dir),
 		},
@@ -23,10 +23,10 @@ func newFrontSrv(dir, port string) (*frontSrv, error) {
 }
 
 func (s *frontSrv) Serve() error {
-	return s.Server.ListenAndServe()
+	return s.s.ListenAndServe()
 }
 
 func (s *frontSrv) Stop() error {
 	// TODO: setup context
-	return s.Shutdown(context.Background())
+	return s.s.Shutdown(context.Background())
 }
