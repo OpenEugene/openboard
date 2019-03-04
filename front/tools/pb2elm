@@ -18,6 +18,10 @@ function yudodis() {
         echo "darwin requires gsed" >&2 && exit 1
 }
 
+function portableMktemp() {
+    echo "$(mktemp -d 2>/dev/null || mktemp -d -t "compat")"
+}
+
 checkDep "protoc"
 checkDep "protoc-gen-elm"
 checkDep "elm-format"
@@ -114,7 +118,7 @@ function main {
 
     files=($(getSourceFiles ${@:$skip})); trip $?
 
-    local tmpDir="$(mktemp -t -d $(basename ${0}).XXXXXX)"
+    local tmpDir="$(portableMktemp)"
 
     function cleanup {
         [[ ! -d "${1}" || "${1}" == "/" ]] && \
