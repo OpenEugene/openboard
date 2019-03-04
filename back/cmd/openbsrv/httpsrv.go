@@ -1,6 +1,9 @@
 package main
 
-import "github.com/champagneabuelo/openboard/back/httpsrv"
+import (
+	"github.com/champagneabuelo/openboard/back/httpsrv"
+	"github.com/codemodus/hedrs"
+)
 
 type httpSrv struct {
 	s *httpsrv.HTTPSrv
@@ -10,7 +13,7 @@ type httpSrv struct {
 }
 
 func newHTTPSrv(rpcPort, httpPort string) (*httpSrv, error) {
-	hs, err := httpsrv.New()
+	hs, err := httpsrv.New(hedrs.DefaultOrigins)
 	if err != nil {
 		return nil, err
 	}

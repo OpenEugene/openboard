@@ -4,6 +4,8 @@ go 1.12
 
 require (
 	github.com/codemodus/alfred v0.2.1
+	github.com/codemodus/chain/v2 v2.1.2
+	github.com/codemodus/hedrs v0.1.1
 	github.com/codemodus/sigmon/v2 v2.0.1
 	github.com/golang/protobuf v1.2.0
 	github.com/grpc-ecosystem/grpc-gateway v1.7.0

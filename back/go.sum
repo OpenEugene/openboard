@@ -2,6 +2,10 @@ cloud.google.com/go v0.26.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMT
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=
 github.com/codemodus/alfred v0.2.1 h1:2/KtUY3UzRqXlYlPmVJPGlBHkS/lRscZsGgwfikI2zI=
 github.com/codemodus/alfred v0.2.1/go.mod h1:BDzJWxQL6mW5Bv8TDIFN9CDnAzXYsPSxbdWTNAhNrf0=
+github.com/codemodus/chain/v2 v2.1.2 h1:mF4DiwKIM7JVDZNLNGu5MxAwwdln+0EeWu3FSUfAxbg=
+github.com/codemodus/chain/v2 v2.1.2/go.mod h1:NfEpk/YQCNWIwbx79PzdrfocwgXS14PwrDuCHUe54cw=
+github.com/codemodus/hedrs v0.1.1 h1:H1QtHv6vBImF9X9ELxKS7WGxB2tf2cY+1EDKkTzKTro=
+github.com/codemodus/hedrs v0.1.1/go.mod h1:WqRMpBWXc9ysM283RlUR7X+dypQGR2K+uLwqwPAc6tM=
 github.com/codemodus/rwap v0.2.0 h1:8T/czFcUoVVB1kjBxp3XCCgY6LSnulE/K9xS/1vMPmg=
 github.com/codemodus/rwap v0.2.0/go.mod h1:GDv6T9CYjop2Xen158BphxIm/txnf4zkX6PLW3dX/PA=
 github.com/codemodus/sigmon/v2 v2.0.1 h1:Af1mEIYTmyO+doosTJeWQyb05LCVVHjeIAsO/RHwe4w=
