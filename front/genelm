@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+./tools/pb2elm src -I ../msgs ../msgs/proto/*.proto
