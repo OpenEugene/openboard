@@ -52,6 +52,8 @@ func multiplexer(gmux *runtime.ServeMux, origins []string) http.Handler {
 		fmt.Fprintln(w, "hello, world")
 	})
 
+	// TODO: add openapi ui/json
+
 	return cmn.End(m)
 }
 
@@ -68,7 +70,12 @@ func (s *HTTPSrv) Serve(rpcPort, httpPort string) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	err = pb.RegisterAuthHandler(ctx, s.gmux, conn)
+	err = pb.RegisterAuthHandler(ctx, s.gmux, conn) // TODO: []callback from new func args
+	if err != nil {
+		return err
+	}
+
+	err = pb.RegisterUserHandler(ctx, s.gmux, conn)
 	if err != nil {
 		return err
 	}
