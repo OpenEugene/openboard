@@ -6,7 +6,16 @@ import Html
 import Html.Styled exposing (..)
 import Html.Styled.Attributes exposing (css, href, src)
 import Html.Styled.Events exposing (onClick)
+import Proto.User
 import Ui
+
+
+test : Proto.User.RoleResp
+test =
+    { id = 0
+    , name = "hello"
+    }
+
 
 
 ---- MODEL ----

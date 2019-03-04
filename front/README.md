@@ -36,4 +36,7 @@ Read the official [Elm Guide](https://guide.elm-lang.org/). Check out issues tag
 
 ### Protobuf
 
-TODO
+To generate type aliases, encoders and decoders run `pb2elm`. This will read all the `.proto` files and generate corresponding `.elm` files. This command should be run frequently and updates to the `Proto/` modules should have there own commit. This gives us a type safe border between the client and the server. If something changes on the server — a field is added or removed, a data model is added or removed — our Elm app should fail to compile. No more `400 Bad Request` at runtime!
+
+`pb2elm src/Proto/ ../msgs/proto/*.proto`
+
