@@ -6,10 +6,16 @@ github.com/codemodus/chain/v2 v2.1.2 h1:mF4DiwKIM7JVDZNLNGu5MxAwwdln+0EeWu3FSUfA
 github.com/codemodus/chain/v2 v2.1.2/go.mod h1:NfEpk/YQCNWIwbx79PzdrfocwgXS14PwrDuCHUe54cw=
 github.com/codemodus/hedrs v0.1.1 h1:H1QtHv6vBImF9X9ELxKS7WGxB2tf2cY+1EDKkTzKTro=
 github.com/codemodus/hedrs v0.1.1/go.mod h1:WqRMpBWXc9ysM283RlUR7X+dypQGR2K+uLwqwPAc6tM=
+github.com/codemodus/mixmux v0.2.0 h1:5EbyU8n38Dj0IYp6zdypzE4VZOvmjZuH5exVwhV8x8w=
+github.com/codemodus/mixmux v0.2.0/go.mod h1:uIe6QEAZeuQFUeXS0P5RsfRRuUVKTW2+sjIkBbeLxXM=
 github.com/codemodus/rwap v0.2.0 h1:8T/czFcUoVVB1kjBxp3XCCgY6LSnulE/K9xS/1vMPmg=
 github.com/codemodus/rwap v0.2.0/go.mod h1:GDv6T9CYjop2Xen158BphxIm/txnf4zkX6PLW3dX/PA=
 github.com/codemodus/sigmon/v2 v2.0.1 h1:Af1mEIYTmyO+doosTJeWQyb05LCVVHjeIAsO/RHwe4w=
 github.com/codemodus/sigmon/v2 v2.0.1/go.mod h1:zrFxWNA3u/3TyD8JhXUgT7/aI3ZhZOCNpBJLM7KVphY=
+github.com/codemodus/swagui v0.2.2 h1:LnZTWUljvDePIle6fSBDUJg/oZDNw6NGI8LKplI/ECk=
+github.com/codemodus/swagui v0.2.2/go.mod h1:9eAe3Kix9k+v9SmeQ3I9CoTr5wn44vYk9FaZgHKGDMQ=
+github.com/dimfeld/httptreemux v5.0.1+incompatible h1:Qj3gVcDNoOthBAqftuD596rm4wg/adLLz5xh5CmpiCA=
+github.com/dimfeld/httptreemux v5.0.1+incompatible/go.mod h1:rbUlSV+CCpv/SuqUTP/8Bk2O3LyUV436/yaRGkhP6Z0=
 github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b h1:VKtxabqXZkF25pY9ekfRL6a582T4P37/31XEstQ5p58=
 github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b/go.mod h1:SBH7ygxi8pfUlaOkMMuAQtPIUF8ecWP5IEl/CR7VP2Q=
 github.com/golang/lint v0.0.0-20180702182130-06c8688daad7/go.mod h1:tluoj9z5200jBnyusfRPU2LqT6J+DAorxEvtC7LHB+E=
@@ -18,6 +24,10 @@ github.com/golang/protobuf v1.2.0 h1:P3YflyNX/ehuJFLhxviNdFxQPkGK5cDcApsge1SqnvM
 github.com/golang/protobuf v1.2.0/go.mod h1:6lQm79b+lXiMfvg/cZm0SGofjICqVBUtrP5yJMmIC1U=
 github.com/grpc-ecosystem/grpc-gateway v1.7.0 h1:tPFY/SM+d656aSgLWO2Eckc3ExwpwwybwdN5Ph20h1A=
 github.com/grpc-ecosystem/grpc-gateway v1.7.0/go.mod h1:RSKVYQBd5MCa4OVpNdGskqpgL2+G+NZTnrVHpWWfpdw=
+github.com/julienschmidt/httprouter v0.0.0-20180715161854-348b672cd90d h1:of6+TpypLAaiv4JxgH5aplBZnt0b65B4v4c8q5oy+Sk=
+github.com/julienschmidt/httprouter v0.0.0-20180715161854-348b672cd90d/go.mod h1:SYymIcj16QtmaHHD7aYtjjsJG7VTCxuUUipMqKk8s4w=
+github.com/julienschmidt/httprouter v1.2.0 h1:TDTW5Yz1mjftljbcKqRcrYhd4XeOoI98t+9HbQbYf7g=
+github.com/julienschmidt/httprouter v1.2.0/go.mod h1:SYymIcj16QtmaHHD7aYtjjsJG7VTCxuUUipMqKk8s4w=
 github.com/kisielk/gotool v1.0.0/go.mod h1:XhKaO+MFFWcvkIS/tQcRk01m1F5IRFswLeQ+oQHNcck=
 golang.org/x/exp v0.0.0-20190121172915-509febef88a4/go.mod h1:CJ0aWSM057203Lf6IL+f9T1iT9GByDxfZKAQTCR3kQA=
 golang.org/x/lint v0.0.0-20180702182130-06c8688daad7/go.mod h1:UVdnD1Gm6xHRNCYTkRU2/jEulfH38KcIWyp/GAMgvoE=

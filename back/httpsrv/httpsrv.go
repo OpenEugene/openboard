@@ -1,13 +1,18 @@
 package httpsrv
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"net/http"
+	"time"
 
+	"github.com/champagneabuelo/openboard/back/httpsrv/internal/embed/assets"
 	"github.com/champagneabuelo/openboard/back/pb"
 	"github.com/codemodus/chain/v2"
 	"github.com/codemodus/hedrs"
+	"github.com/codemodus/mixmux"
+	"github.com/codemodus/swagui"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"google.golang.org/grpc"
 )
@@ -21,7 +26,7 @@ type HTTPSrv struct {
 // New ...
 func New(origins []string) (*HTTPSrv, error) {
 	gmux := runtime.NewServeMux() // TODO: set options
-	mux := multiplexer(gmux, origins)
+	mux := multiplexer(time.Now(), gmux, origins)
 
 	s := HTTPSrv{
 		Server: &http.Server{
@@ -33,7 +38,7 @@ func New(origins []string) (*HTTPSrv, error) {
 	return &s, nil
 }
 
-func multiplexer(gmux *runtime.ServeMux, origins []string) http.Handler {
+func multiplexer(start time.Time, gmux *runtime.ServeMux, origins []string) http.Handler {
 	origins = append(hedrs.DefaultOrigins, origins...)
 	corsOrigins := hedrs.CORSOrigins(hedrs.NewAllowed(origins...))
 	corsMethods := hedrs.CORSMethods(hedrs.NewValues(hedrs.AllMethods...))
@@ -45,14 +50,20 @@ func multiplexer(gmux *runtime.ServeMux, origins []string) http.Handler {
 		corsHeaders,
 	)
 
-	m := http.NewServeMux()
-
-	m.Handle("/", gmux)
-	m.HandleFunc("/hello", func(w http.ResponseWriter, r *http.Request) {
+	m := mixmux.NewTreeMux(nil)
+	m.Get("/hello", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintln(w, "hello, world")
-	})
+	}))
+	m.Any("/v/*x", gmux)
+	// TODO: add swagger json merging
+	m.Any("/v/docs/auth.swagger.json", swaggerJSONHandler(start, "auth"))
+	m.Any("/v/docs/user.swagger.json", swaggerJSONHandler(start, "user"))
 
-	// TODO: add openapi ui/json
+	if ui, err := swagui.New(nil); err == nil {
+		sh := http.StripPrefix("/v/docs/", ui.Handler("/v/docs/user.swagger.json"))
+		m.Get("/v/docs/", sh)
+		m.Get("/v/docs/*x", sh)
+	}
 
 	return cmn.End(m)
 }
@@ -93,4 +104,26 @@ func (s *HTTPSrv) Serve(rpcPort, httpPort string) error {
 func (s *HTTPSrv) Stop() error {
 	// TODO: setup shutdown context
 	return s.Server.Shutdown(context.Background())
+}
+
+func swaggerJSONHandler(start time.Time, prefix string) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		name := prefix + ".swagger.json"
+
+		d, err := assets.Asset(name)
+		if err != nil {
+			stts := http.StatusInternalServerError
+			http.Error(w, http.StatusText(stts), stts)
+			return
+		}
+
+		mt := start
+		i, err := assets.AssetInfo(name)
+		if err == nil {
+			mt = i.ModTime()
+		}
+
+		b := bytes.NewReader(d)
+		http.ServeContent(w, r, name, mt, b)
+	})
 }
