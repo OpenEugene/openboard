@@ -114,6 +114,11 @@ function filterProto {
     return $?
 }
 
+function elmfmtMessage() {
+    local elmfmt="$(elm-format -h 2>&1 | grep "^elm-format.*")"
+    echo "-- ALSO PROCESSED BY ${elmfmt}"
+}
+
 function main {
     local cleanups=()
     function runCleanups() { 
@@ -144,6 +149,7 @@ function main {
     find "${dstDir}" -name "*${token}.elm" | while read file; do
       elm-format --yes "${file}" > /dev/null
       xsed -i 's/'${token}'//g' ${file}
+      xsed -i '/^-- source.*/a '"$(elmfmtMessage)"'' ${file}
       local newfile=${file/${token}/}
       [[ "${file}" != "${newfile}" ]] && mv "${file}" "${newfile}"
     done
