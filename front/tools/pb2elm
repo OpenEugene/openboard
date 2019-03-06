@@ -1,28 +1,29 @@
 #!/usr/bin/env bash
 
-#? {cmd} DEST -I INCLUDES... PROTOS...
+#? {cmd}:
+#? DEST -I INCLUDES... PROTOS...
 #? example: {cmd} src -I ../../msgs ../../msgs/proto/*.proto
 #? 
 #? DEST is the root of the output source
 #? INCLUDES are the root directories from which to gather proto files
 #? PROTOS are generated in paths relative to the provided includes
 #? 
-#? input: {cmd} src -I ../../msgs ../../msgs/proto/example.proto
+#? command: {cmd} src -I ../../msgs ../../msgs/proto/example.proto
 #? output: "Proto/Example.elm" within the "src" directory
+function curcmd() {
+    echo "$(basename "${0}")"
+}
+
+function echerr() {
+    echo "$(curcmd):" "${@}" >&2 && exit 1
+}
 
 function checkDep() {
-    ! hash "${1}" 2>/dev/null && \
-        echo "requires ${1}" >&2 && exit 1
+    ! hash "${1}" 2>/dev/null && echerr "requires ${1}"
 }
 
 function checkDepOr() {
-    ! (hash "${1}" 2>/dev/null || hash "${2}" 2>/dev/null) && \
-        echo "requires ${1} or ${2}" >&2 && exit 1
-}
-
-function yudodis() {
-    [[ "$(uname -s)" == "Darwin" && "${1}" == "sed" ]] && \
-        echo "darwin requires gsed" >&2 && exit 1
+    ! (hash "${1}" 2>/dev/null || hash "${2}" 2>/dev/null) && echerr "requires ${1} or ${2}"
 }
 
 checkDep "protoc"
@@ -31,14 +32,29 @@ checkDep "elm-format"
 checkDepOr "sed" "gsed"
 checkDepOr "realpath" "grealpath"
 
-function getDepOr() {
+function depOr() {
     local ret="${1}"
     hash "${2}" 2>/dev/null && ret="${2}"
     echo "${ret}"
 }
 
+function xsed() {
+    local cmd="$(depOr "sed" "gsed")"
+    ${cmd} "${@}"
+}
+
+function xrealpath() {
+    local cmd="$(depOr "realpath" "grealpath")"
+    ${cmd} "${@}"
+}
+
+function yudodis_osx() {
+    local sedCmd="$(depOr "sed" "gsed")"
+    [[ "$(uname -s)" == "Darwin" && "${sedCmd}" == "sed" ]] && echerr "darwin requires gsed"
+}
+
 function getDestinationDir() {
-    ! mkdir -p "${1}" 2>/dev/null && echo "cannot make directory '${1}'" >&2 && exit 1
+    ! mkdir -p "${1}" 2>/dev/null && echerr "cannot make directory '${1}'"
     echo "${1}"
 }
 
@@ -65,60 +81,53 @@ function getSourceFiles() {
     for arg in ${args[@]}; do
         [[ "${arg}" == "-"* ]] && continue
 
-        [[ ! -f "${arg}" ]] && echo "non-file '${arg}'" >&2 && exit 1
+        [[ ! -f "${arg}" ]] && echerr "non-file '${arg}'"
 
         rets+=("${arg}")
     done
 
-    [[ ${#rets[@]} == 0 ]] && echo "must provide one or more files" >&2 && exit 1
+    [[ ${#rets[@]} == 0 ]] && echerr "must provide one or more files"
     echo "${rets[@]}"
 }
 
 function filterProto {
     local in="${1}"
     local out="${2}"
-    local sedCmd="$(getDepOr "sed" "gsed")"
 
     cat "${in}" | \
         # delete consecutive empty lines (simplifies multi-line empty message deletion)
-        ${sedCmd} '/^$/N;/^\n$/D' | \
+        xsed '/^$/N;/^\n$/D' | \
         # delete service definitions 
-        ${sedCmd} '/^service/,/^}$/d' | \
+        xsed '/^service/,/^}$/d' | \
         # delete annotations.proto (contains proto2 dependency)
-        ${sedCmd} '/annotations.proto/d' | \
+        xsed '/annotations.proto/d' | \
         # delete empty messages (single line)
-        ${sedCmd} '/^message.*{\s*}/d' | \
+        xsed '/^message.*{\s*}/d' | \
         # delete empty messages (multiple lines)
-        ${sedCmd} '/^message.*/ {N;N; /^message.*{[\s|\n]*\}/d}' | \
+        xsed '/^message.*/ {N;N; /^message.*{[\s|\n]*\}/d}' | \
         # delete consecutive empty lines (again, some have likely been created)
-        ${sedCmd} '/^$/N;/^\n$/D' | \
+        xsed '/^$/N;/^\n$/D' | \
         # delete last line if empty
-        ${sedCmd} '${/^$/d}' \
+        xsed '${/^$/d}' \
         >> "${out}"
 
     return $?
 }
 
-function trip {
-    [[ ${1} > 0 ]] && exit ${1}
-}
-
 function main {
     local cleanups=()
-    function runCleanups() {
-        for cleanup in "${cleanups[@]}"; do
-            eval ${cleanup}
-        done
+    function runCleanups() { 
+        for cleanup in "${cleanups[@]}"; do eval ${cleanup}; done
     }
     trap "runCleanups" EXIT RETURN
 
     local skip=1
     local dstDir incs files
-    dstDir="$(getDestinationDir "${1}")"; trip $? 
+    dstDir="$(getDestinationDir "${1}")" || exit 1
     ((skip+=1))
-    incs=($(getIncludeDirs ${@:${skip}})); trip $?
+    incs=($(getIncludeDirs ${@:${skip}})) || exit 1
     ((skip+=${#incs[@]}))
-    files=($(getSourceFiles ${@:$skip})); trip $?
+    files=($(getSourceFiles ${@:$skip})) || exit 1
 
     local token="xxfiltxx"
     local filtfiles=()
@@ -130,18 +139,11 @@ function main {
         cleanups+=("rm ${filtfile}")
     done
 
-    local timeref="${dstDir}/time_ref"
-    touch "${timeref}"
-    cleanups+=("rm ${timeref}")
-
     protoc ${incs[@]} --elm_out="${dstDir}" ${filtfiles[@]} > /dev/null 2>&1
-
-    local sedCmd="$(getDepOr "sed" "gsed")"
 
     find "${dstDir}" -name "*${token}.elm" | while read file; do
       elm-format --yes "${file}" > /dev/null
-      ${sedCmd} -i 's/'${token}'//g' ${file}
-
+      xsed -i 's/'${token}'//g' ${file}
       local newfile=${file/${token}/}
       [[ "${file}" != "${newfile}" ]] && mv "${file}" "${newfile}"
     done
@@ -149,25 +151,16 @@ function main {
 
 function doc() {
     function display() {
-        local cmd="$(basename "${0}")"
-        local rpCmd="$(getDepOr "realpath" "grealpath")"
-        local sedCmd="$(getDepOr "sed" "gsed")"
-
-        grep '^#?' $(${rpCmd} "${0}") | \
-            ${sedCmd} 's/#?\s*//g' | \
-            ${sedCmd} 's/{cmd}/'${cmd}'/g'
+        grep '^#?' $(xrealpath "${0}") | \
+            xsed -e 's/#?\s*//g' -e 's/{cmd}/'"$(curcmd)"'/g'
     }
 
     local args=("${@}")
-
     for arg in ${args[@]}; do
-        [[ "${arg}" == "-h" || "${arg}" == "-help" || "${arg}" == "--help" ]] && \
-            display && exit 0
+        [[ "${arg}" =~ ^(help|-h|-help|--help)$ ]] && display && exit 0
     done
 }
 
-doc ${@}
-
-yudodis "$(getDepOr "sed" "gsed")"
-
-main ${@}
+doc "${@}"
+yudodis_osx
+main "${@}"
