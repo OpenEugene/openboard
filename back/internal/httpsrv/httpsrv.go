@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/champagneabuelo/openboard/back/httpsrv/internal/embed/assets"
+	"github.com/champagneabuelo/openboard/back/internal/httpsrv/internal/embed/swagger"
 	"github.com/champagneabuelo/openboard/back/pb"
 	"github.com/codemodus/chain/v2"
 	"github.com/codemodus/hedrs"
@@ -110,7 +110,7 @@ func swaggerJSONHandler(start time.Time, prefix string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		name := prefix + ".swagger.json"
 
-		d, err := assets.Asset(name)
+		d, err := swagger.Asset(name)
 		if err != nil {
 			stts := http.StatusInternalServerError
 			http.Error(w, http.StatusText(stts), stts)
@@ -118,7 +118,7 @@ func swaggerJSONHandler(start time.Time, prefix string) http.Handler {
 		}
 
 		mt := start
-		i, err := assets.AssetInfo(name)
+		i, err := swagger.AssetInfo(name)
 		if err == nil {
 			mt = i.ModTime()
 		}

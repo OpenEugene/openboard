@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/champagneabuelo/openboard/back/authsvc"
-	"github.com/champagneabuelo/openboard/back/grpcsrv"
+	"github.com/champagneabuelo/openboard/back/internal/grpcsrv"
 	"github.com/champagneabuelo/openboard/back/usersvc"
 )
 

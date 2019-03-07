@@ -2,7 +2,7 @@
 // sources:
 // auth.swagger.json
 // user.swagger.json
-package assets
+package swagger
 
 import (
 	"fmt"
@@ -194,7 +194,7 @@ func authSwaggerJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "auth.swagger.json", size: 3159, mode: os.FileMode(436), modTime: time.Unix(1551767613, 0)}
+	info := bindataFileInfo{name: "auth.swagger.json", size: 3159, mode: os.FileMode(436), modTime: time.Unix(1551954141, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -620,7 +620,7 @@ func userSwaggerJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "user.swagger.json", size: 9268, mode: os.FileMode(436), modTime: time.Unix(1551767613, 0)}
+	info := bindataFileInfo{name: "user.swagger.json", size: 9268, mode: os.FileMode(436), modTime: time.Unix(1551954141, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

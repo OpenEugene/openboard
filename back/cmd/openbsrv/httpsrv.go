@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/champagneabuelo/openboard/back/httpsrv"
+	"github.com/champagneabuelo/openboard/back/internal/httpsrv"
 	"github.com/codemodus/hedrs"
 )
 
