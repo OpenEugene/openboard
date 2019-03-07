@@ -10,6 +10,8 @@ Then you should have the `elm` command available. To compile the application run
 
 `elm make src/Main.elm --output=public/app.js --debug`
 
+<sub>*Please be sure to add `**/elm-stuff/` to your global git ignore file.</sub>
+
 ### Get started
 
 You can serve up the frontend on it's own, or use spin the whole stack up together (see top level README)
