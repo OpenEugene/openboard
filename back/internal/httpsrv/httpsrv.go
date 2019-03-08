@@ -60,7 +60,7 @@ func multiplexer(start time.Time, gmux *runtime.ServeMux, origins []string) http
 	m.Any("/v/docs/user.swagger.json", swaggerJSONHandler(start, "user"))
 
 	if ui, err := swagui.New(nil); err == nil {
-		sh := http.StripPrefix("/v/docs/", ui.Handler("/v/docs/user.swagger.json"))
+		sh := http.StripPrefix("/v/docs/", ui.Handler("/v/docs/swagger.json"))
 		m.Get("/v/docs/", sh)
 		m.Get("/v/docs/*x", sh)
 	}

@@ -27,12 +27,12 @@ func run() error {
 		return err
 	}
 
-	hsrv, err := newHTTPSrv(":4242", ":4243")
+	hsrv, err := newHTTPSrv(nil, ":4242", ":4243")
 	if err != nil {
 		return err
 	}
 
-	fsrv, err := newFrontSrv("../../../front/public", ":4244")
+	fsrv, err := newFrontSrv(nil, "../../../front/public", ":4244")
 	if err != nil {
 		return err
 	}

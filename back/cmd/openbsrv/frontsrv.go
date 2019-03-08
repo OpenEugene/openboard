@@ -5,17 +5,30 @@ import (
 	"net/http"
 
 	"github.com/codemodus/alfred"
+	"github.com/codemodus/chain/v2"
+	"github.com/codemodus/hedrs"
 )
 
 type frontSrv struct {
 	s *http.Server
 }
 
-func newFrontSrv(dir, port string) (*frontSrv, error) {
+func newFrontSrv(origins []string, dir, port string) (*frontSrv, error) {
+	origins = append(hedrs.DefaultOrigins, origins...)
+	corsOrigins := hedrs.CORSOrigins(hedrs.NewAllowed(origins...))
+	corsMethods := hedrs.CORSMethods(hedrs.NewValues(hedrs.AllMethods...))
+	corsHeaders := hedrs.CORSHeaders(hedrs.NewValues(hedrs.DefaultHeaders...))
+
+	cmn := chain.New(
+		corsOrigins,
+		corsMethods,
+		corsHeaders,
+	)
+
 	s := frontSrv{
 		s: &http.Server{
 			Addr:    port,
-			Handler: alfred.New(dir),
+			Handler: cmn.End(alfred.New(dir)),
 		},
 	}
 

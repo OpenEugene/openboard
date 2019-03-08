@@ -12,7 +12,7 @@ type httpSrv struct {
 	httpPort string
 }
 
-func newHTTPSrv(rpcPort, httpPort string) (*httpSrv, error) {
+func newHTTPSrv(origins []string, rpcPort, httpPort string) (*httpSrv, error) {
 	hs, err := httpsrv.New(hedrs.DefaultOrigins)
 	if err != nil {
 		return nil, err
