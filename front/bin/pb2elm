@@ -1,0 +1,172 @@
+#!/usr/bin/env bash
+
+#? {cmd}:
+#? DEST -I INCLUDES... PROTOS...
+#? example: {cmd} src -I ../../msgs ../../msgs/proto/*.proto
+#? 
+#? DEST is the root of the output source
+#? INCLUDES are the root directories from which to gather proto files
+#? PROTOS are generated in paths relative to the provided includes
+#? 
+#? command: {cmd} src -I ../../msgs ../../msgs/proto/example.proto
+#? output: "Proto/Example.elm" within the "src" directory
+function curcmd() {
+    echo "$(basename "${0}")"
+}
+
+function echerr() {
+    echo "$(curcmd):" "${@}" >&2 && exit 1
+}
+
+function checkDep() {
+    ! hash "${1}" 2>/dev/null && echerr "requires ${1}"
+}
+
+function checkDepOr() {
+    ! (hash "${1}" 2>/dev/null || hash "${2}" 2>/dev/null) && echerr "requires ${1} or ${2}"
+}
+
+checkDep "protoc"
+checkDep "protoc-gen-elm"
+checkDep "elm-format"
+checkDepOr "sed" "gsed"
+checkDepOr "realpath" "grealpath"
+
+function depOr() {
+    local ret="${1}"
+    hash "${2}" 2>/dev/null && ret="${2}"
+    echo "${ret}"
+}
+
+function xsed() {
+    local cmd="$(depOr "sed" "gsed")"
+    ${cmd} "${@}"
+}
+
+function xrealpath() {
+    local cmd="$(depOr "realpath" "grealpath")"
+    ${cmd} "${@}"
+}
+
+function yudodis_osx() {
+    local sedCmd="$(depOr "sed" "gsed")"
+    [[ "$(uname -s)" == "Darwin" && "${sedCmd}" == "sed" ]] && echerr "darwin requires gsed"
+}
+
+function getDestinationDir() {
+    ! mkdir -p "${1}" 2>/dev/null && echerr "cannot make directory '${1}'"
+    echo "${1}"
+}
+
+function getIncludeDirs() {
+    local args=("${@}")
+    local flag="-I"
+    local rets=()
+
+    for (( i=0; i<${#args}; i++ )); do
+        local arg="${args[i]}"
+        local argv="${args[i+1]}"
+
+        [[ "${arg}" == "${flag}" ]] && rets+=("${arg}" "${argv}") && ((i++)); continue
+        [[ "${arg}" == "${flag}"* ]] && rets+=("${arg}") && continue
+    done
+
+    echo "${rets[@]}"
+}
+
+function getSourceFiles() {
+    local args=("${@}")
+    local rets=()
+
+    for arg in ${args[@]}; do
+        [[ "${arg}" == "-"* ]] && continue
+
+        [[ ! -f "${arg}" ]] && echerr "non-file '${arg}'"
+
+        rets+=("${arg}")
+    done
+
+    [[ ${#rets[@]} == 0 ]] && echerr "must provide one or more files"
+    echo "${rets[@]}"
+}
+
+function filterProto {
+    local in="${1}"
+    local out="${2}"
+
+    cat "${in}" | \
+        # delete consecutive empty lines (simplifies multi-line empty message deletion)
+        xsed '/^$/N;/^\n$/D' | \
+        # delete service definitions 
+        xsed '/^service/,/^}$/d' | \
+        # delete annotations.proto (contains proto2 dependency)
+        xsed '/annotations.proto/d' | \
+        # delete empty messages (single line)
+        xsed '/^message.*{\s*}/d' | \
+        # delete empty messages (multiple lines)
+        xsed '/^message.*/ {N;N; /^message.*{[\s|\n]*\}/d}' | \
+        # delete consecutive empty lines (again, some have likely been created)
+        xsed '/^$/N;/^\n$/D' | \
+        # delete last line if empty
+        xsed '${/^$/d}' \
+        >> "${out}"
+
+    return $?
+}
+
+function elmfmtMessage() {
+    local elmfmt="$(elm-format -h 2>&1 | grep "^elm-format.*")"
+    echo "-- ALSO PROCESSED BY ${elmfmt}"
+}
+
+function main {
+    local cleanups=()
+    function runCleanups() { 
+        for cleanup in "${cleanups[@]}"; do eval ${cleanup}; done
+    }
+    trap "runCleanups" EXIT RETURN
+
+    local skip=1
+    local dstDir incs files
+    dstDir="$(getDestinationDir "${1}")" || exit 1
+    ((skip+=1))
+    incs=($(getIncludeDirs ${@:${skip}})) || exit 1
+    ((skip+=${#incs[@]}))
+    files=($(getSourceFiles ${@:$skip})) || exit 1
+
+    local token="xxfiltxx"
+    local filtfiles=()
+
+    for file in ${files[@]}; do
+        local filtfile="${file/\.proto/${token}.proto}"
+        ! filterProto "${file}" "${filtfile}" && continue
+        filtfiles+=("${filtfile}")
+        cleanups+=("rm ${filtfile}")
+    done
+
+    protoc ${incs[@]} --elm_out="${dstDir}" ${filtfiles[@]} > /dev/null 2>&1
+
+    find "${dstDir}" -name "*${token}.elm" | while read file; do
+      elm-format --yes "${file}" > /dev/null
+      xsed -i 's/'${token}'//g' ${file}
+      xsed -i '/^-- source.*/a '"$(elmfmtMessage)"'' ${file}
+      local newfile=${file/${token}/}
+      [[ "${file}" != "${newfile}" ]] && mv "${file}" "${newfile}"
+    done
+}
+
+function doc() {
+    function display() {
+        grep '^#?' $(xrealpath "${0}") | \
+            xsed -e 's/#?\s*//g' -e 's/{cmd}/'"$(curcmd)"'/g'
+    }
+
+    local args=("${@}")
+    for arg in ${args[@]}; do
+        [[ "${arg}" =~ ^(help|-h|-help|--help)$ ]] && display && exit 0
+    done
+}
+
+doc "${@}"
+yudodis_osx
+main "${@}"

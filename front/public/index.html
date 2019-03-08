@@ -6,10 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
     <meta name="theme-color" content="#000000">
-    <link rel="stylesheet" href="/css/main.css">
 
-    <link rel="icon" href="/img/favicon.ico">
-    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="icon" href="/favicon.ico">
+    <link rel="shortcut icon" href="/favicon.ico">
 
     <!-- manifest.json: See https://developers.google.com/web/fundamentals/engage-and-retain/web-app-manifest/ -->
     <link rel="manifest" href="/conf/manifest.json">
@@ -20,7 +19,9 @@
     <noscript>JavaScript is required to run this app.</noscript>
     <div id="app"></div>
 
-    <script type="text/javascript" src="/js/app.js"></script>
-    <script type="text/javascript" src="/js/linkage.js"></script>
+    <script type="text/javascript" src="/app.js"></script>
+    <script>
+        Elm.Main.init({node: document.getElementById("app")});
+    </script>
 </body>
 </html>

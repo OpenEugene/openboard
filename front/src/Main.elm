@@ -1,8 +1,21 @@
-module Main exposing (..)
+module Main exposing (Model, Msg(..), init, main, update, view)
 
 import Browser
-import Html exposing (Html, text, div, h1, img)
-import Html.Attributes exposing (src)
+import Css exposing (..)
+import Html
+import Html.Styled exposing (..)
+import Html.Styled.Attributes exposing (css, href, src)
+import Html.Styled.Events exposing (onClick)
+import Proto.User
+import Ui
+
+
+test : Proto.User.RoleResp
+test =
+    { id = 0
+    , name = "hello"
+    }
+
 
 
 ---- MODEL ----
@@ -36,9 +49,10 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    div []
-        [ img [ src "/logo.svg" ] []
-        , h1 [] [ text "Your Elm App is working! And hot reloading!" ]
+    Ui.card []
+        [ Ui.heading [] [ text "openboard!" ]
+        , Ui.linkBtn [ href "https://github.com/rtfeldman/elm-css" ] [ text "Learn more about elm-css" ]
+        , Ui.linkBtn [ href "https://github.com/champagneabuelo/openboard" ] [ text "the repo" ]
         ]
 
 
@@ -49,7 +63,7 @@ view model =
 main : Program () Model Msg
 main =
     Browser.element
-        { view = view
+        { view = view >> toUnstyled
         , init = \_ -> init
         , update = update
         , subscriptions = always Sub.none
