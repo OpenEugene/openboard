@@ -1,6 +1,6 @@
 {
-  "short_name": "OpenBoard",
-  "name": "OpenBoard",
+  "short_name": "openboard",
+  "name": "openboard",
   "icons": [
     {
       "src": "favicon.ico",

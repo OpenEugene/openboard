@@ -50,7 +50,7 @@ update msg model =
 view : Model -> Html Msg
 view model =
     Ui.card []
-        [ Ui.heading [] [ text "Openboard!" ]
+        [ Ui.heading [] [ text "openboard!" ]
         , Ui.linkBtn [ href "https://github.com/rtfeldman/elm-css" ] [ text "Learn more about elm-css" ]
         , Ui.linkBtn [ href "https://github.com/champagneabuelo/openboard" ] [ text "the repo" ]
         ]
