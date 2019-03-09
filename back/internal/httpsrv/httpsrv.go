@@ -3,7 +3,6 @@ package httpsrv
 import (
 	"bytes"
 	"context"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -51,16 +50,11 @@ func multiplexer(start time.Time, gmux *runtime.ServeMux, origins []string) http
 	)
 
 	m := mixmux.NewTreeMux(nil)
-	m.Get("/hello", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintln(w, "hello, world")
-	}))
 	m.Any("/v/*x", gmux)
-	// TODO: add swagger json merging
-	m.Any("/v/docs/auth.swagger.json", swaggerJSONHandler(start, "auth"))
-	m.Any("/v/docs/user.swagger.json", swaggerJSONHandler(start, "user"))
+	m.Any("/v/docs/apidocs.swagger.json", swaggerJSONHandler(start, "apidocs"))
 
 	if ui, err := swagui.New(nil); err == nil {
-		sh := http.StripPrefix("/v/docs/", ui.Handler("/v/docs/swagger.json"))
+		sh := http.StripPrefix("/v/docs/", ui.Handler("/v/docs/apidocs.swagger.json"))
 		m.Get("/v/docs/", sh)
 		m.Get("/v/docs/*x", sh)
 	}
