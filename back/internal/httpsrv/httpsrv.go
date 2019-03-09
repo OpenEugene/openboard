@@ -88,7 +88,7 @@ func (s *HTTPSrv) Serve(rpcPort, httpPort string) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	err = pb.RegisterAuthHandler(ctx, s.gmux, conn) // TODO: []callback from new func args
+	err = pb.RegisterAuthHandler(ctx, s.gmux, conn)
 	if err != nil {
 		return err
 	}
