@@ -3,6 +3,7 @@ package httpsrv
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"net/http"
 	"time"
 
@@ -25,7 +26,10 @@ type HTTPSrv struct {
 // New ...
 func New(origins []string) (*HTTPSrv, error) {
 	gmux := runtime.NewServeMux() // TODO: set options
-	mux := multiplexer(time.Now(), gmux, origins)
+	mux, err := multiplexer(time.Now(), gmux, origins)
+	if err != nil {
+		return nil, err
+	}
 
 	s := HTTPSrv{
 		Server: &http.Server{
@@ -37,7 +41,26 @@ func New(origins []string) (*HTTPSrv, error) {
 	return &s, nil
 }
 
-func multiplexer(start time.Time, gmux *runtime.ServeMux, origins []string) http.Handler {
+func multiplexer(start time.Time, gmux *runtime.ServeMux, origins []string) (http.Handler, error) {
+	handleSwagger, err := swaggerHandler(start, "/v", "apidocs.swagger.json")
+	if err != nil {
+		return nil, err
+	}
+
+	m := mixmux.NewTreeMux(nil)
+
+	gm := http.StripPrefix("/v", gmux)
+	m.Any("/v/", gm)
+	m.Any("/v/*x", gm)
+
+	m.Any("/v/docs/swagger.json", handleSwagger)
+
+	if ui, err := swagui.New(nil); err == nil {
+		sh := http.StripPrefix("/v/docs", ui.Handler("/v/docs/swagger.json"))
+		m.Get("/v/docs/", sh)
+		m.Get("/v/docs/*x", sh)
+	}
+
 	origins = append(hedrs.DefaultOrigins, origins...)
 	corsOrigins := hedrs.CORSOrigins(hedrs.NewAllowed(origins...))
 	corsMethods := hedrs.CORSMethods(hedrs.NewValues(hedrs.AllMethods...))
@@ -49,17 +72,7 @@ func multiplexer(start time.Time, gmux *runtime.ServeMux, origins []string) http
 		corsHeaders,
 	)
 
-	m := mixmux.NewTreeMux(nil)
-	m.Any("/v/*x", gmux)
-	m.Any("/v/docs/apidocs.swagger.json", swaggerJSONHandler(start, "apidocs"))
-
-	if ui, err := swagui.New(nil); err == nil {
-		sh := http.StripPrefix("/v/docs/", ui.Handler("/v/docs/apidocs.swagger.json"))
-		m.Get("/v/docs/", sh)
-		m.Get("/v/docs/*x", sh)
-	}
-
-	return cmn.End(m)
+	return cmn.End(m), nil
 }
 
 // Serve ...
@@ -100,24 +113,55 @@ func (s *HTTPSrv) Stop() error {
 	return s.Server.Shutdown(context.Background())
 }
 
-func swaggerJSONHandler(start time.Time, prefix string) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		name := prefix + ".swagger.json"
+func swaggerHandler(start time.Time, basePath, name string) (http.Handler, error) {
+	d, err := swagger.Asset(name)
+	if err != nil {
+		return nil, err
+	}
 
-		d, err := swagger.Asset(name)
-		if err != nil {
-			stts := http.StatusInternalServerError
-			http.Error(w, http.StatusText(stts), stts)
-			return
+	if basePath != "" {
+		if d, err = setSwaggerBasePath(basePath, d); err != nil {
+			return nil, err
 		}
+	}
 
-		mt := start
-		i, err := swagger.AssetInfo(name)
-		if err == nil {
-			mt = i.ModTime()
-		}
+	mt := start
+	i, err := swagger.AssetInfo(name)
+	if err == nil {
+		mt = i.ModTime()
+	}
 
+	h := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		b := bytes.NewReader(d)
 		http.ServeContent(w, r, name, mt, b)
 	})
+
+	return h, nil
+}
+
+func setSwaggerBasePath(path string, d []byte) ([]byte, error) {
+	var j swaggerJSON
+	if err := json.Unmarshal(d, &j); err != nil {
+		return nil, err
+	}
+
+	j.BasePath = path
+
+	return json.Marshal(&j)
+}
+
+type swaggerJSON struct {
+	Swagger string `json:"swagger"`
+	/*Info struct {
+		Title       string `json:"title,omitempty"`
+		Description string `json:"description,omitempty"`
+		Version     string `json:"version,omitempty"`
+	}*/
+	Info        json.RawMessage `json:"info,omitempty"`
+	BasePath    string          `json:"basePath,omitempty"`
+	Schemes     json.RawMessage `json:"schemes,omitempty"`  // []string
+	Consumes    json.RawMessage `json:"consumes,omitempty"` // []string
+	Produces    json.RawMessage `json:"produces,omitempty"` // []string
+	Paths       json.RawMessage `json:"paths,omitempty"`
+	Definitions json.RawMessage `json:"definitions,omitempty"`
 }
