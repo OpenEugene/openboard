@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
 	"path"
@@ -18,6 +19,13 @@ func main() {
 }
 
 func run() error {
+	var (
+		frontDir = "../../../front/public"
+	)
+
+	flag.StringVar(&frontDir, "frontdir", frontDir, "front public assets directory")
+	flag.Parse()
+
 	sm := sigmon.New(nil)
 	sm.Start()
 	defer sm.Stop()
@@ -32,7 +40,7 @@ func run() error {
 		return err
 	}
 
-	fsrv, err := newFrontSrv(nil, "../../../front/public", ":4244")
+	fsrv, err := newFrontSrv(nil, frontDir, ":4244")
 	if err != nil {
 		return err
 	}
