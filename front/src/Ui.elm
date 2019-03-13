@@ -1,10 +1,19 @@
-module Ui exposing (card, linkBtn, heading)
+module Ui exposing (btn, card, heading, linkBtn, paragraph)
 
 import Css exposing (..)
-import Html
 import Html.Styled exposing (..)
-import Html.Styled.Attributes exposing (css, href, src)
-import Html.Styled.Events exposing (onClick)
+
+
+
+-- Reusabled parts of the Ui used by Pages
+
+
+paragraph =
+    styled p [ pStyle ]
+
+
+btn =
+    styled button [ Css.batch [] ]
 
 
 {-| A reusable card module
@@ -18,14 +27,15 @@ card =
         , margin (px (8 * gridUnit))
         ]
 
+
 {-| A reusable heading
 -}
 heading : String -> Html msg
 heading title =
-    styled h1 [ h1Style ] [] [text title]
+    styled h1 [ h1Style ] [] [ text title ]
 
 
-{-| A reusable link button 
+{-| A reusable link button
 -}
 linkBtn : List (Attribute msg) -> List (Html msg) -> Html msg
 linkBtn =
@@ -57,6 +67,19 @@ h1Style =
         , marginTop (px 0)
         ]
 
+
+{-| Styles for h1
+-}
+pStyle : Style
+pStyle =
+    Css.batch
+        [ fontFamilies [ "Helvetica", "Arial", "sans-serif", "serif" ]
+        , fontSize (2 * gridUnit |> px)
+        , fontWeight normal
+        , lineHeight (2 * gridUnit + gridUnit |> px)
+        ]
+
+
 {-| Theme colors
 -}
 theme =
@@ -65,6 +88,7 @@ theme =
     , hover = hex "3ebc5b"
     , dark = hex "999"
     }
+
 
 {-| Grid unit to keep everything lined up and balanced
 -}

@@ -1,10 +1,9 @@
-module Route exposing (Route(..), fromUrl, href, replaceUrl)
+module Route exposing (Route(..), fromUrl, href)
 
-import Browser.Navigation as Nav
-import Html exposing (Attribute)
-import Html.Attributes as Attr
+import Html.Styled exposing (Attribute)
+import Html.Styled.Attributes as Attr
 import Url exposing (Url)
-import Url.Parser as Parser exposing ((</>), Parser, oneOf, s, string)
+import Url.Parser as Parser exposing ((</>), Parser, oneOf, s)
 
 
 
@@ -13,7 +12,6 @@ import Url.Parser as Parser exposing ((</>), Parser, oneOf, s, string)
 
 type Route
     = Home
-    | Root
     | Login
 
 
@@ -32,11 +30,6 @@ parser =
 href : Route -> Attribute msg
 href targetRoute =
     Attr.href (routeToString targetRoute)
-
-
-replaceUrl : Nav.Key -> Route -> Cmd msg
-replaceUrl key route =
-    Nav.replaceUrl key (routeToString route)
 
 
 fromUrl : Url -> Maybe Route
@@ -58,9 +51,6 @@ routeToString page =
         pieces =
             case page of
                 Home ->
-                    []
-
-                Root ->
                     []
 
                 Login ->

@@ -1,71 +1,51 @@
-module Page.Home exposing (Model, Msg, init, subscriptions, toSession, update, view)
+module Page.Home exposing (Model, Msg(..), init, toSession, update, view)
 
-{-| The homepage. You can get here via either the / or /#/ routes.
--}
-
-import Html exposing (..)
+import Html.Styled exposing (text)
+import Html.Styled.Events exposing (onClick)
+import Route
 import Session exposing (Session)
-import Time
-
-
-
-
-
--- MODEL
+import Ui
 
 
 type alias Model =
     { session : Session
-    , timeZone : Time.Zone
+    , greeting : String
     }
-
-
-
-init : Session -> ( Model, Cmd Msg )
-init session =
-    ( { session = session
-      , timeZone = Time.utc
-      }
-    , Cmd.none
-    )
-
-
-
--- VIEW
-
-
-view : Model -> { title : String, content : Html Msg }
-view model =
-    { title = "Openboard"
-    , content = text "home"
-    }
-
-
--- UPDATE
 
 
 type Msg
-    = Noop
-    | GotSession Session
+    = InternalHomeMsg
+
+
+init : Session -> ( Model, Cmd Msg )
+init s =
+    ( Model s "Change me", Cmd.none )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-            ( model
-            , Cmd.none
-            )
+    case msg of
+        InternalHomeMsg ->
+            ( { model | greeting = "Hello from Page.Home" }, Cmd.none )
 
 
+view : Model -> { title : String, content : Html.Styled.Html Msg }
+view model =
+    { title = "Home"
+    , content = homeView model
+    }
 
-subscriptions : Model -> Sub Msg
-subscriptions model =
-    Session.changes GotSession (Session.navKey model.session)
 
-
-
--- EXPORT
+homeView : Model -> Html.Styled.Html Msg
+homeView model =
+    Ui.card []
+        [ Ui.heading "Home"
+        , Ui.linkBtn [ Route.href Route.Login ] [ text "Login" ]
+        , Ui.paragraph [] [ text model.greeting ]
+        , Ui.btn [ onClick InternalHomeMsg ] [ text "Click me to update the home page" ]
+        ]
 
 
 toSession : Model -> Session
-toSession model =
-    model.session
+toSession { session } =
+    session
