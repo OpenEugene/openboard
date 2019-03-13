@@ -20,10 +20,9 @@ card =
 
 {-| A reusable heading
 -}
-heading : List (Attribute msg) -> List (Html msg) -> Html msg
-heading =
-    styled h1
-        [ h1Style ]
+heading : String -> Html msg
+heading title =
+    styled h1 [ h1Style ] [] [text title]
 
 
 {-| A reusable link button 
