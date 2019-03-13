@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/champagneabuelo/openboard/back/authsvc"
+	"github.com/champagneabuelo/openboard/back/internal/authsvc"
 	"github.com/champagneabuelo/openboard/back/internal/grpcsrv"
-	"github.com/champagneabuelo/openboard/back/usersvc"
+	"github.com/champagneabuelo/openboard/back/internal/usersvc"
 )
 
 type grpcSrv struct {
