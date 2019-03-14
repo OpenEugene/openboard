@@ -6,7 +6,6 @@ import (
 	"os"
 	"path"
 
-	"github.com/champagneabuelo/openboard/back/pb"
 	"github.com/codemodus/sigmon/v2"
 )
 
@@ -53,7 +52,6 @@ func run() error {
 		}
 	})
 
-	fmt.Println(pb.UserResp{})
 	fmt.Println("to gracefully stop the application, send signal like TERM (CTRL-C) or HUP")
 
 	if err := m.serve(); err != nil {

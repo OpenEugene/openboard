@@ -3,7 +3,7 @@ package usersvc
 import (
 	"context"
 
-	"github.com/champagneabuelo/openboard/back/pb"
+	"github.com/champagneabuelo/openboard/back/internal/pb"
 	"google.golang.org/grpc"
 )
 
