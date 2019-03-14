@@ -46,7 +46,7 @@ http://localhost:4243/v/docs. The frontend assets are served on port 4244.
   - If required fixes seem wrong or odd, please include a note in the PR.
 - Run tests and fix incorrect structure/behavior as needed.
 - Add new passing tests when useful.
-- Generate code when modifying protobufs (`gengo` from the root back dir).
+- Generate code when modifying protobufs (`./gengo` from the root back dir).
 
 ### Protobuf
 
