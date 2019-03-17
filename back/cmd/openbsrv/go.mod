@@ -8,6 +8,8 @@ require (
 	github.com/codemodus/chain/v2 v2.1.2
 	github.com/codemodus/hedrs v0.1.1
 	github.com/codemodus/sigmon/v2 v2.0.1
+	github.com/codemodus/sqlmig v0.1.1
+	github.com/go-sql-driver/mysql v1.4.1
 )
 
 replace github.com/champagneabuelo/openboard/back/internal => ../../internal

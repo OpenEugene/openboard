@@ -19,9 +19,19 @@ func main() {
 
 func run() error {
 	var (
+		dbname   = "openeug_openb_dev"
+		dbuser   = "openeug_openbdev"
+		dbpass   = ""
+		dbaddr   = "127.0.0.1"
+		dbport   = ":3306"
 		frontDir = "../../../front/public"
 	)
 
+	flag.StringVar(&dbname, "dbname", dbname, "database name")
+	flag.StringVar(&dbuser, "dbuser", dbuser, "database user")
+	flag.StringVar(&dbpass, "dbpass", dbpass, "database pass")
+	flag.StringVar(&dbaddr, "dbaddr", dbaddr, "database addr")
+	flag.StringVar(&dbport, "dbport", dbport, "database port")
 	flag.StringVar(&frontDir, "frontdir", frontDir, "front public assets directory")
 	flag.Parse()
 
@@ -29,10 +39,23 @@ func run() error {
 	sm.Start()
 	defer sm.Stop()
 
+	mig, err := newDBMig("mysql", dbCreds(dbname, dbuser, dbpass, dbaddr, dbport))
+	if err != nil {
+		return err
+	}
+
 	gsrv, err := newGRPCSrv(":4242")
 	if err != nil {
 		return err
 	}
+
+	mig.addMigrators(gsrv.migrators()...)
+	mres := mig.Migrate()
+	if mres.HasError() {
+		return mres.ErrsErr()
+	}
+
+	fmt.Println("migrated:", mres)
 
 	hsrv, err := newHTTPSrv(nil, ":4242", ":4243")
 	if err != nil {

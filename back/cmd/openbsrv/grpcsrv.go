@@ -10,6 +10,7 @@ type grpcSrv struct {
 	s *grpcsrv.GRPCSrv
 
 	port string
+	migs []interface{}
 }
 
 func newGRPCSrv(port string) (*grpcSrv, error) {
@@ -35,9 +36,16 @@ func newGRPCSrv(port string) (*grpcSrv, error) {
 	s := grpcSrv{
 		s:    gs,
 		port: port,
+		migs: []interface{}{
+			auth, user,
+		},
 	}
 
 	return &s, nil
+}
+
+func (s *grpcSrv) migrators() []interface{} {
+	return s.migs
 }
 
 func (s *grpcSrv) Serve() error {
