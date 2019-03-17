@@ -4,10 +4,14 @@ import (
 	"context"
 
 	"github.com/champagneabuelo/openboard/back/internal/pb"
+	"github.com/champagneabuelo/openboard/back/internal/usersvc/internal/userdb/mysqlmig"
 	"google.golang.org/grpc"
 )
 
 var _ pb.UserServer = &UserSvc{}
+
+//var _ sqlmig.QueryingMigrator = &UserSvc{}
+//var _ sqlmig.Regularizer = &UserSvc{}
 
 // UserSvc encapsulates dependencies and data required to implement the
 // pb.UserServer interface.
@@ -67,4 +71,24 @@ func (s *UserSvc) RmvUser(ctx context.Context, req *pb.RmvUserReq) (*pb.RmvUserR
 	// TODO: implement RmvUser
 
 	return nil, nil
+}
+
+// MigrationName ...
+func (s *UserSvc) MigrationName() string {
+	return "usersvc"
+}
+
+// MigrationIDs ...
+func (s *UserSvc) MigrationIDs(ref string) ([]string, error) {
+	return mysqlmig.AssetDir(ref)
+}
+
+// MigrationData ...
+func (s *UserSvc) MigrationData(id string) ([]byte, error) {
+	return mysqlmig.Asset(id)
+}
+
+//Regularize ...
+func (s *UserSvc) Regularize(ctx context.Context) error {
+	return nil
 }
