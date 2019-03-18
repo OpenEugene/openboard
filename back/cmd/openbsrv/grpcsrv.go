@@ -10,7 +10,7 @@ type grpcSrv struct {
 	s *grpcsrv.GRPCSrv
 
 	port string
-	migs []interface{}
+	svcs []interface{}
 }
 
 func newGRPCSrv(port string) (*grpcSrv, error) {
@@ -24,28 +24,30 @@ func newGRPCSrv(port string) (*grpcSrv, error) {
 		return nil, err
 	}
 
+	svcs := []interface{}{
+		auth, user,
+	}
+
 	gs, err := grpcsrv.New()
 	if err != nil {
 		return nil, err
 	}
 
-	if err := gs.RegisterServices(auth, user); err != nil {
+	if err := registerServices(gs, svcs...); err != nil {
 		return nil, err
 	}
 
 	s := grpcSrv{
 		s:    gs,
 		port: port,
-		migs: []interface{}{
-			auth, user,
-		},
+		svcs: svcs,
 	}
 
 	return &s, nil
 }
 
-func (s *grpcSrv) migrators() []interface{} {
-	return s.migs
+func (s *grpcSrv) services() []interface{} {
+	return s.svcs
 }
 
 func (s *grpcSrv) Serve() error {
@@ -54,5 +56,16 @@ func (s *grpcSrv) Serve() error {
 
 func (s *grpcSrv) Stop() error {
 	s.s.GracefulStop()
+	return nil
+}
+
+func registerServices(srv *grpcsrv.GRPCSrv, svcs ...interface{}) error {
+	for _, svc := range svcs {
+		if s, ok := svc.(grpcsrv.Registerable); ok {
+			if err := srv.RegisterServices(s); err != nil {
+				return err
+			}
+		}
+	}
 	return nil
 }

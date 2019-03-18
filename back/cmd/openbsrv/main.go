@@ -49,7 +49,7 @@ func run() error {
 		return err
 	}
 
-	mig.addMigrators(gsrv.migrators()...)
+	mig.addMigrators(gsrv.services()...)
 	mres := mig.Migrate()
 	if mres.HasError() {
 		return mres.ErrsErr()
