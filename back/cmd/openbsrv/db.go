@@ -40,12 +40,12 @@ func newDBMig(driver, creds string) (*dbmig, error) {
 
 func (m *dbmig) addMigrators(us ...interface{}) {
 	for _, u := range us {
-		switch v := u.(type) {
-		case sqlmig.QueryingMigrator:
-			m.AddQueryingMigs(v)
-		case sqlmig.Regularizer:
-			m.AddRegularizers(v)
-		default:
+		if qm, ok := u.(sqlmig.QueryingMigrator); ok {
+			m.AddQueryingMigs(qm)
+		}
+
+		if r, ok := u.(sqlmig.Regularizer); ok {
+			m.AddRegularizers(r)
 		}
 	}
 }
