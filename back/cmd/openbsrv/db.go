@@ -22,7 +22,7 @@ func newSQLDB(driver, creds string) (*sql.DB, error) {
 }
 
 type dbmig struct {
-	*sqlmig.SQLMig
+	m *sqlmig.SQLMig
 }
 
 func newDBMig(db *sql.DB, driver string) (*dbmig, error) {
@@ -32,7 +32,7 @@ func newDBMig(db *sql.DB, driver string) (*dbmig, error) {
 	}
 
 	dbm := dbmig{
-		SQLMig: mig,
+		m: mig,
 	}
 
 	return &dbm, nil
@@ -41,12 +41,25 @@ func newDBMig(db *sql.DB, driver string) (*dbmig, error) {
 func (m *dbmig) addMigrators(us ...interface{}) {
 	for _, u := range us {
 		if qm, ok := u.(sqlmig.QueryingMigrator); ok {
-			m.AddQueryingMigs(qm)
+			m.m.AddQueryingMigs(qm)
 		}
 
 		if r, ok := u.(sqlmig.Regularizer); ok {
-			m.AddRegularizers(r)
+			m.m.AddRegularizers(r)
 		}
+	}
+}
+
+func (m *dbmig) run(migrate, rollback bool) (sqlmig.Results, string) {
+	switch {
+	case migrate && rollback:
+		return sqlmig.Results{}, ""
+	case migrate:
+		return m.m.Migrate(), "migrated"
+	case rollback:
+		return m.m.RollBack(), "rolled back"
+	default:
+		return sqlmig.Results{}, ""
 	}
 }
 
