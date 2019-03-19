@@ -25,6 +25,7 @@ func run() error {
 		dbaddr   = "127.0.0.1"
 		dbport   = ":3306"
 		frontDir = "../../../front/public"
+		sqlDrv   = "mysql"
 	)
 
 	flag.StringVar(&dbname, "dbname", dbname, "database name")
@@ -39,12 +40,17 @@ func run() error {
 	sm.Start()
 	defer sm.Stop()
 
-	mig, err := newDBMig("mysql", dbCreds(dbname, dbuser, dbpass, dbaddr, dbport))
+	db, err := newSQLDB(sqlDrv, dbCreds(dbname, dbuser, dbpass, dbaddr, dbport))
 	if err != nil {
 		return err
 	}
 
-	gsrv, err := newGRPCSrv(":4242")
+	mig, err := newDBMig(db, sqlDrv)
+	if err != nil {
+		return err
+	}
+
+	gsrv, err := newGRPCSrv(":4242", db)
 	if err != nil {
 		return err
 	}

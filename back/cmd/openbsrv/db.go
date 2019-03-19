@@ -9,15 +9,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-func dbCreds(name, user, pass, addr, port string) string {
-	return fmt.Sprintf("%s:%s@tcp(%s%s)/%s?parseTime=true", user, pass, addr, port, name)
-}
-
-type dbmig struct {
-	*sqlmig.SQLMig
-}
-
-func newDBMig(driver, creds string) (*dbmig, error) {
+func newSQLDB(driver, creds string) (*sql.DB, error) {
 	db, err := sql.Open(driver, creds)
 	if err != nil {
 		return nil, err
@@ -26,6 +18,14 @@ func newDBMig(driver, creds string) (*dbmig, error) {
 	db.SetMaxIdleConns(128)
 	db.SetConnMaxLifetime(time.Hour)
 
+	return db, nil
+}
+
+type dbmig struct {
+	*sqlmig.SQLMig
+}
+
+func newDBMig(db *sql.DB, driver string) (*dbmig, error) {
 	mig, err := sqlmig.New(db, driver)
 	if err != nil {
 		return nil, err
@@ -48,4 +48,8 @@ func (m *dbmig) addMigrators(us ...interface{}) {
 			m.AddRegularizers(r)
 		}
 	}
+}
+
+func dbCreds(name, user, pass, addr, port string) string {
+	return fmt.Sprintf("%s:%s@tcp(%s%s)/%s?parseTime=true", user, pass, addr, port, name)
 }
