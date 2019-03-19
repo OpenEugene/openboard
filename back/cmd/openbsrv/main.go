@@ -67,12 +67,12 @@ func run() error {
 		fmt.Println(migType+":", mres)
 	}
 
-	hsrv, err := newHTTPSrv(nil, ":4242", ":4243")
+	hsrv, err := newHTTPSrv(":4242", ":4243", nil)
 	if err != nil {
 		return err
 	}
 
-	fsrv, err := newFrontSrv(nil, frontDir, ":4244")
+	fsrv, err := newFrontSrv(":4244", frontDir, nil)
 	if err != nil {
 		return err
 	}

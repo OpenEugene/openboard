@@ -13,7 +13,7 @@ type frontSrv struct {
 	s *http.Server
 }
 
-func newFrontSrv(origins []string, dir, port string) (*frontSrv, error) {
+func newFrontSrv(port, dir string, origins []string) (*frontSrv, error) {
 	origins = append(hedrs.DefaultOrigins, origins...)
 	corsOrigins := hedrs.CORSOrigins(hedrs.NewAllowed(origins...))
 	corsMethods := hedrs.CORSMethods(hedrs.NewValues(hedrs.AllMethods...))
