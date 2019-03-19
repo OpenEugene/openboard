@@ -54,13 +54,14 @@ http://localhost:4243/v/docs. The frontend assets are served on port 4244.
 
 Protocol buffers are Google's language-neutral, platform-neutral, extensible
 mechanism for serializing structured data.
-[Learn More](https://developers.google.com/protocol-buffers/)
-[Releases](https://github.com/protocolbuffers/protobuf/releases)
+
+[Learn More](https://developers.google.com/protocol-buffers/) |
+[Releases](https://github.com/protocolbuffers/protobuf/releases) |
 [Install From
 Source](https://github.com/protocolbuffers/protobuf/blob/master/src/README.md)
 
 ```shell
-// basic install from source; may require changes for your OS/ENV...
+# basic install from source; may require changes for your OS/ENV...
 git clone https://github.com/protocolbuffers/protobuf.git
 cd protobuf
 git submodule update --init --recursive
