@@ -36,7 +36,10 @@ func newFrontSrv(port, dir string, origins []string) (*frontSrv, error) {
 }
 
 func (s *frontSrv) Serve() error {
-	return s.s.ListenAndServe()
+	if err := s.s.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		return err
+	}
+	return nil
 }
 
 func (s *frontSrv) Stop() error {
