@@ -1,11 +1,11 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
 	"path"
 
-	"github.com/champagneabuelo/openboard/back/pb"
 	"github.com/codemodus/sigmon/v2"
 )
 
@@ -18,21 +18,56 @@ func main() {
 }
 
 func run() error {
+	var (
+		dbname   = "openeug_openb_dev"
+		dbuser   = "openeug_openbdev"
+		dbpass   = ""
+		dbaddr   = "127.0.0.1"
+		dbport   = ":3306"
+		frontDir = "../../../front/public"
+	)
+
+	flag.StringVar(&dbname, "dbname", dbname, "database name")
+	flag.StringVar(&dbuser, "dbuser", dbuser, "database user")
+	flag.StringVar(&dbpass, "dbpass", dbpass, "database pass")
+	flag.StringVar(&dbaddr, "dbaddr", dbaddr, "database addr")
+	flag.StringVar(&dbport, "dbport", dbport, "database port")
+	flag.StringVar(&frontDir, "frontdir", frontDir, "front public assets directory")
+	flag.Parse()
+
 	sm := sigmon.New(nil)
 	sm.Start()
 	defer sm.Stop()
+
+	mig, err := newDBMig("mysql", dbCreds(dbname, dbuser, dbpass, dbaddr, dbport))
+	if err != nil {
+		return err
+	}
 
 	gsrv, err := newGRPCSrv(":4242")
 	if err != nil {
 		return err
 	}
 
-	fsrv, err := newFrontSrv("../../../front/public", ":4244")
+	mig.addMigrators(gsrv.services()...)
+	mres := mig.Migrate()
+	if mres.HasError() {
+		return mres.ErrsErr()
+	}
+
+	fmt.Println("migrated:", mres)
+
+	hsrv, err := newHTTPSrv(nil, ":4242", ":4243")
 	if err != nil {
 		return err
 	}
 
-	m := newServerMgmt(gsrv, fsrv)
+	fsrv, err := newFrontSrv(nil, frontDir, ":4244")
+	if err != nil {
+		return err
+	}
+
+	m := newServerMgmt(gsrv, hsrv, fsrv)
 
 	sm.Set(func(s *sigmon.State) {
 		if err := m.stop(); err != nil {
@@ -40,7 +75,6 @@ func run() error {
 		}
 	})
 
-	fmt.Println(pb.UserResp{})
 	fmt.Println("to gracefully stop the application, send signal like TERM (CTRL-C) or HUP")
 
 	if err := m.serve(); err != nil {
