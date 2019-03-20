@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"time"
@@ -17,6 +18,13 @@ func newSQLDB(driver, creds string) (*sql.DB, error) {
 
 	db.SetMaxIdleConns(128)
 	db.SetConnMaxLifetime(time.Hour)
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
+	defer cancel()
+
+	if err = db.PingContext(ctx); err != nil {
+		return nil, err
+	}
 
 	return db, nil
 }
