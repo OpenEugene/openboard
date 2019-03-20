@@ -10,7 +10,7 @@ import (
 
 var _ pb.UserServer = &UserSvc{}
 
-//var _ sqlmig.QueryingMigrator = &UserSvc{}
+//var _ sqlmig.DataProvider = &UserSvc{}
 //var _ sqlmig.Regularizer = &UserSvc{}
 
 // UserSvc encapsulates dependencies and data required to implement the
@@ -73,19 +73,26 @@ func (s *UserSvc) RmvUser(ctx context.Context, req *pb.RmvUserReq) (*pb.RmvUserR
 	return nil, nil
 }
 
-// MigrationName ...
-func (s *UserSvc) MigrationName() string {
-	return "usersvc"
-}
-
-// MigrationIDs ...
-func (s *UserSvc) MigrationIDs(ref string) ([]string, error) {
-	return mysqlmig.AssetDir(ref)
-}
-
 // MigrationData ...
-func (s *UserSvc) MigrationData(id string) ([]byte, error) {
-	return mysqlmig.Asset(id)
+func (s *UserSvc) MigrationData() (string, map[string][]byte) {
+	name := "usersvc"
+	m := make(map[string][]byte)
+
+	ids, err := mysqlmig.AssetDir("")
+	if err != nil {
+		return name, nil
+	}
+
+	for _, id := range ids {
+		d, err := mysqlmig.Asset(id)
+		if err != nil {
+			return name, nil
+		}
+
+		m[id] = d
+	}
+
+	return name, m
 }
 
 //Regularize ...

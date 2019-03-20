@@ -33,8 +33,8 @@ type dbmig struct {
 	m *sqlmig.SQLMig
 }
 
-func newDBMig(db *sql.DB, driver string) (*dbmig, error) {
-	mig, err := sqlmig.New(db, driver)
+func newDBMig(db *sql.DB, driver, tablePrefix string) (*dbmig, error) {
+	mig, err := sqlmig.New(db, driver, tablePrefix)
 	if err != nil {
 		return nil, err
 	}
@@ -48,8 +48,8 @@ func newDBMig(db *sql.DB, driver string) (*dbmig, error) {
 
 func (m *dbmig) addMigrators(us ...interface{}) {
 	for _, u := range us {
-		if qm, ok := u.(sqlmig.QueryingMigrator); ok {
-			m.m.AddQueryingMigs(qm)
+		if p, ok := u.(sqlmig.DataProvider); ok {
+			m.m.AddDataProviders(p)
 		}
 
 		if r, ok := u.(sqlmig.Regularizer); ok {

@@ -19,15 +19,16 @@ func main() {
 
 func run() error {
 	var (
-		dbdrvr   = "mysql"
-		dbname   = "openeug_openb_dev"
-		dbuser   = "openeug_openbdev"
-		dbpass   = ""
-		dbaddr   = "127.0.0.1"
-		dbport   = ":3306"
-		migrate  bool
-		rollback bool
-		frontDir = "../../../front/public"
+		dbdrvr    = "mysql"
+		dbname    = "openeug_openb_dev"
+		dbuser    = "openeug_openbdev"
+		dbpass    = ""
+		dbaddr    = "127.0.0.1"
+		dbport    = ":3306"
+		migrate   bool
+		rollback  bool
+		frontDir  = "../../../front/public"
+		migTblPfx = "mig_"
 	)
 
 	flag.StringVar(&dbname, "dbname", dbname, "database name")
@@ -49,7 +50,7 @@ func run() error {
 		return err
 	}
 
-	mig, err := newDBMig(db, dbdrvr)
+	mig, err := newDBMig(db, dbdrvr, migTblPfx)
 	if err != nil {
 		return err
 	}
