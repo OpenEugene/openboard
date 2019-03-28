@@ -1,0 +1,32 @@
+version: '3'
+
+volumes:
+  openbdb-trial_mariadb:
+
+services:
+
+  openbdb-trial:
+    environment:
+      MYSQL_DATABASE: "${OPENBSRV_DBNAME}"
+      MYSQL_USER: "${OPENBSRV_DBUSER}"
+      MYSQL_PASSWORD: "${OPENBSRV_DBPASS}"
+      MYSQL_ROOT_PASSWORD: "${OPENBSRV_DBPASS}"
+    volumes:
+      - "openbdb-trial_mariadb:/var/lib/mysql"
+    build: "./openbdb"
+    restart: "unless-stopped"
+
+  openbsrv-trial:
+    depends_on:
+      - "openbdb-trial"
+    environment:
+      DBADDR: "openbdb-trial"
+      DBNAME: "${OPENBSRV_DBNAME}"
+      DBUSER: "${OPENBSRV_DBUSER}"
+      DBPASS: "${OPENBSRV_DBPASS}"
+      MIGRATETYPE: "${MIGRATETYPE:-migrate}"
+    ports:
+      - "${OPENBSRV_APIPORT:-4243}:4243"
+      - "${OPENBSRV_FRONTPORT:-4244}:4244"
+    build: "./openbsrv"
+    restart: "unless-stopped" 
