@@ -7,6 +7,7 @@ import Html.Styled
 import Page
 import Page.Home
 import Page.Login
+import Page.Posts
 import Route exposing (Route(..))
 import Session
 import Url exposing (Url)
@@ -19,6 +20,7 @@ import Url exposing (Url)
 type Model
     = Login Page.Login.Model
     | Home Page.Home.Model
+    | Posts Page.Posts.Model
 
 
 
@@ -39,6 +41,7 @@ type Msg
     | ClickedLink UrlRequest
     | GotHomeMsg Page.Home.Msg
     | GotLoginMsg Page.Login.Msg
+    | GotPostsMsg Page.Posts.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -63,6 +66,10 @@ update msg model =
             Page.Login.update subMsg home
                 |> updateWith Login GotLoginMsg model
 
+        ( GotPostsMsg subMsg, Posts home ) ->
+            Page.Posts.update subMsg home
+                |> updateWith Posts GotPostsMsg model
+
         ( _, _ ) ->
             -- Disregard messages that arrived for the wrong page.
             ( model, Cmd.none )
@@ -86,6 +93,10 @@ changeRouteTo maybeRoute model =
             Page.Login.init (toSession model)
                 |> updateWith Login GotLoginMsg model
 
+        Just Route.Posts ->
+            Page.Posts.init (toSession model)
+                |> updateWith Posts GotPostsMsg model
+
         Nothing ->
             ( model, Cmd.none )
 
@@ -98,6 +109,9 @@ toSession model =
 
         Home homeModel ->
             Page.Home.toSession homeModel
+
+        Posts postsModel ->
+            Page.Posts.toSession postsModel
 
 
 
@@ -123,6 +137,9 @@ view model =
 
         Login login ->
             viewPage Page.Other GotLoginMsg (Page.Login.view login)
+
+        Posts posts ->
+            viewPage Page.Other GotPostsMsg (Page.Posts.view posts)
 
 
 
