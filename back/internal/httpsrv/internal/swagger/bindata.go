@@ -110,6 +110,136 @@ var _apidocsSwaggerJson = []byte(`{
         ]
       }
     },
+    "/hello": {
+      "post": {
+        "operationId": "AddHello",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/pbHelloResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/pbAddHelloReq"
+            }
+          }
+        ],
+        "tags": [
+          "Hello"
+        ]
+      }
+    },
+    "/hello/{id}": {
+      "delete": {
+        "operationId": "RmvHello",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/pbRmvHelloResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Hello"
+        ]
+      },
+      "put": {
+        "operationId": "OvrHello",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/pbHelloResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/pbOvrHelloReq"
+            }
+          }
+        ],
+        "tags": [
+          "Hello"
+        ]
+      }
+    },
+    "/hellos": {
+      "get": {
+        "operationId": "FndHellos",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/pbHellosResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "ids",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "salutations",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "name": "lapse",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "Hello"
+        ]
+      }
+    },
     "/roles": {
       "get": {
         "operationId": "FndRoles",
@@ -377,6 +507,17 @@ var _apidocsSwaggerJson = []byte(`{
         }
       }
     },
+    "pbAddHelloReq": {
+      "type": "object",
+      "properties": {
+        "salutation": {
+          "type": "string"
+        },
+        "subject": {
+          "type": "string"
+        }
+      }
+    },
     "pbAddUserReq": {
       "type": "object",
       "properties": {
@@ -445,6 +586,58 @@ var _apidocsSwaggerJson = []byte(`{
         }
       }
     },
+    "pbHelloResp": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "salutation": {
+          "type": "string"
+        },
+        "subject": {
+          "type": "string"
+        },
+        "created": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "deleted": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "pbHellosResp": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/pbHelloResp"
+          }
+        },
+        "total": {
+          "type": "integer",
+          "format": "int64"
+        }
+      }
+    },
+    "pbOvrHelloReq": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "req": {
+          "$ref": "#/definitions/pbAddHelloReq"
+        }
+      }
+    },
     "pbOvrUserReq": {
       "type": "object",
       "properties": {
@@ -458,6 +651,9 @@ var _apidocsSwaggerJson = []byte(`{
       }
     },
     "pbRmvAuthResp": {
+      "type": "object"
+    },
+    "pbRmvHelloResp": {
       "type": "object"
     },
     "pbRmvUserResp": {
@@ -580,7 +776,7 @@ func apidocsSwaggerJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "apidocs.swagger.json", size: 11695, mode: os.FileMode(436), modTime: time.Unix(1552848057, 0)}
+	info := bindataFileInfo{name: "apidocs.swagger.json", size: 15904, mode: os.FileMode(436), modTime: time.Unix(1553825863, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
