@@ -5,6 +5,7 @@ import (
 	"database/sql"
 
 	"github.com/champagneabuelo/openboard/back/internal/helosvc/internal/helodb"
+	"github.com/champagneabuelo/openboard/back/internal/helosvc/internal/helodb/mysqlmig"
 	"github.com/champagneabuelo/openboard/back/internal/pb"
 	"google.golang.org/grpc"
 )
@@ -12,6 +13,8 @@ import (
 var _ pb.HelloServer = &HeloSvc{}
 
 //var _ grpcsrv.Registerable = &HeloSvc{}
+//var _ sqlmig.DataProvider = &HeloSvc{}
+//var _ sqlmig.Regularizer = &HeloSvc{}
 
 type relDB interface {
 	pb.HelloServer
@@ -60,5 +63,32 @@ func (s *HeloSvc) FndHellos(ctx context.Context, req *pb.FndHellosReq) (*pb.Hell
 // RegisterWithGRPCServer implements the grpcsrv.Registerable interface.
 func (s *HeloSvc) RegisterWithGRPCServer(g *grpc.Server) error {
 	pb.RegisterHelloServer(g, s)
+	return nil
+}
+
+// MigrationData ...
+func (s *HeloSvc) MigrationData() (string, map[string][]byte) {
+	name := "helosvc"
+	m := make(map[string][]byte)
+
+	ids, err := mysqlmig.AssetDir("")
+	if err != nil {
+		return name, nil
+	}
+
+	for _, id := range ids {
+		d, err := mysqlmig.Asset(id)
+		if err != nil {
+			return name, nil
+		}
+
+		m[id] = d
+	}
+
+	return name, m
+}
+
+//Regularize ...
+func (s *HeloSvc) Regularize(ctx context.Context) error {
 	return nil
 }
