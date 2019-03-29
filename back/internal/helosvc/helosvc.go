@@ -27,8 +27,8 @@ type HeloSvc struct {
 }
 
 // New returns a pointer to a HeloSvc instance or an error.
-func New(relDB *sql.DB, driver string) (*HeloSvc, error) {
-	db, err := helodb.New(relDB, driver)
+func New(relDB *sql.DB, driver string, offset uint64) (*HeloSvc, error) {
+	db, err := helodb.New(relDB, driver, offset)
 	if err != nil {
 		return nil, err
 	}

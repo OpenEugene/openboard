@@ -15,8 +15,12 @@ github.com/codemodus/sigmon/v2 v2.0.1 h1:Af1mEIYTmyO+doosTJeWQyb05LCVVHjeIAsO/RH
 github.com/codemodus/sigmon/v2 v2.0.1/go.mod h1:zrFxWNA3u/3TyD8JhXUgT7/aI3ZhZOCNpBJLM7KVphY=
 github.com/codemodus/sqlmig v0.2.3 h1:e1KykQaFfdKgip3+6J1sp46rEUEzGcu5NaFd8aYz5WA=
 github.com/codemodus/sqlmig v0.2.3/go.mod h1:UrgwmWu5jaFBY4FAMKB1vGT4xquODsUbaL7yIVHfwqk=
+github.com/codemodus/sqlo v0.2.1 h1:ANK44gHLqMOCAoPjRA+1qaCK2CtXmJypmS+F6z0bIUo=
+github.com/codemodus/sqlo v0.2.1/go.mod h1:AvALahpyhhOyku8EzCb9eI3DmOX9fkBBjcREdyaYgsc=
 github.com/codemodus/swagui v0.2.2 h1:LnZTWUljvDePIle6fSBDUJg/oZDNw6NGI8LKplI/ECk=
 github.com/codemodus/swagui v0.2.2/go.mod h1:9eAe3Kix9k+v9SmeQ3I9CoTr5wn44vYk9FaZgHKGDMQ=
+github.com/codemodus/uidgen v0.1.0 h1:iTmdqcK9NGsELfq28LZyOkH/pirGFXBWebhaVkaqGwo=
+github.com/codemodus/uidgen v0.1.0/go.mod h1:bUbKBvDWC6zE18ZzR2KOqvd40iFYy+gY7a5Qf5Qc1g4=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
@@ -65,6 +69,8 @@ github.com/markbates/oncer v0.0.0-20181203154359-bf2de49a0be2/go.mod h1:Ld9puTsI
 github.com/markbates/safe v1.0.1/go.mod h1:nAqgmRi7cY2nqMc92/bSEeQA+R4OheNU2T1kNSCBdG0=
 github.com/mattn/go-sqlite3 v1.10.0 h1:jbhqpg7tQe4SupckyijYiy0mJJ/pRyHvXf7JdWK860o=
 github.com/mattn/go-sqlite3 v1.10.0/go.mod h1:FPy6KqzDD04eiIsT53CuJW3U88zkxoIYsOqkbpncsNc=
+github.com/oklog/ulid v1.3.1 h1:EGfNDEx6MqHz8B3uNV6QAib1UR2Lm97sHi3ocA6ESJ4=
+github.com/oklog/ulid v1.3.1/go.mod h1:CirwcVhetQ6Lv90oh/F+FBtV6XMibvdAFo93nm5qn4U=
 github.com/pkg/errors v0.8.0/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pkg/errors v0.8.1 h1:iURUrRGxPUNPdy5/HRSm+Yj6okJ6UtLINN0Q9M4+h3I=
 github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
