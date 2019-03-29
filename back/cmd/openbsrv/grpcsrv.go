@@ -5,6 +5,7 @@ import (
 
 	"github.com/champagneabuelo/openboard/back/internal/authsvc"
 	"github.com/champagneabuelo/openboard/back/internal/grpcsrv"
+	"github.com/champagneabuelo/openboard/back/internal/helosvc"
 	"github.com/champagneabuelo/openboard/back/internal/usersvc"
 )
 
@@ -15,7 +16,7 @@ type grpcSrv struct {
 	svcs []interface{}
 }
 
-func newGRPCSrv(port string, db *sql.DB) (*grpcSrv, error) {
+func newGRPCSrv(port string, db *sql.DB, drvr string) (*grpcSrv, error) {
 	auth, err := authsvc.New()
 	if err != nil {
 		return nil, err
@@ -26,8 +27,13 @@ func newGRPCSrv(port string, db *sql.DB) (*grpcSrv, error) {
 		return nil, err
 	}
 
+	helo, err := helosvc.New(db, drvr)
+	if err != nil {
+		return nil, err
+	}
+
 	svcs := []interface{}{
-		auth, user,
+		auth, user, helo,
 	}
 
 	gs, err := grpcsrv.New()
