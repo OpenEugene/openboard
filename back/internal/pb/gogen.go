@@ -5,5 +5,5 @@ package pb
 //go:generate -command pb-gg protoc -I../../../msgs/proto -I../../../msgs/proto/vendor-extra/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis --grpc-gateway_out=logtostderr=true:.
 
 // generate grpc, grpc-gateway
-//go:generate pb-go ../../../msgs/proto/auth.proto ../../../msgs/proto/user.proto
-//go:generate pb-gg ../../../msgs/proto/auth.proto ../../../msgs/proto/user.proto
+//go:generate pb-go ../../../msgs/proto/auth.proto ../../../msgs/proto/user.proto ../../../msgs/proto/hello.proto
+//go:generate pb-gg ../../../msgs/proto/auth.proto ../../../msgs/proto/user.proto ../../../msgs/proto/hello.proto
