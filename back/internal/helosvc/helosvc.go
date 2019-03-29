@@ -2,7 +2,9 @@ package helosvc
 
 import (
 	"context"
+	"database/sql"
 
+	"github.com/champagneabuelo/openboard/back/internal/helosvc/internal/helodb"
 	"github.com/champagneabuelo/openboard/back/internal/pb"
 	"google.golang.org/grpc"
 )
@@ -22,8 +24,17 @@ type HeloSvc struct {
 }
 
 // New returns a pointer to a HeloSvc instance or an error.
-func New() (*HeloSvc, error) {
-	return &HeloSvc{}, nil
+func New(relDB *sql.DB, driver string) (*HeloSvc, error) {
+	db, err := helodb.New(relDB, driver)
+	if err != nil {
+		return nil, err
+	}
+
+	s := HeloSvc{
+		db: db,
+	}
+
+	return &s, nil
 }
 
 // AddHello implements part of the pb.HelloServer interface.
