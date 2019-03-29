@@ -1,0 +1,15 @@
+-- +migrate Up
+
+CREATE TABLE hello (
+    hello_id VARCHAR(26) NOT NULL PRIMARY KEY,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at DATETIME DEFAULT NULL,
+
+    salutation VARCHAR(255) NOT NULL UNIQUE,
+    subject VARCHAR(255) NOT NULL
+);
+
+-- +migrate Down
+
+DROP TABLE IF EXISTS hello;
