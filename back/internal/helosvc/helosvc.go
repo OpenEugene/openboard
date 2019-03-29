@@ -11,9 +11,15 @@ var _ pb.HelloServer = &HeloSvc{}
 
 //var _ grpcsrv.Registerable = &HeloSvc{}
 
+type relDB interface {
+	pb.HelloServer
+}
+
 // HeloSvc encapsulates dependencies and data required to implement the
 // pb.HelloServer interface.
-type HeloSvc struct{}
+type HeloSvc struct {
+	db relDB
+}
 
 // New returns a pointer to a HeloSvc instance or an error.
 func New() (*HeloSvc, error) {
@@ -22,22 +28,22 @@ func New() (*HeloSvc, error) {
 
 // AddHello implements part of the pb.HelloServer interface.
 func (s *HeloSvc) AddHello(ctx context.Context, req *pb.AddHelloReq) (*pb.HelloResp, error) {
-	return nil, nil
+	return s.db.AddHello(ctx, req)
 }
 
 // OvrHello implements part of the pb.HelloServer interface.
 func (s *HeloSvc) OvrHello(ctx context.Context, req *pb.OvrHelloReq) (*pb.HelloResp, error) {
-	return nil, nil
+	return s.db.OvrHello(ctx, req)
 }
 
 // RmvHello implements part of the pb.HelloServer interface.
 func (s *HeloSvc) RmvHello(ctx context.Context, req *pb.RmvHelloReq) (*pb.RmvHelloResp, error) {
-	return nil, nil
+	return s.db.RmvHello(ctx, req)
 }
 
 // FndHellos implements part of the pb.HelloServer interface.
 func (s *HeloSvc) FndHellos(ctx context.Context, req *pb.FndHellosReq) (*pb.HellosResp, error) {
-	return nil, nil
+	return s.db.FndHellos(ctx, req)
 }
 
 // RegisterWithGRPCServer implements the grpcsrv.Registerable interface.
