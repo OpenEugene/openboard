@@ -1,4 +1,4 @@
-module Page.Posts exposing (Model, Msg(..), init, postsView, update, view, toSession)
+module Page.Posts exposing (Model, Msg(..), init, postsView, toSession, update, view)
 
 import Html.Styled exposing (text)
 import Route
@@ -8,6 +8,7 @@ import Ui
 
 type alias Model =
     { session : Session
+    , slug : String
     }
 
 
@@ -15,9 +16,9 @@ type Msg
     = Noop
 
 
-init : Session -> ( Model, Cmd Msg )
-init s =
-    ( Model s, Cmd.none )
+init : Session -> String -> ( Model, Cmd Msg )
+init session slug =
+    ( Model session slug, Cmd.none )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
