@@ -19,14 +19,34 @@ func newSQLDB(driver, creds string) (*sql.DB, error) {
 	db.SetMaxIdleConns(128)
 	db.SetConnMaxLifetime(time.Hour)
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
-	defer cancel()
+	return db, patientPing(db)
+}
 
-	if err = db.PingContext(ctx); err != nil {
-		return nil, err
+func patientPing(db *sql.DB) error {
+	limit := time.Second * 3
+	pause := time.Millisecond * 500
+	iters := 6 // 0 + .5 + 1 + 2 + 4 + 8
+	var err error
+
+	for i := 0; i < iters; i++ {
+		if i > 0 {
+			time.Sleep(pause)
+			pause = pause * 2
+		}
+
+		func() {
+			ctx, cancel := context.WithTimeout(context.Background(), limit)
+			defer cancel()
+
+			err = db.PingContext(ctx)
+		}()
+
+		if err == nil {
+			return nil
+		}
 	}
 
-	return db, nil
+	return err
 }
 
 type dbmig struct {
