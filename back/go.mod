@@ -1,4 +1,4 @@
-module github.com/champagneabuelo/openboard/back/internal
+module github.com/champagneabuelo/openboard/back
 
 go 1.12
 
