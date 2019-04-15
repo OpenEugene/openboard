@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+go generate -tags tools github.com/champagneabuelo/openboard/back/tools
