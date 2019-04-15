@@ -2,8 +2,7 @@
 
 ## Getting Started (Easy Mode)
 
-The following scripts should be working for Bash on Linux and WSL. Apple users
-should refer to the Normal Mode section.
+The following scripts should be working for Bash on Linux, WSL, and Darwin.
 
 ```shell
 ./tools/install-go
@@ -12,20 +11,17 @@ should refer to the Normal Mode section.
 ```
 
 ```shell
-# skip if using mariadb local install
-pushd ./tools/iso/
-./dev up # subcommands [up|down|ip|clean] (default: up)
-popd
+# container setup; skip if using mariadb local install
+pushd ./tools/iso/ >/dev/null
+./dev up # subcommands [up|dn|ip|clean] (default: up)
+popd >/dev/null
 ```
 
 ## Getting Started (Normal Mode)
 
-Copy the following Bash scripts to your system or enter their contents manually
-while making changes as needed.
-
-- [Install Go](./tools/install-go)
+- [Install Go](https://golang.org/doc/install)
 - [Install Tools](./tools/install-tools)
-- [Install MariaDB](./tools/install-mariadb)
+- [Install MariaDB](https://www.google.com/search?q=install+mariadb+on)
 
 ## Protobuf/protoc (Advanced Mode; Optional)
 

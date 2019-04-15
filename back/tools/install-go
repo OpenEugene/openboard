@@ -1,19 +1,52 @@
 #!/usr/bin/env bash
 set -e
 
-hash go 2>/dev/null && echo "go is already installed" && exit 0
+gover="$(\
+	curl -s https://golang.org/dl/ | \
+	grep -o 'go1\.[0-9]\{1,2\}\.[0-9]' | \
+	sort -t. -k2 -h | \
+	tail -1 \
+)"
+rmvold=""
 
-hash git 2>/dev/null || sudo apt install git
+if hash go 2>/dev/null; then
+	gver=${gover#go1.}
+	goins="$(go version | cut -d " " -f 3)"
+	gins="${goins#go1.}"
+	[[ "${goins}" == "" ]] && echo >&2 "cannot find installed go version" && exit 1
 
-gorel="go1.12.4.linux-amd64.tar.gz"
+	msg="go is already installed and updated"
+	[[ "$(echo "${gins} >= ${gver}" | bc -l)" == "1" ]] && echo "${msg}" && exit 0
 
-pushd /usr/local
+	[[ -d "/usr/local/go" ]] && sudo mv "/usr/local/go" "/usr/local/${goins}"
+	echo "remove previous go installation (${goins})? [y/N]"
+	read rmvold
+fi
+
+ostype="$([[ "${OSTYPE}" == "darwin"* ]] && echo "darwin" || echo "linux")"
+
+if ! hash git 2>/dev/null; then
+	[[ "${ostype}" == "linux" ]] && sudo apt update && sudo apt install git
+	[[ "${ostype}" == "darwin" ]] && brew update && brew install git
+fi
+
+gorel="${gover}.${ostype}-amd64.tar.gz"
+
+pushd /usr/local >/dev/null
 sudo wget https://dl.google.com/go/${gorel}
 sudo tar -C /usr/local -zxf ${gorel}
 sudo rm ${gorel}
-popd
+popd >/dev/null
 
-echo 'PATH=${PATH}:/usr/local/go/bin' >> ${HOME}/.profile
-echo 'export GO111MODULE=on' >> ${HOME}/.profile
+srcpro="false"
+if ! grep -iP "PATH=.*?go.*?bin" ${HOME}/.profile >/dev/null; then
+	echo 'PATH=${PATH}:/usr/local/go/bin' >> ${HOME}/.profile
+	srcpro="true"
+fi
+if ! grep "GO111MODULE=" ${HOME}/.profile >/dev/null; then
+	echo 'export GO111MODULE=on' >> ${HOME}/.profile
+	srcpro="true"
+fi
 
-echo "please run 'source ~/.profile'"
+[[ "${rmvold}" =~ ^y|Y$ ]] && sudo rm -rf "/usr/local/${goins}"
+[[ "${srcpro}" == "true" ]] && echo "please run 'source ~/.profile'"
