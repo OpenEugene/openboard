@@ -13,6 +13,15 @@ add-apt-repository "deb [arch=amd64] ${repourl} $(lsb_release -cs) main"
 apt update
 apt install mariadb-server
 
+cat << EOF > /etc/mysql/mariadb.conf.d/60-encoding.cnf
+[mysqld]
+character-set-server = utf8mb4
+collation-server     = utf8mb4_unicode_ci
+character_set_server = utf8mb4
+collation_server     = utf8mb4_unicode_ci
+EOF
+systemctl restart mariadb
+
 adddb=""
 rootpass=""
 echo "add database? [y/N]"
