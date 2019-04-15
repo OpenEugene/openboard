@@ -13,6 +13,7 @@ import (
 	"github.com/codemodus/hedrs"
 	"github.com/codemodus/mixmux"
 	"github.com/codemodus/swagui"
+	"github.com/codemodus/swagui/suidata3"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"google.golang.org/grpc"
 )
@@ -55,7 +56,7 @@ func multiplexer(start time.Time, gmux *runtime.ServeMux, origins []string) (htt
 
 	m.Any("/v/docs/swagger.json", handleSwagger)
 
-	if ui, err := swagui.New(nil); err == nil {
+	if ui, err := swagui.New(http.NotFoundHandler(), suidata3.New()); err == nil {
 		sh := http.StripPrefix("/v/docs", ui.Handler("/v/docs/swagger.json"))
 		m.Get("/v/docs/", sh)
 		m.Get("/v/docs/*x", sh)
