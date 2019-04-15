@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -e
 
 hash go 2>/dev/null && echo "go is already installed" && exit 0
 
