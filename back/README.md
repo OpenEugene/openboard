@@ -11,7 +11,7 @@ The following scripts should be working for Bash on Linux, WSL, and Darwin.
 ```
 
 ```shell
-# container setup; skip if using mariadb local install
+# container setup (database); skip if using mariadb local install
 pushd ./tools/iso/ >/dev/null
 ./dev up # subcommands [up|dn|ip|clean] (default: up)
 popd >/dev/null
