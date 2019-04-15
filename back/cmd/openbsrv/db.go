@@ -25,7 +25,7 @@ func newSQLDB(driver, creds string) (*sql.DB, error) {
 func patientPing(db *sql.DB) error {
 	limit := time.Second * 3
 	pause := time.Millisecond * 500
-	iters := 6 // 0 + .5 + 1 + 2 + 4 + 8
+	iters := 5 // 0 + .5 + 1 + 2 + 4
 	var err error
 
 	for i := 0; i < iters; i++ {
