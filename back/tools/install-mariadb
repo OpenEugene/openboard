@@ -1,26 +1,25 @@
 #!/usr/bin/env bash
+set -e
 
-hash mysql 2>/dev/null && echo "mysql is already installed" && exit 0
+if [[ ! $(hash mysql 2>/dev/null) ]]; then
+	sudo apt update
+	sudo apt install software-properties-common
 
-sudo su -
+	sudo apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0xF1656F24C74CD1D8
+	repourl=http://sfo1.mirrors.digitalocean.com/mariadb/repo/10.3/ubuntu 
+	sudo add-apt-repository "deb [arch=amd64] ${repourl} $(lsb_release -cs) main"
+	sudo apt update
+	sudo apt install mariadb-server
 
-apt update
-apt install software-properties-common
-
-apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0xF1656F24C74CD1D8
-repourl=http://sfo1.mirrors.digitalocean.com/mariadb/repo/10.3/ubuntu 
-add-apt-repository "deb [arch=amd64] ${repourl} $(lsb_release -cs) main"
-apt update
-apt install mariadb-server
-
-cat << EOF > /etc/mysql/mariadb.conf.d/60-encoding.cnf
+	sudo cat << EOF > /etc/mysql/mariadb.conf.d/60-encoding.cnf
 [mysqld]
 character-set-server = utf8mb4
 collation-server     = utf8mb4_unicode_ci
 character_set_server = utf8mb4
 collation_server     = utf8mb4_unicode_ci
 EOF
-systemctl restart mariadb
+	sudo systemctl restart mariadb
+fi
 
 adddb=""
 rootpass=""
@@ -40,7 +39,7 @@ read dbuser
 echo "database pass:"
 read -s dbpass
 
-mysql -u root -p "${rootpass}" << EOF
+mysql -uroot -p"${rootpass}" << EOF
 CREATE DATABASE ${dbname} DEFAULT CHARACTER SET utf8mb4 DEFAULT COLLATE utf8mb4_unicode_ci;
 GRANT ALL PRIVILEGES ON ${dbname}.* TO ${dbuser}@'%' IDENTIFIED BY '${dbpass}';
 EOF
