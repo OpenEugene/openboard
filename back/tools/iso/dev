@@ -50,7 +50,7 @@ function main() {
 				"$(docker ps --filter "name=${proj}_${svc}" -q | head -1)"
 		;;
 		*)
-			echo >&2 "must be a valid subcmd [up|down]"
+			echo >&2 "must be a valid subcmd [up|dn|ip|clean]"
 			exit 1
 		;;
 	esac
