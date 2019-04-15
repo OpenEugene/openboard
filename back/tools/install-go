@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+hash go 2>/dev/null && echo "go is already installed" && exit 0
+
+hash git 2>/dev/null || sudo apt install git
+
+gorel="go1.12.4.linux-amd64.tar.gz"
+
+pushd /usr/local
+sudo wget https://dl.google.com/go/${gorel}
+sudo tar -C /usr/local -zxf ${gorel}
+sudo rm ${gorel}
+popd
+
+echo 'PATH=${PATH}:/usr/local/go/bin' >> ${HOME}/.profile
+echo 'export GO111MODULE=on' >> ${HOME}/.profile
+
+echo "please run 'source ~/.profile'"

@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+
+hash mysql 2>/dev/null && echo "mysql is already installed" && exit 0
+
+sudo su -
+
+apt update
+apt install software-properties-common
+
+apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0xF1656F24C74CD1D8
+repourl=http://sfo1.mirrors.digitalocean.com/mariadb/repo/10.3/ubuntu 
+add-apt-repository "deb [arch=amd64] ${repourl} $(lsb_release -cs) main"
+apt update
+apt install mariadb-server
+
+adddb=""
+rootpass=""
+echo "add database? [y/N]"
+read adddb
+[[ ! ${adddb} =~ y|Y ]] && exit 0
+echo "mysql root pass:"
+read -s rootpass
+
+dbname=""
+dbuser=""
+dbpass=""
+echo "database name:"
+read dbname
+echo "database user:"
+read dbuser
+echo "database pass:"
+read -s dbpass
+
+mysql -u root -p "${rootpass}" << EOF
+CREATE DATABASE ${dbname} DEFAULT CHARACTER SET utf8mb4 DEFAULT COLLATE utf8mb4_unicode_ci;
+GRANT ALL PRIVILEGES ON ${dbname}.* TO ${dbuser}@'%' IDENTIFIED BY '${dbpass}';
+EOF
