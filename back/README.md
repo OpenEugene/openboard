@@ -79,9 +79,10 @@ openbsrv -frontdir=../../../front/public/ --dbpass={your_dbpass} --dbaddr={your_
 
 - Communicate before opening a PR.
 - Run gometalinter and fix raised errors/warnings.
-  - gometalinter install directions are highly dependent on choice of dev environment.
-  - If gometalinter suggests fixes that seem wrong or odd, please include a note
-  in the PR and skip a solution is agreed on.
+  - gometalinter install directions are highly dependent on choice of dev
+  environment.
+  - If gometalinter suggests odd/wrong fixes, please communicate before applying
+  them.
 - Run tests and fix incorrect structure/behavior as needed.
 - Add new passing tests when useful.
 - Generate code when modifying protobufs (`./gengo` from the root back dir).
