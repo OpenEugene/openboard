@@ -37,7 +37,7 @@ EOF
 	if [[ "${ostype}" == "linux" ]]; then
 		sudo systemctl restart mariadb
 	fi
-	if [[ "${ostype}" == "linux" ]]; then
+	if [[ "${ostype}" == "darwin" ]]; then
 		mysql.server start
 		brew services start mariadb
 	fi
