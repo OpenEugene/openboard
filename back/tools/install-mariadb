@@ -8,8 +8,14 @@ if [[ ! $(hash mysql 2>/dev/null) ]]; then
 		sudo apt update
 		sudo apt install software-properties-common
 
-		keysrv="hkp://keyserver.ubuntu.com:80"
-		sudo apt-key adv --recv-keys --keyserver "${keysrv}" 0xF1656F24C74CD1D8
+		pkey="0xF1656F24C74CD1D8"
+		if grep -qi "Microsoft\|WSL" /proc/version; then
+			keysrch="http://keyserver.ubuntu.com/pks/lookup?op=get&search=${pkey}"
+			curl -sL "${keysrch}" | sudo apt-key add
+		else
+			keysrv="hkp://keyserver.ubuntu.com:80"
+			sudo apt-key adv --recv-keys --keyserver "${keysrv}" "${pkey}"
+		fi
 		repourl=http://sfo1.mirrors.digitalocean.com/mariadb/repo/10.3/ubuntu 
 		sudo add-apt-repository "deb [arch=amd64] ${repourl} $(lsb_release -cs) main"
 		sudo apt update
