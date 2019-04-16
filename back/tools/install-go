@@ -33,7 +33,7 @@ fi
 gorel="${gover}.${ostype}-amd64.tar.gz"
 
 pushd /usr/local >/dev/null
-sudo wget https://dl.google.com/go/${gorel}
+sudo curl -O https://dl.google.com/go/${gorel}
 sudo tar -C /usr/local -zxf ${gorel}
 sudo rm ${gorel}
 popd >/dev/null
