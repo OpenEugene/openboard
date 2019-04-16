@@ -46,7 +46,7 @@ EOF
 
 	case ${ostype} in
 	${OSLIN}*)
-		sudo systemctl restart mariadb
+		sudo service mariadb restart
 		;;
 	${OSDAR})
 		mysql.server start
