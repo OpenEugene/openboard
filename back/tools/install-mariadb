@@ -1,30 +1,40 @@
 #!/usr/bin/env bash
 set -e
 
-ostype="$([[ "${OSTYPE}" == "darwin"* ]] && echo "darwin" || echo "linux")"
+OSLIN="linux"
+OSWSL="linux-wsl"
+OSDAR="darwin"
+ostype="$([[ "${OSTYPE}" == ${OSDAR}* ]] && echo ${OSDAR} || echo ${OSLIN})"
+[[ "${ostype}" == ${OSLIN} ]] && grep -qi "Microsoft\|WSL" /proc/version && ostype=${OSWSL}
+
 
 if [[ ! $(hash mysql 2>/dev/null) ]]; then
-	if [[ "${ostype}" == "linux" ]]; then
+	case ${ostype} in
+	${OSLIN}*)
 		sudo apt update
 		sudo apt install software-properties-common
 
 		pkey="0xF1656F24C74CD1D8"
-		if grep -qi "Microsoft\|WSL" /proc/version; then
+		case ${ostype} in
+		${OSLIN})
 			keysrch="http://keyserver.ubuntu.com/pks/lookup?op=get&search=${pkey}"
 			curl -sL "${keysrch}" | sudo apt-key add
-		else
+			;;
+		${OSWSL})
 			keysrv="hkp://keyserver.ubuntu.com:80"
 			sudo apt-key adv --recv-keys --keyserver "${keysrv}" "${pkey}"
-		fi
+			;;
+		esac
 		repourl=http://sfo1.mirrors.digitalocean.com/mariadb/repo/10.3/ubuntu 
 		sudo add-apt-repository "deb [arch=amd64] ${repourl} $(lsb_release -cs) main"
 		sudo apt update
 		sudo apt install mariadb-server
-	fi
-	if [[ "${ostype}" == "darwin" ]]; then
+		;;
+	${OSDAR})
 		brew update
 		brew install mariadb
-	fi
+		;;
+	esac
 
 	sudo cat << EOF > /etc/mysql/mariadb.conf.d/60-encoding.cnf
 [mysqld]
@@ -34,13 +44,15 @@ character_set_server = utf8mb4
 collation_server     = utf8mb4_unicode_ci
 EOF
 
-	if [[ "${ostype}" == "linux" ]]; then
+	case ${ostype} in
+	${OSLIN}*)
 		sudo systemctl restart mariadb
-	fi
-	if [[ "${ostype}" == "darwin" ]]; then
+		;;
+	${OSDAR})
 		mysql.server start
 		brew services start mariadb
-	fi
+		;;
+	esac
 fi
 
 adddb=""
