@@ -21,7 +21,7 @@ popd >/dev/null
 
 - [Install Go](https://golang.org/doc/install)
 - [Install Tools](./tools/install-tools)
-- [Install MariaDB](https://www.google.com/search?q=install+mariadb+on)
+- [Install MariaDB (>=10.2.22)](https://www.google.com/search?q=install+mariadb+stable+on)
 
 ## Protobuf/protoc (Advanced Mode; Optional)
 
