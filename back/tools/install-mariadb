@@ -17,12 +17,12 @@ if [[ ! $(hash mysql 2>/dev/null) ]]; then
 		pkey="0xF1656F24C74CD1D8"
 		case ${ostype} in
 		${OSLIN})
-			keysrch="http://keyserver.ubuntu.com/pks/lookup?op=get&search=${pkey}"
-			curl -sL "${keysrch}" | sudo apt-key add
-			;;
-		${OSWSL})
 			keysrv="hkp://keyserver.ubuntu.com:80"
 			sudo apt-key adv --recv-keys --keyserver "${keysrv}" "${pkey}"
+			;;
+		${OSWSL})
+			keysrch="http://keyserver.ubuntu.com/pks/lookup?op=get&search=${pkey}"
+			curl -sL "${keysrch}" | sudo apt-key add
 			;;
 		esac
 		repourl=http://sfo1.mirrors.digitalocean.com/mariadb/repo/10.3/ubuntu 
@@ -46,7 +46,7 @@ EOF
 
 	case ${ostype} in
 	${OSLIN}*)
-		sudo service mariadb restart
+		sudo service mysql restart
 		;;
 	${OSDAR})
 		mysql.server start
