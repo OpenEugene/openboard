@@ -1,5 +1,36 @@
 #!/usr/bin/env bash
 
+function ensureDocker() {
+	OSLIN="linux"
+	OSDAR="darwin"
+	ostype="$([[ "${OSTYPE}" == ${OSDAR}* ]] && echo ${OSDAR} || echo ${OSLIN})"
+
+	if ! hash docker 2>/dev/null; then
+		case ${ostype} in
+		${OSLIN})
+			sudo apt install docker.io
+			;;
+		${OSDAR})
+			brew install docker || echo 
+			;;
+		esac
+		[[ "$?" != "0" ]] &&  echo >&2 "cannot install docker" && exit 1
+	fi
+
+	if ! hash docker-compose 2>/dev/null; then
+		case ${ostype} in
+		${OSLIN})
+			sudo easy_install pip
+			pip install --user docker-compose
+			;;
+		${OSDAR})
+			brew install docker-compose
+			;;
+		esac
+		[[ "$?" != "0" ]] &&  echo >&2 "cannot install docker-compose" && exit 1
+	fi
+}
+
 function main() {
 	local dir="${1:-up}"
 	local proj="dev"
@@ -56,4 +87,5 @@ function main() {
 	esac
 }
 
+ensureDocker
 main "${1}"
