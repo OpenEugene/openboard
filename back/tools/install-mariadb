@@ -2,13 +2,13 @@
 set -e
 
 OSLIN="linux"
-OSWSL="linux-wsl"
 OSDAR="darwin"
 ostype="$([[ "${OSTYPE}" == ${OSDAR}* ]] && echo ${OSDAR} || echo ${OSLIN})"
+OSWSL="linux-wsl"
 [[ "${ostype}" == ${OSLIN} ]] && grep -qi "Microsoft\|WSL" /proc/version && ostype=${OSWSL}
 
 
-if [[ ! $(hash mysql 2>/dev/null) ]]; then
+if ! hash mysql 2>/dev/null; then
 	case ${ostype} in
 	${OSLIN}*)
 		sudo apt update
