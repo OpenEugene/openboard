@@ -36,7 +36,7 @@ if ! hash mysql 2>/dev/null; then
 		;;
 	esac
 
-	sudo cat << EOF > /etc/mysql/mariadb.conf.d/60-encoding.cnf
+	sudo tee "/etc/mysql/mariadb.conf.d/60-encoding.cnf" >/dev/null << EOF
 [mysqld]
 character-set-server = utf8mb4
 collation-server     = utf8mb4_unicode_ci
