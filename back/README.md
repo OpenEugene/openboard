@@ -2,7 +2,9 @@
 
 ## Getting Started (Easy Mode)
 
-The following scripts should be working for Bash on Linux, WSL, and Darwin.
+The following scripts should be working for Bash on Linux, WSL, and Darwin. When
+installing the database, the suggested defaults for this project are:
+dbname = "openeug_openb_dev", and dbuser = "openeug_openbdev".
 
 ```shell
 ./tools/install-go
@@ -67,7 +69,8 @@ go build -o {your_bin_dir}/openbsrv
 openbsrv -frontdir=../../../front/public/ --dbpass={your_dbpass} --dbaddr={your_dbaddr}
 ```
 
-[openbsrv readme](./cmd/openbsrv/README.md)
+Please refer to the [openbsrv readme](./cmd/openbsrv/README.md) for more details
+about usage and flags (e.g. -dbname, -dbuser, etc.).
 
 ## Contributing
 
