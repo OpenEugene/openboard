@@ -41,6 +41,7 @@ homeView model =
     Ui.card []
         [ Ui.heading "Home"
         , Ui.linkBtn [ Route.href Route.Login ] [ text "Login" ]
+        , Ui.linkBtn [ Route.href Route.NewPost ] [ text "Make a new Post" ]
         , Ui.paragraph [] [ text model.greeting ]
         , Ui.btn [ onClick InternalHomeMsg ] [ text "Click me to update the home page" ]
         ]

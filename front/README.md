@@ -18,6 +18,7 @@ You can serve up the frontend on it's own, or use spin the whole stack up togeth
 
 ```
 npm i -g elm-live
+cd front/
 elm-live src/Main.elm -u --open --dir=public -- --output=public/app.js --debug
 ```
 

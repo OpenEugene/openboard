@@ -3,7 +3,7 @@ module Route exposing (Route(..), fromUrl, href)
 import Html.Styled exposing (Attribute)
 import Html.Styled.Attributes as Attr
 import Url exposing (Url)
-import Url.Parser as Parser exposing ((</>), Parser, oneOf, s)
+import Url.Parser as Parser exposing ((</>), Parser, oneOf, s, string)
 
 
 
@@ -13,6 +13,10 @@ import Url.Parser as Parser exposing ((</>), Parser, oneOf, s)
 type Route
     = Home
     | Login
+    | NewPost
+    | PostDetail String
+    | EditPost String
+    | AllPosts
 
 
 parser : Parser (Route -> a) a
@@ -20,6 +24,10 @@ parser =
     oneOf
         [ Parser.map Home Parser.top
         , Parser.map Login (s "login")
+        , Parser.map NewPost (s "posts" </> s "new")
+        , Parser.map PostDetail (s "posts" </> string)
+        , Parser.map EditPost (s "posts" </> string </> s "edit")
+        , Parser.map AllPosts (s "posts")
         ]
 
 
@@ -55,5 +63,17 @@ routeToString page =
 
                 Login ->
                     [ "login" ]
+
+                NewPost ->
+                    [ "posts", "new" ]
+
+                PostDetail string ->
+                    [ "posts", string ]
+
+                AllPosts ->
+                    [ "posts" ]
+
+                EditPost string ->
+                    [ "posts", string, "edit" ]
     in
     "#/" ++ String.join "/" pieces

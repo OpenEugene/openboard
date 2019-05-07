@@ -1,0 +1,32 @@
+version: '3'
+
+volumes:
+  openbdb_mariadb:
+
+services:
+
+  openbdb:
+    environment:
+      MYSQL_DATABASE: "${OPENBSRV_DBNAME}"
+      MYSQL_USER: "${OPENBSRV_DBUSER}"
+      MYSQL_PASSWORD: "${OPENBSRV_DBPASS}"
+      MYSQL_ROOT_PASSWORD: "${OPENBSRV_DBPASS}"
+    volumes:
+      - "openbdb_mariadb:/var/lib/mysql"
+    build: "../../file/openbdb"
+    restart: "unless-stopped"
+
+  openbsrv:
+    depends_on:
+      - "openbdb"
+    environment:
+      DBADDR: "openbdb"
+      DBNAME: "${OPENBSRV_DBNAME}"
+      DBUSER: "${OPENBSRV_DBUSER}"
+      DBPASS: "${OPENBSRV_DBPASS}"
+      MIGRATETYPE: "${MIGRATETYPE:-migrate}"
+    ports:
+      - "${OPENBSRV_APIPORT:-4243}:4243"
+      - "${OPENBSRV_FRONTPORT:-4244}:4244"
+    build: "../../file/openbsrv-full"
+    restart: "unless-stopped" 

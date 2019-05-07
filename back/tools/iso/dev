@@ -1,0 +1,91 @@
+#!/usr/bin/env bash
+
+function ensureDocker() {
+	OSLIN="linux"
+	OSDAR="darwin"
+	ostype="$([[ "${OSTYPE}" == ${OSDAR}* ]] && echo ${OSDAR} || echo ${OSLIN})"
+
+	if ! hash docker 2>/dev/null; then
+		case ${ostype} in
+		${OSLIN})
+			sudo apt install docker.io
+			;;
+		${OSDAR})
+			brew install docker || echo 
+			;;
+		esac
+		[[ "$?" != "0" ]] &&  echo >&2 "cannot install docker" && exit 1
+	fi
+
+	if ! hash docker-compose 2>/dev/null; then
+		case ${ostype} in
+		${OSLIN})
+			sudo easy_install pip
+			pip install --user docker-compose
+			;;
+		${OSDAR})
+			brew install docker-compose
+			;;
+		esac
+		[[ "$?" != "0" ]] &&  echo >&2 "cannot install docker-compose" && exit 1
+	fi
+}
+
+function main() {
+	local dir="${1:-up}"
+	local proj="dev"
+	local svc="openbdb"
+	local file="./compose/poc/docker-compose.yml"
+
+	export OPENBSRV_DBNAME="${OPENBSRV_DBNAME:-openeug_openb_dev}"
+	export OPENBSRV_DBUSER="${OPENBSRV_DBUSER:-openeug_openbdev}"
+	export OPENBSRV_DBPASS="${OPENBSRV_DBPASS:-dummy}"
+
+	case "${dir}" in
+		up)
+			if [[ "${OPENBSRV_DBPASS}" == "dummy" ]]; then
+				local dbpass
+				echo "database pass:"
+				read -s dbpass
+				export OPENBSRV_DBPASS="${dbpass}"
+			fi
+
+			docker-compose \
+				--file "${file}" \
+				--project-name  "${proj}" \
+				up \
+				--detach \
+				"${svc}"
+			[[ "$?" != "0" ]] && echo >&2 "cannot setup containers" && exit 1
+
+			main ip
+		;;
+		down|dn|clean)
+			docker-compose \
+				--file "${file}" \
+				--project-name  "${proj}" \
+				down
+
+			[[ "${dir}" != "clean" ]] && exit 0
+
+			docker image rm "${proj}_${svc}"
+
+			docker volume rm \
+				"$(docker volume ls --filter "name=${proj}_${svc}" -q)"
+		;;
+		ip)
+
+			docker inspect \
+				--format \
+				'{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' \
+				"$(docker ps --filter "name=${proj}_${svc}" -q | head -1)"
+		;;
+		*)
+			echo >&2 "must be a valid subcmd [up|dn|ip|clean]"
+			exit 1
+		;;
+	esac
+}
+
+ensureDocker
+main "${1}"
