@@ -1,9 +1,10 @@
-module Main exposing (Model, Msg(..), init, main, update, view)
+port module Main exposing (Model, Msg(..), init, main, update, view)
 
 import Browser exposing (Document, UrlRequest(..))
 import Browser.Navigation as Nav
 import Html
 import Html.Styled
+import Json.Decode exposing (Value)
 import Page
 import Page.Home
 import Page.Login
@@ -39,6 +40,7 @@ type Msg
     | ClickedLink UrlRequest
     | GotHomeMsg Page.Home.Msg
     | GotLoginMsg Page.Login.Msg
+    | GotJwt Value
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -124,7 +126,16 @@ view model =
         Login login ->
             viewPage Page.Other GotLoginMsg (Page.Login.view login)
 
+-- Ports
 
+port storeCache : Maybe Value -> Cmd msg
+
+
+port onStoreChange : (Value -> msg) -> Sub msg
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    onStoreChange GotJwt
 
 ---- PROGRAM ----
 
@@ -135,7 +146,7 @@ main =
         { init = init
         , onUrlChange = ChangedUrl
         , onUrlRequest = ClickedLink
-        , subscriptions = always Sub.none
+        , subscriptions = subscriptions
         , update = update
         , view = view
         }
