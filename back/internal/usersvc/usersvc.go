@@ -3,11 +3,15 @@ package usersvc
 import (
 	"context"
 
-	"github.com/champagneabuelo/openboard/back/pb"
+	"github.com/champagneabuelo/openboard/back/internal/pb"
+	"github.com/champagneabuelo/openboard/back/internal/usersvc/internal/userdb/mysqlmig"
 	"google.golang.org/grpc"
 )
 
 var _ pb.UserServer = &UserSvc{}
+
+//var _ sqlmig.DataProvider = &UserSvc{}
+//var _ sqlmig.Regularizer = &UserSvc{}
 
 // UserSvc encapsulates dependencies and data required to implement the
 // pb.UserServer interface.
@@ -67,4 +71,31 @@ func (s *UserSvc) RmvUser(ctx context.Context, req *pb.RmvUserReq) (*pb.RmvUserR
 	// TODO: implement RmvUser
 
 	return nil, nil
+}
+
+// MigrationData ...
+func (s *UserSvc) MigrationData() (string, map[string][]byte) {
+	name := "usersvc"
+	m := make(map[string][]byte)
+
+	ids, err := mysqlmig.AssetDir("")
+	if err != nil {
+		return name, nil
+	}
+
+	for _, id := range ids {
+		d, err := mysqlmig.Asset(id)
+		if err != nil {
+			return name, nil
+		}
+
+		m[id] = d
+	}
+
+	return name, m
+}
+
+//Regularize ...
+func (s *UserSvc) Regularize(ctx context.Context) error {
+	return nil
 }
