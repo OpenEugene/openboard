@@ -1,33 +1,34 @@
-module Main exposing (Model, Msg(..), init, main, update, view)
+port module Main exposing (Model, Msg(..), init, main, update, view)
 
-import Browser
-import Css exposing (..)
+import Browser exposing (Document, UrlRequest(..))
+import Browser.Navigation as Nav
 import Html
-import Html.Styled exposing (..)
-import Html.Styled.Attributes exposing (css, href, src)
-import Html.Styled.Events exposing (onClick)
-import Proto.User
-import Ui
-
-
-test : Proto.User.RoleResp
-test =
-    { id = 0
-    , name = "hello"
-    }
+import Html.Styled
+import Json.Decode exposing (Value)
+import Page
+import Page.Home
+import Page.Login
+import Route exposing (Route(..))
+import Session
+import Url exposing (Url)
 
 
 
 ---- MODEL ----
 
 
-type alias Model =
-    {}
+type Model
+    = Login Page.Login.Model
+    | Home Page.Home.Model
 
 
-init : ( Model, Cmd Msg )
-init =
-    ( {}, Cmd.none )
+
+--TODO: decode incoming JWT from localStorage and initialize Session accordingly
+
+
+init : () -> Url -> Nav.Key -> ( Model, Cmd Msg )
+init _ url navKey =
+    changeRouteTo (Route.fromUrl url) (Home (Page.Home.Model (Session.Guest navKey) ""))
 
 
 
@@ -35,36 +36,117 @@ init =
 
 
 type Msg
-    = NoOp
+    = ChangedUrl Url
+    | ClickedLink UrlRequest
+    | GotHomeMsg Page.Home.Msg
+    | GotLoginMsg Page.Login.Msg
+    | GotJwt Value
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    ( model, Cmd.none )
+    case ( msg, model ) of
+        ( ChangedUrl url, _ ) ->
+            changeRouteTo (Route.fromUrl url) model
+
+        ( ClickedLink urlRequest, _ ) ->
+            case urlRequest of
+                Internal url ->
+                    ( model, Nav.pushUrl (Session.navKey (toSession model)) (Url.toString url) )
+
+                External url ->
+                    ( model, Nav.load url )
+
+        ( GotHomeMsg subMsg, Home home ) ->
+            Page.Home.update subMsg home
+                |> updateWith Home GotHomeMsg model
+
+        ( GotLoginMsg subMsg, Login home ) ->
+            Page.Login.update subMsg home
+                |> updateWith Login GotLoginMsg model
+
+        ( _, _ ) ->
+            -- Disregard messages that arrived for the wrong page.
+            ( model, Cmd.none )
+
+
+updateWith : (subModel -> Model) -> (subMsg -> Msg) -> Model -> ( subModel, Cmd subMsg ) -> ( Model, Cmd Msg )
+updateWith toModel toMsg _ ( subModel, subCmd ) =
+    ( toModel subModel
+    , Cmd.map toMsg subCmd
+    )
+
+
+changeRouteTo : Maybe Route -> Model -> ( Model, Cmd Msg )
+changeRouteTo maybeRoute model =
+    case maybeRoute of
+        Just Route.Home ->
+            Page.Home.init (toSession model)
+                |> updateWith Home GotHomeMsg model
+
+        Just Route.Login ->
+            Page.Login.init (toSession model)
+                |> updateWith Login GotLoginMsg model
+
+        Nothing ->
+            ( model, Cmd.none )
+
+
+toSession : Model -> Session.Session
+toSession model =
+    case model of
+        Login loginModel ->
+            Page.Login.toSession loginModel
+
+        Home homeModel ->
+            Page.Home.toSession homeModel
 
 
 
 ---- VIEW ----
 
 
-view : Model -> Html Msg
+view : Model -> Document Msg
 view model =
-    Ui.card []
-        [ Ui.heading [] [ text "openboard!" ]
-        , Ui.linkBtn [ href "https://github.com/rtfeldman/elm-css" ] [ text "Learn more about elm-css" ]
-        , Ui.linkBtn [ href "https://github.com/champagneabuelo/openboard" ] [ text "the repo" ]
-        ]
+    let
+        viewPage : Page.Page -> (msg -> Msg) -> { title : String, content : Html.Styled.Html msg } -> Document Msg
+        viewPage page toMsg config =
+            let
+                { title, body } =
+                    Page.view (Session.viewer (toSession model)) page config
+            in
+            { title = title
+            , body = List.map (Html.map toMsg) body
+            }
+    in
+    case model of
+        Home home ->
+            viewPage Page.Home GotHomeMsg (Page.Home.view home)
+
+        Login login ->
+            viewPage Page.Other GotLoginMsg (Page.Login.view login)
+
+-- Ports
+
+port storeCache : Maybe Value -> Cmd msg
 
 
+port onStoreChange : (Value -> msg) -> Sub msg
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    onStoreChange GotJwt
 
 ---- PROGRAM ----
 
 
 main : Program () Model Msg
 main =
-    Browser.element
-        { view = view >> toUnstyled
-        , init = \_ -> init
+    Browser.application
+        { init = init
+        , onUrlChange = ChangedUrl
+        , onUrlRequest = ClickedLink
+        , subscriptions = subscriptions
         , update = update
-        , subscriptions = always Sub.none
+        , view = view
         }
