@@ -2,6 +2,8 @@
 
 An open source version of Switchboard.
 
+***Join us to work In Real Life at noon every Tuesday [@RAIN](https://goo.gl/maps/NvamavVu2CtUMQFp9)***
+
 Currently a WIP, anticipated stack will be the following:
 - Elm frontend
 - Go backend
