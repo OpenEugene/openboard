@@ -3,7 +3,7 @@ package authsvc
 import (
 	"context"
 
-	"github.com/champagneabuelo/openboard/back/internal/pb"
+	"github.com/OpenEugene/openboard/back/internal/pb"
 	"google.golang.org/grpc"
 )
 

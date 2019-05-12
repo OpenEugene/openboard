@@ -3,8 +3,8 @@ package usersvc
 import (
 	"context"
 
-	"github.com/champagneabuelo/openboard/back/internal/pb"
-	"github.com/champagneabuelo/openboard/back/internal/usersvc/internal/userdb/mysqlmig"
+	"github.com/OpenEugene/openboard/back/internal/pb"
+	"github.com/OpenEugene/openboard/back/internal/usersvc/internal/userdb/mysqlmig"
 	"google.golang.org/grpc"
 )
 

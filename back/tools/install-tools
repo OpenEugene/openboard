@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 set -e
 
-go generate -tags tools github.com/champagneabuelo/openboard/back/tools
+go generate -tags tools github.com/OpenEugene/openboard/back/tools
