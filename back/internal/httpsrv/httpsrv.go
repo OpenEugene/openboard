@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/champagneabuelo/openboard/back/internal/httpsrv/internal/swagger"
-	"github.com/champagneabuelo/openboard/back/internal/pb"
+	"github.com/OpenEugene/openboard/back/internal/httpsrv/internal/swagger"
+	"github.com/OpenEugene/openboard/back/internal/pb"
 	"github.com/codemodus/chain/v2"
 	"github.com/codemodus/hedrs"
 	"github.com/codemodus/mixmux"

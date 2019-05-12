@@ -56,7 +56,7 @@ port 4243. In order to view the API endpoints, please visit
 http://localhost:4243/v/docs. The frontend assets are served on port 4244.
 
 ```shell
-repo="champagneabuelo/openboard"
+repo="OpenEugene/openboard"
 cd {your_source_dir}
 mkdir -p ${repo}
 cd $_

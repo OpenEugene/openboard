@@ -3,9 +3,9 @@ package main
 import (
 	"database/sql"
 
-	"github.com/champagneabuelo/openboard/back/internal/authsvc"
-	"github.com/champagneabuelo/openboard/back/internal/grpcsrv"
-	"github.com/champagneabuelo/openboard/back/internal/usersvc"
+	"github.com/OpenEugene/openboard/back/internal/authsvc"
+	"github.com/OpenEugene/openboard/back/internal/grpcsrv"
+	"github.com/OpenEugene/openboard/back/internal/usersvc"
 )
 
 type grpcSrv struct {

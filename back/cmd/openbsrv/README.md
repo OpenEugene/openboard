@@ -1,6 +1,6 @@
 # openbsrv
 
-    go get -u github.com/champagneabuelo/openboard/back/cmd/openbsrv
+    go get -u github.com/OpenEugene/openboard/back/cmd/openbsrv
 
 openbsrv is an application. This doc will be added to.
 
