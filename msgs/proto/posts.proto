@@ -1,0 +1,85 @@
+syntax = "proto3";
+
+// openboard
+//
+// user semantics:
+//
+//  Add{T}(s)    (Add{T}(s)Req)    returns {T}(s)Resp // POST
+//  Ovr{T}(s)    (Ovr{T}(s)Req)    returns {T}(s)Resp // PUT
+//  Mod{T}(s)    (Mod{T}(s)Req)    returns {T}(s)Resp // PATCH
+//  Get{T}       (Get{T}Req)       returns {T}Resp    // GET
+//  Fnd{T}s      (Fnd{T}sReq)      returns {T}sResp   // GET
+//  Rmv{T}(s)    (Rmv{T}(s)Req)    returns EmptyResp  // DELETE
+//  Unr{T}       (Unr{T}Req)       returns {T}Resp    // PATCH
+package pb;
+
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+
+message metadata {
+	string type = 1;
+	// ?? other things ??
+}
+
+message AddPostReq {
+	string title = 1;
+	string body = 2;
+	metadata metadata = 3;
+}
+
+message PostResp {
+	uint32 id = 1;
+	string link = 2;
+	google.protobuf.Timestamp created = 3;
+    google.protobuf.Timestamp updated = 4;
+    google.protobuf.Timestamp deleted = 5;
+    google.protobuf.Timestamp blocked = 6;
+}
+
+message PostsResp {
+	repeated PostResp posts = 1;
+	uint32 total = 2;
+}
+
+message OvrPostReq {
+	uint32 id = 1;
+	AddPostReq req = 2;
+}
+
+message FndPostsReq {
+	repeated string keywords = 1;
+	google.protobuf.Timestamp created = 2;
+	google.protobuf.Timestamp updated = 3;
+	google.protobuf.Timestamp deleted = 4;
+}
+
+message RmvPostReq {
+	uint32 id = 1;
+}
+
+message RmvPostResp {}
+
+service Post {
+	rpc AddPost(AddPostReq) returns (PostResp) {
+
+	};
+	
+	rpc FndPosts(FndPostsReq) returns (PostsResp) {
+		option(google.api.http) = {
+			get: "/posts"
+		};
+	}
+
+	rpc OvrPost(OvrPostReq) returns (PostResp) {
+		option(google.api.http) = {
+			put: "/post/{id}"
+			body: "*"
+		};
+	}
+
+	rpc RmvPost(RmvPostReq) returns (RmvPostResp) {
+		option(google.api.http) = {
+			delete: "/post/{id}"
+		}
+	}
+}
