@@ -16,34 +16,59 @@ package pb;
 import "google/api/annotations.proto";
 import "google/protobuf/timestamp.proto";
 
-message metadata {
-	string type = 1;
-	// ?? other things ??
+message CommentResp {
+
+}
+
+message AddCommentResp {
+
+}
+
+message TypeResp {
+	uint32 id = 1;
+	string name = 2;
+}
+
+message AddTypeReq {
+	string name = 1;
+}
+
+message TypesResp {
+	repeated TypeResp items = 1;
+	uint32 total = 2;
+}
+
+message FndTypesReq {
+	uint32 limit = 1;
+	uint32 lapse = 2;
+}
+
+message PostResp {
+	uint32 id = 1;
+	string slug = 2;
+	string title = 3;
+	string body = 4;
+	string typeId = 5;
+	google.protobuf.Timestamp created = 6;
+    google.protobuf.Timestamp updated = 7;
+    google.protobuf.Timestamp deleted = 8;
+    google.protobuf.Timestamp blocked = 9;
 }
 
 message AddPostReq {
 	string title = 1;
 	string body = 2;
-	metadata metadata = 3;
-}
-
-message PostResp {
-	uint32 id = 1;
-	string link = 2;
-	google.protobuf.Timestamp created = 3;
-    google.protobuf.Timestamp updated = 4;
-    google.protobuf.Timestamp deleted = 5;
-    google.protobuf.Timestamp blocked = 6;
-}
-
-message PostsResp {
-	repeated PostResp posts = 1;
-	uint32 total = 2;
+	uint32 typeId = 3;
 }
 
 message OvrPostReq {
 	uint32 id = 1;
 	AddPostReq req = 2;
+}
+
+message PostsResp {
+	repeated PostResp posts = 1;
+	uint32 total = 2;
 }
 
 message FndPostsReq {
@@ -60,10 +85,20 @@ message RmvPostReq {
 message RmvPostResp {}
 
 service Post {
-	rpc AddPost(AddPostReq) returns (PostResp) {
+	rpc AddType(AddTypeReq) returns (TypeResp) {
+		option(google.api.http) = {
+            post: "/type"
+            body: "*"
+        };
+	}
 
+	rpc AddPost(AddPostReq) returns (PostResp) {
+		option(google.api.http) = {
+            post: "/post"
+            body: "*"
+        };
 	};
-	
+
 	rpc FndPosts(FndPostsReq) returns (PostsResp) {
 		option(google.api.http) = {
 			get: "/posts"
@@ -80,6 +115,6 @@ service Post {
 	rpc RmvPost(RmvPostReq) returns (RmvPostResp) {
 		option(google.api.http) = {
 			delete: "/post/{id}"
-		}
+		};
 	}
 }
