@@ -96,19 +96,19 @@ changeRouteTo maybeRoute model =
                 |> updateWith Login GotLoginMsg model
 
         Just Route.NewRequest ->
-            Page.Posts.init (toSession model) Page.Posts.Request
+            Page.Posts.init (toSession model) Page.Posts.Request ""
                 |> updateWith Posts GotPostsMsg model
 
         Just Route.NewOffer ->
-            Page.Posts.init (toSession model) Page.Posts.Offer
+            Page.Posts.init (toSession model) Page.Posts.Offer ""
                 |> updateWith Posts GotPostsMsg model
 
         Just (Route.PostDetail slug) ->
-            Page.Posts.init (toSession model) slug
+            Page.Posts.init (toSession model) Page.Posts.Unknown slug
                 |> updateWith Posts GotPostsMsg model
 
         Just (Route.EditPost slug) ->
-            Page.Posts.init (toSession model) slug
+            Page.Posts.init (toSession model) Page.Posts.Unknown slug
                 |> updateWith Posts GotPostsMsg model
 
         Nothing ->

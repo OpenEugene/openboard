@@ -13,12 +13,14 @@ type alias Model =
     , title : String
     , body : String
     , kind : Kind
+    , slug : String
     }
 
 
 type Kind
     = Offer
     | Request
+    | Unknown
 
 
 type Msg
@@ -26,9 +28,9 @@ type Msg
     | SetBody String
 
 
-init : Session -> Kind -> ( Model, Cmd Msg )
-init session kind =
-    ( Model session "" "" kind, Cmd.none )
+init : Session -> Kind -> String -> ( Model, Cmd Msg )
+init session kind slug =
+    ( Model session "" "" kind slug, Cmd.none )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -48,10 +50,23 @@ view model =
     }
 
 
+heading : Kind -> Html.Styled.Html Msg
+heading kind =
+    case kind of
+        Offer ->
+            Ui.heading "New Offer"
+
+        Request ->
+            Ui.heading "New Request"
+
+        Unknown ->
+            Ui.heading "Impossible!!"
+
+
 postsView : Model -> Html.Styled.Html Msg
 postsView model =
     Ui.card []
-        [ Ui.heading "New Post"
+        [ heading model.kind
         , Ui.linkBtn [ Route.href Route.Home ] [ text "Home" ]
         , form []
             [ label []

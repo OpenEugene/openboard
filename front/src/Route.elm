@@ -24,8 +24,8 @@ parser =
     oneOf
         [ Parser.map Home Parser.top
         , Parser.map Login (s "login")
-        , Parser.map NewOffer (s "request" </> s "new")
-        , Parser.map NewRequest (s "offer" </> s "new")
+        , Parser.map NewOffer (s "offer" </> s "new")
+        , Parser.map NewRequest (s "request" </> s "new")
         , Parser.map PostDetail (s "posts" </> string)
         , Parser.map EditPost (s "posts" </> string </> s "edit")
         ]
