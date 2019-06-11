@@ -1,4 +1,4 @@
-# Contribution Guidelines
+# Contribution Guidelines 
 
 First off, thank you for considering contributing to Openboard. It's people like you that make projects like this possible!
 

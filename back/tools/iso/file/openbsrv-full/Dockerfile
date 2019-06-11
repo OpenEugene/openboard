@@ -13,7 +13,7 @@ ARG codebin=${codedir}/bin
 RUN mkdir -p ${codebin}
 ENV PATH=${PATH}:${codebin}
 
-ARG repo=champagneabuelo/openboard
+ARG repo=OpenEugene/openboard
 ARG codesrc=${codedir}/src
 RUN mkdir -p ${codesrc}/${repo}
 RUN git clone https://github.com/${repo} ${codesrc}/${repo}

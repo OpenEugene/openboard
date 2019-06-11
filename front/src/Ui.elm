@@ -1,7 +1,16 @@
-module Ui exposing (btn, card, heading, linkBtn, paragraph)
+module Ui exposing (PostingKind(..), btn, card, flexBox, globalStyle, gridUnit, h1Style, heading, kindButton, kindToColor, linkBtn, mainContent, navBar, navBarList, pStyle, paragraph, postingBlurb, postingsList, theme)
 
 import Css exposing (..)
+import Css.Global exposing (global, selector)
 import Html.Styled exposing (..)
+
+
+globalStyle =
+    global
+        [ selector "body"
+            [ margin (px 0)
+            ]
+        ]
 
 
 
@@ -22,10 +31,98 @@ card : List (Attribute msg) -> List (Html msg) -> Html msg
 card =
     styled div
         [ borderRadius (px 4)
-        , padding (px (gridUnit * 4))
+        , padding (px (gridUnit * 1))
         , boxShadow4 (px 1) (px 1) (px 5) theme.dark
         , margin (px (8 * gridUnit))
         ]
+
+
+{-| navBar
+-}
+navBar : List (Attribute msg) -> List (Html msg) -> Html msg
+navBar =
+    styled nav
+        [ boxShadow4 (px 1) (px 1) (px 5) theme.dark
+        , displayFlex
+        ]
+
+
+navBarList : List (Attribute msg) -> List (Html msg) -> Html msg
+navBarList =
+    styled ul
+        [ listStyleType none
+        , margin (px 0)
+        , padding (px 0)
+        ]
+
+
+mainContent : List (Attribute msg) -> List (Html msg) -> Html msg
+mainContent =
+    styled div
+        [ maxWidth (px 960)
+        , marginLeft auto
+        , marginRight auto
+        , padding (px 16)
+        ]
+
+
+type PostingKind
+    = Request
+    | Offer
+
+
+kindToColor k =
+    case k of
+        Request ->
+            theme.request
+
+        Offer ->
+            theme.offer
+
+
+flexBox =
+    styled div
+        [ displayFlex
+        , marginBottom (px 10)
+        , firstChild [ marginRight (px 10) ]
+        ]
+
+
+kindButton : PostingKind -> List (Attribute msg) -> List (Html msg) -> Html msg
+kindButton k =
+    styled button
+        [ padding4 (px 8) (px 16) (px 8) (px 16)
+        , color (rgb 250 250 250)
+        , hover
+            [ backgroundColor theme.dark
+            , textDecoration underline
+            ]
+        , display block
+        , backgroundColor (kindToColor k)
+        , cursor pointer
+        , border (px 0)
+        , borderRadius (px 3)
+        , fontSize (Css.em 2)
+        ]
+
+
+postingsList =
+    styled ul
+        [ listStyleType none
+        , margin (px 0)
+        , padding (px 0)
+        ]
+
+
+postingBlurb { title, body } =
+    styled article
+        [ borderRadius (px 4)
+        , padding (px (gridUnit * 1))
+        , boxShadow4 (px 1) (px 1) (px 5) theme.dark
+        , marginBottom (px gridUnit)
+        ]
+        []
+        [ heading title, paragraph [] [text body] ]
 
 
 {-| A reusable heading
@@ -43,7 +140,7 @@ linkBtn =
         [ padding4 (px 8) (px 16) (px 8) (px 16)
         , color (rgb 250 250 250)
         , hover
-            [ backgroundColor theme.hover
+            [ backgroundColor theme.dark
             , textDecoration underline
             ]
         , display block
@@ -62,7 +159,7 @@ h1Style : Style
 h1Style =
     Css.batch
         [ fontFamilies [ "Palatino Linotype", "Georgia", "serif" ]
-        , fontSize (6 * gridUnit |> px)
+        , fontSize (3 * gridUnit |> px)
         , fontWeight bold
         , marginTop (px 0)
         ]
@@ -77,16 +174,20 @@ pStyle =
         , fontSize (2 * gridUnit |> px)
         , fontWeight normal
         , lineHeight (2 * gridUnit + gridUnit |> px)
+        , color theme.dark
+        , margin (px 0)
         ]
 
 
 {-| Theme colors
 -}
 theme =
-    { primary = hex "55af6a"
+    { primary = hex "000"
     , secondary = rgb 250 240 230
     , hover = hex "3ebc5b"
     , dark = hex "999"
+    , request = hex "2135d1"
+    , offer = hex "50b320"
     }
 
 

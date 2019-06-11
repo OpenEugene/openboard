@@ -1,4 +1,4 @@
-module github.com/champagneabuelo/openboard/back/tools
+module github.com/OpenEugene/openboard/back/tools
 
 go 1.12
 
