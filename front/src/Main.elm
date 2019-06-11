@@ -8,6 +8,7 @@ import Json.Decode exposing (Value)
 import Page
 import Page.Home
 import Page.Login
+import Page.Posts
 import Route exposing (Route(..))
 import Session
 import Url exposing (Url)
@@ -20,6 +21,7 @@ import Url exposing (Url)
 type Model
     = Login Page.Login.Model
     | Home Page.Home.Model
+    | Posts Page.Posts.Model
 
 
 
@@ -40,6 +42,7 @@ type Msg
     | ClickedLink UrlRequest
     | GotHomeMsg Page.Home.Msg
     | GotLoginMsg Page.Login.Msg
+    | GotPostsMsg Page.Posts.Msg
     | GotJwt Value
 
 
@@ -65,6 +68,10 @@ update msg model =
             Page.Login.update subMsg home
                 |> updateWith Login GotLoginMsg model
 
+        ( GotPostsMsg subMsg, Posts home ) ->
+            Page.Posts.update subMsg home
+                |> updateWith Posts GotPostsMsg model
+
         ( _, _ ) ->
             -- Disregard messages that arrived for the wrong page.
             ( model, Cmd.none )
@@ -88,6 +95,22 @@ changeRouteTo maybeRoute model =
             Page.Login.init (toSession model)
                 |> updateWith Login GotLoginMsg model
 
+        Just Route.NewRequest ->
+            Page.Posts.init (toSession model) Page.Posts.Request ""
+                |> updateWith Posts GotPostsMsg model
+
+        Just Route.NewOffer ->
+            Page.Posts.init (toSession model) Page.Posts.Offer ""
+                |> updateWith Posts GotPostsMsg model
+
+        Just (Route.PostDetail slug) ->
+            Page.Posts.init (toSession model) Page.Posts.Unknown slug
+                |> updateWith Posts GotPostsMsg model
+
+        Just (Route.EditPost slug) ->
+            Page.Posts.init (toSession model) Page.Posts.Unknown slug
+                |> updateWith Posts GotPostsMsg model
+
         Nothing ->
             ( model, Cmd.none )
 
@@ -100,6 +123,9 @@ toSession model =
 
         Home homeModel ->
             Page.Home.toSession homeModel
+
+        Posts postsModel ->
+            Page.Posts.toSession postsModel
 
 
 
@@ -126,16 +152,23 @@ view model =
         Login login ->
             viewPage Page.Other GotLoginMsg (Page.Login.view login)
 
--- Ports
+        Posts posts ->
+            viewPage Page.Other GotPostsMsg (Page.Posts.view posts)
 
-port storeCache : Maybe Value -> Cmd msg
+
+
+-- Ports
+-- port storeCache : Maybe Value -> Cmd msg
 
 
 port onStoreChange : (Value -> msg) -> Sub msg
 
+
 subscriptions : Model -> Sub Msg
 subscriptions model =
     onStoreChange GotJwt
+
+
 
 ---- PROGRAM ----
 

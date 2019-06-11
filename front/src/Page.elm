@@ -1,9 +1,10 @@
 module Page exposing (Page(..), view)
 
 import Browser
-import Html.Styled
+import Html.Styled exposing (..)
 import Viewer exposing (Viewer)
-
+import Route
+import Ui
 
 type Page
     = Home
@@ -17,12 +18,20 @@ type Page
 view : Maybe Viewer -> Page -> { title : String, content : Html.Styled.Html msg } -> Browser.Document msg
 view maybeViewer page { title, content } =
     { title = title ++ " - Openboard"
-    , body = nav page maybeViewer :: content :: [] |> List.map Html.Styled.toUnstyled
+    , body = Ui.globalStyle :: navBar page maybeViewer :: content :: [] |> List.map Html.Styled.toUnstyled
     }
 
 
-nav page maybeViewer =
-    Html.Styled.text ("Top Level Stuff: " ++ Debug.toString page ++ " and " ++ viewerAsString maybeViewer)
+navBar page maybeViewer =
+    Ui.navBar [] [
+        Ui.navBarList [] [
+            li [] [
+                Ui.linkBtn [ Route.href Route.Home ] [ text "OpenBoard" ]
+            ]
+        ]
+    ]
+    
+
 
 
 viewerAsString : Maybe Viewer -> String

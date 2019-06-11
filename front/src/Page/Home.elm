@@ -1,6 +1,6 @@
 module Page.Home exposing (Model, Msg(..), init, toSession, update, view)
 
-import Html.Styled exposing (text)
+import Html.Styled exposing (..)
 import Html.Styled.Events exposing (onClick)
 import Route
 import Session exposing (Session)
@@ -38,11 +38,17 @@ view model =
 
 homeView : Model -> Html.Styled.Html Msg
 homeView model =
-    Ui.card []
-        [ Ui.heading "Home"
-        , Ui.linkBtn [ Route.href Route.Login ] [ text "Login" ]
-        , Ui.paragraph [] [ text model.greeting ]
-        , Ui.btn [ onClick InternalHomeMsg ] [ text "Click me to update the home page" ]
+    Ui.mainContent []
+        [ Ui.flexBox []
+            [ Ui.linkBtn [ Route.href Route.NewRequest ] [ text "Request" ]
+            , Ui.linkBtn [ Route.href Route.NewOffer ] [ text "Offer" ]
+            ]
+        , Ui.postingsList []
+            (List.map Ui.postingBlurb
+                [ { slug = "1", title = "Golang Needed", body = "A bunch of text blablablaosdihf osidhf sdoifh sdfs df...." }
+                , { slug = "2", title = "Another Posting Example", body = "lsjkdfno sidhsdf sdf sdfhj osd fsdf sdf sdf sdfmore some posting stuff" }
+                ]
+            )
         ]
 
 
