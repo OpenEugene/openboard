@@ -95,8 +95,12 @@ changeRouteTo maybeRoute model =
             Page.Login.init (toSession model)
                 |> updateWith Login GotLoginMsg model
 
-        Just Route.NewPost ->
-            Page.Posts.init (toSession model) ""
+        Just Route.NewRequest ->
+            Page.Posts.init (toSession model) Page.Posts.Request
+                |> updateWith Posts GotPostsMsg model
+
+        Just Route.NewOffer ->
+            Page.Posts.init (toSession model) Page.Posts.Offer
                 |> updateWith Posts GotPostsMsg model
 
         Just (Route.PostDetail slug) ->
@@ -105,10 +109,6 @@ changeRouteTo maybeRoute model =
 
         Just (Route.EditPost slug) ->
             Page.Posts.init (toSession model) slug
-                |> updateWith Posts GotPostsMsg model
-
-        Just Route.AllPosts ->
-            Page.Posts.init (toSession model) ""
                 |> updateWith Posts GotPostsMsg model
 
         Nothing ->
@@ -155,16 +155,20 @@ view model =
         Posts posts ->
             viewPage Page.Other GotPostsMsg (Page.Posts.view posts)
 
--- Ports
 
-port storeCache : Maybe Value -> Cmd msg
+
+-- Ports
+-- port storeCache : Maybe Value -> Cmd msg
 
 
 port onStoreChange : (Value -> msg) -> Sub msg
 
+
 subscriptions : Model -> Sub Msg
 subscriptions model =
     onStoreChange GotJwt
+
+
 
 ---- PROGRAM ----
 

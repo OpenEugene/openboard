@@ -40,13 +40,13 @@ homeView : Model -> Html.Styled.Html Msg
 homeView model =
     Ui.mainContent []
         [ Ui.flexBox []
-            [ Ui.kindButton Ui.Request [ Route.href Route.NewPost ] [ text "Request" ]
-            , Ui.kindButton Ui.Offer [ Route.href Route.NewPost ] [ text "Offer" ]
+            [ Ui.linkBtn [ Route.href Route.NewRequest ] [ text "Request" ]
+            , Ui.linkBtn [ Route.href Route.NewOffer ] [ text "Offer" ]
             ]
         , Ui.postingsList []
             (List.map Ui.postingBlurb
-                [ { title = "Golang Needed", body = "A bunch of text blablablaosdihf osidhf sdoifh sdfs df...." }
-                , { title = "Another Posting Example", body = "lsjkdfno sidhsdf sdf sdfhj osd fsdf sdf sdf sdfmore some posting stuff" }
+                [ { slug = "1", title = "Golang Needed", body = "A bunch of text blablablaosdihf osidhf sdoifh sdfs df...." }
+                , { slug = "2", title = "Another Posting Example", body = "lsjkdfno sidhsdf sdf sdfhj osd fsdf sdf sdf sdfmore some posting stuff" }
                 ]
             )
         ]

@@ -3,6 +3,8 @@ module Ui exposing (PostingKind(..), btn, card, flexBox, globalStyle, gridUnit, 
 import Css exposing (..)
 import Css.Global exposing (global, selector)
 import Html.Styled exposing (..)
+import Html.Styled.Attributes exposing (..)
+import Route
 
 
 globalStyle =
@@ -114,7 +116,7 @@ postingsList =
         ]
 
 
-postingBlurb { title, body } =
+postingBlurb { title, body, slug } =
     styled article
         [ borderRadius (px 4)
         , padding (px (gridUnit * 1))
@@ -122,7 +124,7 @@ postingBlurb { title, body } =
         , marginBottom (px gridUnit)
         ]
         []
-        [ heading title, paragraph [] [text body] ]
+        [ a [ Route.PostDetail slug |> Route.href ] [ heading title ], paragraph [] [ text body ] ]
 
 
 {-| A reusable heading

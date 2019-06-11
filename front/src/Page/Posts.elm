@@ -1,4 +1,4 @@
-module Page.Posts exposing (Model, Msg(..), init, postsView, toSession, update, view)
+module Page.Posts exposing (Kind(..), Model, Msg(..), init, postsView, toSession, update, view)
 
 import Html.Styled exposing (button, form, input, label, text, textarea)
 import Html.Styled.Attributes exposing (type_)
@@ -10,10 +10,15 @@ import Ui
 
 type alias Model =
     { session : Session
-    , slug : String
     , title : String
     , body : String
+    , kind : Kind
     }
+
+
+type Kind
+    = Offer
+    | Request
 
 
 type Msg
@@ -21,9 +26,9 @@ type Msg
     | SetBody String
 
 
-init : Session -> String -> ( Model, Cmd Msg )
-init session slug =
-    ( Model session slug "" "", Cmd.none )
+init : Session -> Kind -> ( Model, Cmd Msg )
+init session kind =
+    ( Model session "" "" kind, Cmd.none )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
