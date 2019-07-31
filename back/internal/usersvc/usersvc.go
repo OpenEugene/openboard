@@ -2,9 +2,10 @@ package usersvc
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/OpenEugene/openboard/back/internal/pb"
-	"github.com/OpenEugene/openboard/back/internal/usersvc/internal/userdb/mysqlmig"
+	"github.com/OpenEugene/openboard/back/internal/usersvc/internal/userdb"
 	"google.golang.org/grpc"
 )
 
@@ -20,8 +21,17 @@ type UserSvc struct {
 }
 
 // New returns a pointer to a UserSvc instance or an error.
-func New() (*UserSvc, error) {
-	return &UserSvc{}, nil
+func New(relDb *sql.DB, driver string, offset uint64) (*UserSvc, error) {
+	db, err := userdb.New(relDb, driver, offset)
+	if err != nil {
+		return nil, err
+	}
+
+	s := UserSvc{
+		db: db,
+	}
+
+	return &s, nil
 }
 
 // RegisterWithGRPCServer implements the grpcsrv.Registerable interface.
