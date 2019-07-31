@@ -14,10 +14,14 @@ var _ pb.UserServer = &UserSvc{}
 //var _ sqlmig.DataProvider = &UserSvc{}
 //var _ sqlmig.Regularizer = &UserSvc{}
 
+type relDb interface {
+	pb.UserServer
+}
+
 // UserSvc encapsulates dependencies and data required to implement the
 // pb.UserServer interface.
 type UserSvc struct {
-	// TODO: implement UserSvc
+	db relDb
 }
 
 // New returns a pointer to a UserSvc instance or an error.
@@ -43,44 +47,32 @@ func (s *UserSvc) RegisterWithGRPCServer(g *grpc.Server) error {
 
 // AddRole implements part of the pb.UserServer interface.
 func (s *UserSvc) AddRole(ctx context.Context, req *pb.AddRoleReq) (*pb.RoleResp, error) {
-	// TODO: implement AddRole
-
-	return nil, nil
+	return s.db.AddRole(ctx, req)
 }
 
 // FndRoles implements part of the pb.UserServer interface.
 func (s *UserSvc) FndRoles(ctx context.Context, req *pb.FndRolesReq) (*pb.RolesResp, error) {
-	// TODO: implement FndRoles
-
-	return nil, nil
+	return s.db.FndRoles(ctx, req)
 }
 
 // AddUser implements part of the pb.UserServer interface.
 func (s *UserSvc) AddUser(ctx context.Context, req *pb.AddUserReq) (*pb.UserResp, error) {
-	// TODO: implement AddUser
-
-	return nil, nil
+	return s.db.AddUser(ctx, req)
 }
 
 // OvrUser implements part of the pb.UserServer interface.
 func (s *UserSvc) OvrUser(ctx context.Context, req *pb.OvrUserReq) (*pb.UserResp, error) {
-	// TODO: implement OvrUser
-
-	return nil, nil
+	return s.db.OvrUser(ctx, req)
 }
 
 // FndUsers implements part of the pb.UserServer interface.
 func (s *UserSvc) FndUsers(ctx context.Context, req *pb.FndUsersReq) (*pb.UsersResp, error) {
-	// TODO: implement FndUsers
-
-	return nil, nil
+	return s.db.FndUsers(ctx, req)
 }
 
 // RmvUser implements part of the pb.UserServer interface.
 func (s *UserSvc) RmvUser(ctx context.Context, req *pb.RmvUserReq) (*pb.RmvUserResp, error) {
-	// TODO: implement RmvUser
-
-	return nil, nil
+	return s.db.RmvUser(ctx, req)
 }
 
 // MigrationData ...
