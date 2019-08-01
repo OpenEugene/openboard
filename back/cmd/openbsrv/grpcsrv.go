@@ -15,13 +15,13 @@ type grpcSrv struct {
 	svcs []interface{}
 }
 
-func newGRPCSrv(port string, db *sql.DB) (*grpcSrv, error) {
+func newGRPCSrv(port string, db *sql.DB, drvr string) (*grpcSrv, error) {
 	auth, err := authsvc.New()
 	if err != nil {
 		return nil, err
 	}
 
-	user, err := usersvc.New()
+	user, err := usersvc.New(db, drvr)
 	if err != nil {
 		return nil, err
 	}
