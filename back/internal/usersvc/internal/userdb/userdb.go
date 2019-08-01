@@ -5,6 +5,8 @@ import (
 	"database/sql"
 
 	"github.com/OpenEugene/openboard/back/internal/pb"
+	"github.com/codemodus/sqlo"
+	"github.com/codemodus/uidgen"
 )
 
 var _ pb.UserServer = &UserDB{}
@@ -14,6 +16,7 @@ var _ pb.UserServer = &UserDB{}
 type UserDB struct {
 	db  *sqlo.SQLO
 	drv string
+	ug *uidgen.UIDGen
 }
 
 // New returns a pointer to a UserDB instance or an error.
@@ -29,30 +32,53 @@ func New(relDB *sql.DB, driver string, offset uint64) (*UserDB, error) {
 
 // AddUser implements part of the pb.UserServer interface.
 func (s *UserDB) AddUser(ctx context.Context, req *pb.AddUserReq) (*pb.UserResp, error) {
-	return nil, nil
+	r := &pb.UserResp{}
+	if err := s.upsertUser(ctx, "", req, r); err != nil {
+		return nil, err
+	}
+	return r, nil
 }
 
 // OvrUser implements part of the pb.UserServer interface.
 func (s *UserDB) OvrUser(ctx context.Context, req *pb.OvrUserReq) (*.pb.UserResp, error) {
-	return nil, nil
+	r := &pb.UserResp{}
+	if err := s.upsertUser(ctx, req.Id, req.Req, r); err != nil {
+		return nil, err
+	}
+	return r, nil
 }
 
 // RmvUser implements part of the pb.UserServer interface.
 func (s *UserDB) RmvUser(ctx context.Context, req *pb.RmvUserReq) (*pb.RmvUserResp, error) {
-	return nil, nil
+	if err := s.deleteUser(ctx, req.Id); err != nil {
+		return nil, err
+	}
+	return &pb.RmvUserResp{}, nil
 }
 
 // FndUsers implements part of the pb.UserServer interface.
 func (s *UserDB) FndUsers(ctx context.Context, req *pb.FndUsersReq) (*pb.UsersResp, error) {
-	return nil, nil
+	r := &pb.UsersResp{}
+	if err := s.findUsers(ctx, req, r); err != nil {
+		return nil, err
+	}
+	return r, nil
 }
 
 // AddRole implements part of the pb.UserServer interface.
 func (s *UserDB) AddRole(ctx context.Context, req *pb.AddRoleReq) (*pb.RoleResp, error) {
-	return nil, nil
+	r := &pb.RoleResp{}
+	if err := s.upsertRole(ctx, "", req, r); err != nil {
+		return nil, err
+	}
+	return r, nil
 }
 
 // FndRoles implements part of the pb.UserServer interface.
 func (s *UserDB) FndRoles(ctx context.Context, req *pb.FndRolesReq) (*pb.RolesResp, error) {
-	return nil, nil
+	r := &pb.RolesResp{}
+	if err := s.findRoles(ctx, req, r); err != nil {
+		return nil, err
+	}
+	return r, nil
 }

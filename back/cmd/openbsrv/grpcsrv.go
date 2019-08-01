@@ -21,7 +21,7 @@ func newGRPCSrv(port string, db *sql.DB, drvr string) (*grpcSrv, error) {
 		return nil, err
 	}
 
-	user, err := usersvc.New(db, drvr)
+	user, err := usersvc.New(db, drvr, 123456)
 	if err != nil {
 		return nil, err
 	}
