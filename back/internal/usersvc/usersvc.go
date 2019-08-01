@@ -6,6 +6,7 @@ import (
 
 	"github.com/OpenEugene/openboard/back/internal/pb"
 	"github.com/OpenEugene/openboard/back/internal/usersvc/internal/userdb"
+	"github.com/OpenEugene/openboard/back/internal/usersvc/internal/userdb/mysqlmig"
 	"google.golang.org/grpc"
 )
 
