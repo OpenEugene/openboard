@@ -11,6 +11,7 @@ import (
 
 var _ pb.UserServer = &UserSvc{}
 
+//var _ grpcsrv.Registerable = &UserSvc{}
 //var _ sqlmig.DataProvider = &UserSvc{}
 //var _ sqlmig.Regularizer = &UserSvc{}
 
