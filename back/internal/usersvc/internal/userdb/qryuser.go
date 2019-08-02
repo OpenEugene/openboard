@@ -43,16 +43,16 @@ func (s *UserDB) upsertUser(ctx cx, sid string, x *pb.AddUserReq, y *pb.UserResp
 		return err
 	}
 
-	y.id = id
-	y.username = x.username
-	y.email = x.email
+	y.Id = id
+	y.Username = x.username
+	y.Email = x.email
 	y.emailHold = x.emailHold
-	y.altmail = x.altmail
-	y.altmailHold = x.altmailHold
-	y.firstName = x.firstName
-	y.lastName = x.lastName
-	y.avatar = x.avatar
-	y.roles = x.roles
+	y.Altmail = x.altmail
+	y.AltmailHold = x.altmailHold
+	y.FirstName = x.firstName
+	y.LastName = x.lastName
+	y.Avatar = x.avatar
+	y.Roles = x.roles
 
 	return nil
 }
@@ -72,23 +72,52 @@ func (s *UserDB) deleteUser(ctx cx, sid string) error {
 }
 
 func (s *UserDB) findUsers(ctx cx, x *pb.FndUsersReq, y *pb.UsersResp) error {
-	stmt, err := db.Prepare("SELECT user_id, username, email, email_hold, 
-	altmail, altmail_hold, first_name, last_name, avatar, last_login, created_at,
-	updated_at, deleted_at, blocked_at WHERE ")
+	selStmt, err := db.Prepare("SELECT user_id, username, email, email_hold, 
+		altmail, altmail_hold, first_name, last_name, avatar, last_login, created_at,
+		updated_at, deleted_at, blocked_at FROM user WHERE email = ? OR email_hold = ?
+		OR altmail = ? OR altmail_hold = ?")
 
 	if err != nil {
 		return err
 	}
-	defer stmt.Close()
-	rows, err := stmt.Query()
+	defer selStmt.Close()
+	rows, err := selStmt.Query(x.email, x.emailHold, x.altmail, x.altmailHold)
 	if err != nil {
 		return err
 	}
 	defer rows.Close()
-	for rows.Next() {
 
+	for rows.Next() {
+		r := pb.UserResp{}
+
+		var tl, tc, tu, td, tb mysql.NullTime
+		err := rows.Scan(
+			&r.Id, &r.Username, &r.Email, &r.EmailHold, &r.Altmail, &r.AltmailHold,
+			&r.FirstName, &r.LastName, &r.Avatar, &tl, &tc, &tu, &td, &tb,
+		)
+
+		if err != nil {
+			return err
+		}
+
+		// TODO: retrieve users by roleIDs, which doesn't have a table yet.
+		r.LastLogin = asTS(tl.Time, tl.Valid)
+		r.Created = asTS(tc.Time, tc.Valid)
+		r.Updated = asTS(tu.Time, tu.Valid)
+		r.Deleted = asTS(td.Time, td.Valid)
+		r.Blocked = asTS(tb.Time, tb.Valid)
+		
+		y.Items = append(y.Items, &r)
 	}
+
 	if err = rows.Err(); err != nil {
+		return err
+	}
+
+	err = db.QueryRow("SELECT COUNT(*) FROM user WHERE email = ? OR email_hold = ?
+		OR altmail = ? OR altmail_hold = ?").Scan(&y.Total)
+
+	if err != nil {
 		return err
 	}
 }
