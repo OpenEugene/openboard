@@ -31,13 +31,28 @@ func (s *UserDB) upsertUser(ctx cx, sid string, x *pb.AddUserReq, y *pb.UserResp
 		return fmt.Errorf("invalid uid")
 	}
 
-	stmt, err := s.db.Prepare("INSERT INTO users(user_id, username, email, email_hold, altmail, altmail_hold, first_name, last_name, avatar, password) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE user_id = ?, username = ?, email = ?, email_hold = ?, altmail = ?, altmail_hold = ?, first_name = ?, last_name = ?, avatar = ?, password = ?")
+	stmt, err := s.db.Prepare("INSERT INTO users(user_id, username, email, email_hold,
+		altmail, altmail_hold, first_name, last_name, avatar, password) VALUES(
+		?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE user_id = ?, username = ?,
+		email = ?, email_hold = ?, altmail = ?, altmail_hold = ?, first_name = ?,
+		last_name = ?, avatar = ?, password = ?")
 
 	if err != nil {
 		return err
 	}
 
-	_, err := stmt.Exec(id, x.username, x.email, x.emailHold, x.altmail, x.altmailHold, x.firstName, x.lastName, x.avatar, x.password)
+	_, err := stmt.Exec(
+		id,
+		x.username,
+		x.email,
+		x.emailHold,
+		x.altmail,
+		x.altmailHold,
+		x.firstName,
+		x.lastName,
+		x.avatar,
+		x.password
+	)
 
 	if err != nil {
 		return err
@@ -75,20 +90,27 @@ func (s *UserDB) findUsers(ctx cx, x *pb.FndUsersReq, y *pb.UsersResp) error {
 	selStmt, err := db.Prepare("SELECT user_id, username, email, email_hold, 
 		altmail, altmail_hold, first_name, last_name, avatar, last_login, created_at,
 		updated_at, deleted_at, blocked_at FROM user WHERE email = ? OR email_hold = ?
-		OR altmail = ? OR altmail_hold = ?")
+		OR altmail = ? OR altmail_hold = ? LIMIT ? OFFSET ?")
 
 	if err != nil {
 		return err
 	}
 	defer selStmt.Close()
-	rows, err := selStmt.Query(x.email, x.emailHold, x.altmail, x.altmailHold)
+	rows, err := selStmt.Query(
+		x.email,
+		x.emailHold,
+		x.altmail,
+		x.altmailHold,
+		x.limit,
+		x.lapse
+	)
 	if err != nil {
 		return err
 	}
 	defer rows.Close()
 
 	for rows.Next() {
-		r := pb.UserResp{}
+		r := pb.UsersResp{}
 
 		var tl, tc, tu, td, tb mysql.NullTime
 		err := rows.Scan(
@@ -128,8 +150,62 @@ func (s *UserDB) upsertRole(ctx cx, sid string, x *pb.AddRoleReq, y *pb.RoleResp
 	if !ok {
 		return fmt.Errorf("invalid uid")
 	}
+
+	stmt, err := s.db.Prepare("INSERT INTO roles(role_id, role_name) VALUES(?, ?)
+		 ON DUPLICATE KEY UPDATE role_id = ?, role_name = ?")
+
+	if err != nil {
+		return err
+	}
+
+	_, err := stmt.Exec(id, x.name)
+
+	if err != nil {
+		return err
+	}
+
+	y.Id = id
+	y.name = x.name
+
+	return nil
 }
 
 func (s *UserDB) findRole(ctx cx, x *pb.FndRolesReq, y *pb.RolesResp) error {
+	selStmt, err := db.Prepare("SELECT role_id, role_name FROM role WHERE role_id in ? 
+		OR role_name in = ? LIMIT ? OFFSET ?")
 
+	if err != nil {
+		return err
+	}
+	defer selStmt.Close()
+	rows, err := selStmt.Query(x.roleIDs, x.roleNames, x.limit, x.lapse)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		r := pb.RolesResp{}
+
+		err := rows.Scan(
+			&r.Id, &r.name,
+		)
+
+		if err != nil {
+			return err
+		}
+
+		y.Items = append(y.Items, &r)
+	}
+
+	if err = rows.Err(); err != nil {
+		return err
+	}
+
+	err = db.QueryRow("SELECT COUNT(*) FROM role WHERE role_id in ? 
+		OR role_name in = ? LIMIT ? OFFSET ?").Scan(&y.Total)
+
+	if err != nil {
+		return err
+	}
 }
