@@ -3,6 +3,7 @@ package userdb
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	"github.com/OpenEugene/openboard/back/internal/altr"
 	"github.com/OpenEugene/openboard/back/internal/pb"
@@ -31,43 +32,46 @@ func (s *UserDB) upsertUser(ctx cx, sid string, x *pb.AddUserReq, y *pb.UserResp
 		return fmt.Errorf("invalid uid")
 	}
 
-	stmt, err := s.db.Prepare("INSERT INTO users(user_id, username, email, email_hold,
-		altmail, altmail_hold, first_name, last_name, avatar, password) VALUES(
-		?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE user_id = ?, username = ?,
-		email = ?, email_hold = ?, altmail = ?, altmail_hold = ?, first_name = ?,
-		last_name = ?, avatar = ?, password = ?")
+	// todo: be able to link roleIDs to users.
+	stmt, err := s.db.Prepare("INSERT INTO users(user_id, username, email, email_hold, altmail, altmail_hold, first_name, last_name, avatar, password) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE user_id = ?, username = ?, email = ?, email_hold = ?, altmail = ?, altmail_hold = ?, first_name = ?, last_name = ?, avatar = ?, password = ?")
 
 	if err != nil {
 		return err
 	}
 
-	_, err := stmt.Exec(
-		id,
-		x.username,
-		x.email,
-		x.emailHold,
-		x.altmail,
-		x.altmailHold,
-		x.firstName,
-		x.lastName,
-		x.avatar,
-		x.password
+	_, err = stmt.Exec(
+		&id,
+		x.Username,
+		x.Email,
+		x.EmailHold,
+		x.Altmail,
+		x.AltmailHold,
+		x.FirstName,
+		x.LastName,
+		x.Avatar,
+		x.Password,
 	)
 
 	if err != nil {
 		return err
 	}
 
-	y.Id = id
-	y.Username = x.username
-	y.Email = x.email
-	y.emailHold = x.emailHold
-	y.Altmail = x.altmail
-	y.AltmailHold = x.altmailHold
-	y.FirstName = x.firstName
-	y.LastName = x.lastName
-	y.Avatar = x.avatar
-	y.Roles = x.roles
+	var intID int
+	intID, err = strconv.Atoi(id.String())
+	if err != nil {
+		return err
+	}
+
+	y.Id = uint32(intID)
+	y.Username = x.Username
+	y.Email = x.Email
+	y.EmailHold = x.EmailHold
+	y.Altmail = x.Altmail
+	y.AltmailHold = x.AltmailHold
+	y.FirstName = x.FirstName
+	y.LastName = x.LastName
+	y.Avatar = x.Avatar
+	// todo: respond with user roles
 
 	return nil
 }
@@ -78,7 +82,7 @@ func (s *UserDB) deleteUser(ctx cx, sid string) error {
 		return err
 	}
 
-	_, err := stmt.Exec(sid)
+	_, err = stmt.Exec(sid)
 	if err != nil {
 		return err
 	}
@@ -87,22 +91,19 @@ func (s *UserDB) deleteUser(ctx cx, sid string) error {
 }
 
 func (s *UserDB) findUsers(ctx cx, x *pb.FndUsersReq, y *pb.UsersResp) error {
-	selStmt, err := db.Prepare("SELECT user_id, username, email, email_hold, 
-		altmail, altmail_hold, first_name, last_name, avatar, last_login, created_at,
-		updated_at, deleted_at, blocked_at FROM user WHERE email = ? OR email_hold = ?
-		OR altmail = ? OR altmail_hold = ? LIMIT ? OFFSET ?")
+	selStmt, err := s.db.Prepare("SELECT user_id, username, email, email_hold, altmail, altmail_hold, first_name, last_name, avatar, last_login, created_at, updated_at, deleted_at, blocked_at FROM user WHERE email IN ? OR email_hold = ? OR altmail in ? OR altmail_hold = ? LIMIT ? OFFSET ?")
 
 	if err != nil {
 		return err
 	}
 	defer selStmt.Close()
 	rows, err := selStmt.Query(
-		x.email,
-		x.emailHold,
-		x.altmail,
-		x.altmailHold,
-		x.limit,
-		x.lapse
+		x.Emails,
+		x.EmailHold,
+		x.Altmails,
+		x.AltmailHold,
+		x.Limit,
+		x.Lapse,
 	)
 	if err != nil {
 		return err
@@ -110,7 +111,7 @@ func (s *UserDB) findUsers(ctx cx, x *pb.FndUsersReq, y *pb.UsersResp) error {
 	defer rows.Close()
 
 	for rows.Next() {
-		r := pb.UsersResp{}
+		r := pb.UserResp{}
 
 		var tl, tc, tu, td, tb mysql.NullTime
 		err := rows.Scan(
@@ -128,7 +129,7 @@ func (s *UserDB) findUsers(ctx cx, x *pb.FndUsersReq, y *pb.UsersResp) error {
 		r.Updated = asTS(tu.Time, tu.Valid)
 		r.Deleted = asTS(td.Time, td.Valid)
 		r.Blocked = asTS(tb.Time, tb.Valid)
-		
+
 		y.Items = append(y.Items, &r)
 	}
 
@@ -136,12 +137,13 @@ func (s *UserDB) findUsers(ctx cx, x *pb.FndUsersReq, y *pb.UsersResp) error {
 		return err
 	}
 
-	err = db.QueryRow("SELECT COUNT(*) FROM user WHERE email = ? OR email_hold = ?
-		OR altmail = ? OR altmail_hold = ?").Scan(&y.Total)
+	err = s.db.QueryRow("SELECT COUNT(*) FROM user WHERE email = ? OR email_hold = ? OR altmail = ? OR altmail_hold = ?").Scan(&y.Total)
 
 	if err != nil {
 		return err
 	}
+
+	return nil
 }
 
 func (s *UserDB) upsertRole(ctx cx, sid string, x *pb.AddRoleReq, y *pb.RoleResp) error {
@@ -151,44 +153,47 @@ func (s *UserDB) upsertRole(ctx cx, sid string, x *pb.AddRoleReq, y *pb.RoleResp
 		return fmt.Errorf("invalid uid")
 	}
 
-	stmt, err := s.db.Prepare("INSERT INTO roles(role_id, role_name) VALUES(?, ?)
-		 ON DUPLICATE KEY UPDATE role_id = ?, role_name = ?")
+	stmt, err := s.db.Prepare("INSERT INTO roles(role_id, role_name) VALUES(?, ?) ON DUPLICATE KEY UPDATE role_id = ?, role_name = ?")
 
 	if err != nil {
 		return err
 	}
 
-	_, err := stmt.Exec(id, x.name)
+	_, err = stmt.Exec(id, x.Name)
 
 	if err != nil {
 		return err
 	}
 
-	y.Id = id
-	y.name = x.name
+	var intID int
+	intID, err = strconv.Atoi(id.String())
+	if err != nil {
+		return err
+	}
+	y.Id = uint32(intID)
+	y.Name = x.Name
 
 	return nil
 }
 
-func (s *UserDB) findRole(ctx cx, x *pb.FndRolesReq, y *pb.RolesResp) error {
-	selStmt, err := db.Prepare("SELECT role_id, role_name FROM role WHERE role_id in ? 
-		OR role_name in = ? LIMIT ? OFFSET ?")
+func (s *UserDB) findRoles(ctx cx, x *pb.FndRolesReq, y *pb.RolesResp) error {
+	selStmt, err := s.db.Prepare("SELECT role_id, role_name FROM role WHERE role_id in ? OR role_name in = ? LIMIT ? OFFSET ?")
 
 	if err != nil {
 		return err
 	}
 	defer selStmt.Close()
-	rows, err := selStmt.Query(x.roleIDs, x.roleNames, x.limit, x.lapse)
+	rows, err := selStmt.Query(x.RoleIds, x.RoleNames, x.Limit, x.Lapse)
 	if err != nil {
 		return err
 	}
 	defer rows.Close()
 
 	for rows.Next() {
-		r := pb.RolesResp{}
+		r := pb.RoleResp{}
 
 		err := rows.Scan(
-			&r.Id, &r.name,
+			&r.Id, &r.Name,
 		)
 
 		if err != nil {
@@ -202,10 +207,11 @@ func (s *UserDB) findRole(ctx cx, x *pb.FndRolesReq, y *pb.RolesResp) error {
 		return err
 	}
 
-	err = db.QueryRow("SELECT COUNT(*) FROM role WHERE role_id in ? 
-		OR role_name in = ? LIMIT ? OFFSET ?").Scan(&y.Total)
+	err = s.db.QueryRow("SELECT COUNT(*) FROM role WHERE role_id in ? OR role_name in = ? LIMIT ? OFFSET ?").Scan(&y.Total)
 
 	if err != nil {
 		return err
 	}
+
+	return nil
 }

@@ -16,7 +16,7 @@ var _ pb.UserServer = &UserDB{}
 type UserDB struct {
 	db  *sqlo.SQLO
 	drv string
-	ug *uidgen.UIDGen
+	ug  *uidgen.UIDGen
 }
 
 // New returns a pointer to a UserDB instance or an error.
@@ -40,9 +40,9 @@ func (s *UserDB) AddUser(ctx context.Context, req *pb.AddUserReq) (*pb.UserResp,
 }
 
 // OvrUser implements part of the pb.UserServer interface.
-func (s *UserDB) OvrUser(ctx context.Context, req *pb.OvrUserReq) (*.pb.UserResp, error) {
+func (s *UserDB) OvrUser(ctx context.Context, req *pb.OvrUserReq) (*pb.UserResp, error) {
 	r := &pb.UserResp{}
-	if err := s.upsertUser(ctx, req.Id, req.Req, r); err != nil {
+	if err := s.upsertUser(ctx, string(req.Id), req.Req, r); err != nil {
 		return nil, err
 	}
 	return r, nil
@@ -50,7 +50,7 @@ func (s *UserDB) OvrUser(ctx context.Context, req *pb.OvrUserReq) (*.pb.UserResp
 
 // RmvUser implements part of the pb.UserServer interface.
 func (s *UserDB) RmvUser(ctx context.Context, req *pb.RmvUserReq) (*pb.RmvUserResp, error) {
-	if err := s.deleteUser(ctx, req.Id); err != nil {
+	if err := s.deleteUser(ctx, string(req.Id)); err != nil {
 		return nil, err
 	}
 	return &pb.RmvUserResp{}, nil
