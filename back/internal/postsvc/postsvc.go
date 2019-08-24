@@ -1,6 +1,8 @@
 package postsvc
 
 import (
+	"context"
+
 	"github.com/OpenEugene/openboard/back/internal/pb"
 )
 
@@ -15,10 +17,27 @@ func New() (*PostSvc, error) {
 	return &PostSvc{}, nil
 }
 
-/*type PostServer interface {
-	AddType(context.Context, *AddTypeReq) (*TypeResp, error)
-	AddPost(context.Context, *AddPostReq) (*PostResp, error)
-	FndPosts(context.Context, *FndPostsReq) (*PostsResp, error)
-	OvrPost(context.Context, *OvrPostReq) (*PostResp, error)
-	RmvPost(context.Context, *RmvPostReq) (*RmvPostResp, error)
-}*/
+// AddType implements part of the pb.PostServer interface.
+func (s *PostSvc) AddType(ctx context.Context, req *pb.AddTypeReq) (*pb.TypeResp, error) {
+	return nil, nil
+}
+
+// AddPost implements part of the pb.PostServer interface.
+func (s *PostSvc) AddPost(ctx context.Context, req *pb.AddPostReq) (*pb.PostResp, error) {
+	return nil, nil
+}
+
+// FndPosts implements part of the pb.PostServer interface.
+func (s *PostSvc) FndPosts(ctx context.Context, req *pb.FndPostsReq) (*pb.PostsResp, error) {
+	return nil, nil
+}
+
+// OvrPost implements part of the pb.PostServer interface.
+func (s *PostSvc) OvrPost(ctx context.Context, req *pb.OvrPostReq) (*pb.PostResp, error) {
+	return nil, nil
+}
+
+// RmvPost implements part of the pb.PostServer interface.
+func (s *PostSvc) RmvPost(ctx context.Context, req *pb.RmvPostReq) (*pb.RmvPostResp, error) {
+	return nil, nil
+}
