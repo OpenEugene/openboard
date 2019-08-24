@@ -2,8 +2,10 @@ package postsvc
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/OpenEugene/openboard/back/internal/pb"
+	"github.com/OpenEugene/openboard/back/internal/postsvc/internal/postdb"
 	"google.golang.org/grpc"
 )
 
@@ -22,8 +24,18 @@ type PostSvc struct {
 }
 
 // New returns a pointer to a PostSvc instance or an error.
-func New() (*PostSvc, error) {
-	return &PostSvc{}, nil
+func New(relDb *sql.DB, driver string) (*PostSvc, error) {
+	db, err := postdb.New(relDB, driver)
+
+	if err != nil {
+		return nil, err
+	}
+
+	s := PostSvc {
+		db: db
+	}
+
+	return &s, nil
 }
 
 // AddType implements part of the pb.PostServer interface.
