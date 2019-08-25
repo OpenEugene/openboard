@@ -6,12 +6,15 @@ import (
 
 	"github.com/OpenEugene/openboard/back/internal/pb"
 	"github.com/OpenEugene/openboard/back/internal/postsvc/internal/postdb"
+	"github.com/OpenEugene/openboard/back/internal/postsvc/internal/postdb/mysqlmig"
 	"google.golang.org/grpc"
 )
 
 var _ pb.PostServer = &PostSvc{}
 
 // var _ grpcsrv.Registerable = &PostSvc{}
+// var _ sqlmig.DataProvider = &PostSvc{}
+// var _ sqlmig.Regularizer = &PostSvc{}
 
 type relDB interface {
 	pb.PostServer
@@ -66,5 +69,32 @@ func (s *PostSvc) RmvPost(ctx context.Context, req *pb.RmvPostReq) (*pb.RmvPostR
 // RegisterWithGRPCServer implements the grpcsrv.Registerable interface.
 func (s *PostSvc) RegisterWithGRPCServer(g *grpc.Server) error {
 	pb.RegisterPostServer(g, s)
+	return nil
+}
+
+// MigrationData ...
+func (s *PostSvc) MigrationData() (string, map[string][]byte) {
+	name := "postsvc"
+	m := make(map[string][]byte) 
+	
+	ids, err := mysqlmig.AssetDir("")
+	if err != nil {
+		return name, nil
+	}
+
+	for _, id := range ids {
+		d, err := mysqlmig.Asset(id)
+		if err != nil {
+			return name, nil
+		}
+
+		m[id] = d
+	}
+
+	return name, m
+}
+
+// Regularize ...
+func (s *PostSvc) Regularize (ctx context.Context) error {
 	return nil
 }
