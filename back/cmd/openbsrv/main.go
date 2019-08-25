@@ -55,7 +55,7 @@ func run() error {
 		return err
 	}
 
-	gsrv, err := newGRPCSrv(":4242", db)
+	gsrv, err := newGRPCSrv(":4242", db, dbdrvr)
 	if err != nil {
 		return err
 	}
