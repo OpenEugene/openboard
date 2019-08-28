@@ -27,8 +27,8 @@ type PostSvc struct {
 }
 
 // New returns a pointer to a PostSvc instance or an error.
-func New(relDb *sql.DB, driver string) (*PostSvc, error) {
-	db, err := postdb.New(relDB, driver)
+func New(relDb *sql.DB, driver string, offset uint64) (*PostSvc, error) {
+	db, err := postdb.New(relDB, driver, offset)
 
 	if err != nil {
 		return nil, err

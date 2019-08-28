@@ -27,7 +27,7 @@ func newGRPCSrv(port string, db *sql.DB, drvr string) (*grpcSrv, error) {
 		return nil, err
 	}
 
-	post, err := postsvc.New(db, drvr)
+	post, err := postsvc.New(db, drvr, 123456)
 	if err != nil {
 		return nil, err
 	}
