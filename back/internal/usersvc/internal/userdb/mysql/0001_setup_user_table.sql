@@ -11,8 +11,7 @@ CREATE TABLE user (
     email_hold BOOL NOT NULL DEFAULT TRUE,
     altmail VARCHAR(255) NOT NULL UNIQUE,
     altmail_hold BOOL NOT NULL DEFAULT TRUE,
-    first_name VARCHAR(255) NOT NULL,
-    last_name VARCHAR(255) NOT NULL,
+    full_name VARCHAR(255) NOT NULL,
     avatar VARCHAR(255) NOT NULL DEFAULT "",
     password VARCHAR(255) NOT NULL,
 
