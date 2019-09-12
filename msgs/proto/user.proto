@@ -44,15 +44,14 @@ message UserResp {
     bool emailHold = 4;
     string altmail = 5;
     bool altmailHold = 6;
-    string firstName = 7;
-    string lastName = 8;
-    string avatar = 9;
-    repeated RoleResp roles = 10;
-    google.protobuf.Timestamp lastLogin = 11;
-    google.protobuf.Timestamp created = 12;
-    google.protobuf.Timestamp updated = 13;
-    google.protobuf.Timestamp deleted = 14;
-    google.protobuf.Timestamp blocked = 15;
+    string fullName = 7;
+    string avatar = 8;
+    repeated RoleResp roles = 9;
+    google.protobuf.Timestamp lastLogin = 10;
+    google.protobuf.Timestamp created = 11;
+    google.protobuf.Timestamp updated = 12;
+    google.protobuf.Timestamp deleted = 13;
+    google.protobuf.Timestamp blocked = 14;
 }
 
 message AddUserReq {
@@ -61,11 +60,10 @@ message AddUserReq {
     bool emailHold = 3;
     string altmail = 4;
     bool altmailHold = 5;
-    string firstName = 6;
-    string lastName = 7;
-    string avatar = 8;
-    string password = 9;
-    repeated uint32 roleIds = 10;
+    string fullName = 6;
+    string avatar = 7;
+    string password = 8;
+    repeated uint32 roleIds = 9;
 }
 
 message OvrUserReq {

@@ -33,7 +33,7 @@ func (s *UserDB) upsertUser(ctx cx, sid string, x *pb.AddUserReq, y *pb.UserResp
 	}
 
 	// todo: be able to link roleIDs to users.
-	stmt, err := s.db.Prepare("INSERT INTO users(user_id, username, email, email_hold, altmail, altmail_hold, first_name, last_name, avatar, password) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE user_id = ?, username = ?, email = ?, email_hold = ?, altmail = ?, altmail_hold = ?, first_name = ?, last_name = ?, avatar = ?, password = ?")
+	stmt, err := s.db.Prepare("INSERT INTO users(user_id, username, email, email_hold, altmail, altmail_hold, full_name, avatar, password) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE user_id = ?, username = ?, email = ?, email_hold = ?, altmail = ?, altmail_hold = ?, full_name = ?, avatar = ?, password = ?")
 
 	if err != nil {
 		return err
@@ -46,8 +46,7 @@ func (s *UserDB) upsertUser(ctx cx, sid string, x *pb.AddUserReq, y *pb.UserResp
 		x.EmailHold,
 		x.Altmail,
 		x.AltmailHold,
-		x.FirstName,
-		x.LastName,
+		x.FullName,
 		x.Avatar,
 		x.Password,
 	)
@@ -68,8 +67,7 @@ func (s *UserDB) upsertUser(ctx cx, sid string, x *pb.AddUserReq, y *pb.UserResp
 	y.EmailHold = x.EmailHold
 	y.Altmail = x.Altmail
 	y.AltmailHold = x.AltmailHold
-	y.FirstName = x.FirstName
-	y.LastName = x.LastName
+	y.FullName = x.FullName
 	y.Avatar = x.Avatar
 	// todo: respond with user roles
 
@@ -91,7 +89,7 @@ func (s *UserDB) deleteUser(ctx cx, sid string) error {
 }
 
 func (s *UserDB) findUsers(ctx cx, x *pb.FndUsersReq, y *pb.UsersResp) error {
-	selStmt, err := s.db.Prepare("SELECT user_id, username, email, email_hold, altmail, altmail_hold, first_name, last_name, avatar, last_login, created_at, updated_at, deleted_at, blocked_at FROM user WHERE email IN ? OR email_hold = ? OR altmail in ? OR altmail_hold = ? LIMIT ? OFFSET ?")
+	selStmt, err := s.db.Prepare("SELECT user_id, username, email, email_hold, altmail, altmail_hold, full_name, avatar, last_login, created_at, updated_at, deleted_at, blocked_at FROM user WHERE email IN ? OR email_hold = ? OR altmail in ? OR altmail_hold = ? LIMIT ? OFFSET ?")
 
 	if err != nil {
 		return err
@@ -116,7 +114,7 @@ func (s *UserDB) findUsers(ctx cx, x *pb.FndUsersReq, y *pb.UsersResp) error {
 		var tl, tc, tu, td, tb mysql.NullTime
 		err := rows.Scan(
 			&r.Id, &r.Username, &r.Email, &r.EmailHold, &r.Altmail, &r.AltmailHold,
-			&r.FirstName, &r.LastName, &r.Avatar, &tl, &tc, &tu, &td, &tb,
+			&r.FullName, &r.Avatar, &tl, &tc, &tu, &td, &tb,
 		)
 
 		if err != nil {
