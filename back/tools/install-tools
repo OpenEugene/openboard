@@ -1,4 +1,11 @@
 #!/usr/bin/env bash
-set -e
 
-go generate -tags tools github.com/OpenEugene/openboard/back/tools
+function main() {
+	local rootDir="$(dirname "${0}")"
+
+	pushd "${rootDir}" &> /dev/null
+	go generate -tags tools "${rootDir}"
+	popd &> /dev/null
+}
+
+main
