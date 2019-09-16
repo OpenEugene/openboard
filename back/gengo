@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 function main() {
-	local rootDir="$(dirname ${0})"
+	local rootDir="$(dirname "${0}")"
 	local dirs=(\
 		"internal/pb" \
 		"internal/httpsrv" \

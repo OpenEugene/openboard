@@ -1,29 +1,12 @@
 #!/usr/bin/env bash
 
-function checkDepOr() {
-    ! (hash "${1}" 2>/dev/null || hash "${2}" 2>/dev/null) && echerr "requires ${1} or ${2}"
-}
-
-checkDepOr "realpath" "grealpath"
-
-function depOr() {
-    local ret="${1}"
-    hash "${2}" 2>/dev/null && ret="${2}"
-    echo "${ret}"
-}
-
-function xrealpath() {
-    local cmd="$(depOr "realpath" "grealpath")"
-    ${cmd} "${@}"
-}
-
 function main() {
-    local dir="$(xrealpath "${0}" | xargs dirname)"
-    local fpb2elm="$(find ${dir} -name pb2elm -print -quit)"
+    local rootDir="$(dirname "${0}")"
+    local fpb2elm="$(find "${rootDir}" -name pb2elm -print -quit)"
 
     [[ ! -f "${fpb2elm}" || ! -x "${fpb2elm}" ]] && echo "cannot find pb2elm" >&2 && exit 1
 
-    "${fpb2elm}" "${dir}/src" -I "${dir}/../msgs" "${dir}/../msgs/proto/*.proto"
+    "${fpb2elm}" "${rootDir}/src" -I "${rootDir}/../msgs" "${rootDir}/../msgs/proto/*.proto"
 }
 
 main
