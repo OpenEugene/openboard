@@ -113,8 +113,7 @@ func (s *UserDB) findUsers(ctx cx, x *pb.FndUsersReq, y *pb.UsersResp) error {
 
 		var tl, tc, tu, td, tb mysql.NullTime
 		err := rows.Scan(
-			&r.Id, &r.Username, &r.Email, &r.EmailHold, &r.Altmail, &r.AltmailHold,
-			&r.FullName, &r.Avatar, &tl, &tc, &tu, &td, &tb,
+			&r.Id, &r.Username, &r.Email, &r.EmailHold, &r.Altmail, &r.AltmailHold, &r.FullName, &r.Avatar, &tl, &tc, &tu, &td, &tb,
 		)
 
 		if err != nil {
