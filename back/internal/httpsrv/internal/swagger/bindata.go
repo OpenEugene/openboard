@@ -413,10 +413,7 @@ var _apidocsSwaggerJson = []byte(`{
           "type": "boolean",
           "format": "boolean"
         },
-        "firstName": {
-          "type": "string"
-        },
-        "lastName": {
+        "fullName": {
           "type": "string"
         },
         "avatar": {
@@ -530,10 +527,7 @@ var _apidocsSwaggerJson = []byte(`{
           "type": "boolean",
           "format": "boolean"
         },
-        "firstName": {
-          "type": "string"
-        },
-        "lastName": {
+        "fullName": {
           "type": "string"
         },
         "avatar": {
@@ -596,7 +590,7 @@ func apidocsSwaggerJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "apidocs.swagger.json", size: 11900, mode: os.FileMode(436), modTime: time.Unix(1555366809, 0)}
+	info := bindataFileInfo{name: "apidocs.swagger.json", size: 11778, mode: os.FileMode(436), modTime: time.Unix(1568941053, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
