@@ -94,6 +94,11 @@ func (s *HTTPSrv) Serve(rpcPort, httpPort string) error {
 		return err
 	}
 
+	err = pb.RegisterPostHandler(ctx, s.gmux, conn)
+	if err != nil {
+		return err
+	}
+
 	err = pb.RegisterUserHandler(ctx, s.gmux, conn)
 	if err != nil {
 		return err
