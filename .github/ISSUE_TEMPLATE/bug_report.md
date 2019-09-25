@@ -1,38 +1,30 @@
 ---
-name: Bug report
-about: Create a report to help us improve
-title: ''
+name: Bug Report
+about: Create a bug report
+title: 'Bug: '
 labels: ''
 assignees: ''
-
 ---
 
-**Describe the bug**
-A clear and concise description of what the bug is.
+## Expected Behavior
 
-**To Reproduce**
-Steps to reproduce the behavior:
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
 
-**Expected behavior**
-A clear and concise description of what you expected to happen.
+## Actual Behavior
 
-**Screenshots**
-If applicable, add screenshots to help explain your problem.
 
-**Desktop (please complete the following information):**
- - OS: [e.g. iOS]
- - Browser [e.g. chrome, safari]
- - Version [e.g. 22]
+## Steps To Reproduce The Problem
 
-**Smartphone (please complete the following information):**
- - Device: [e.g. iPhone6]
- - OS: [e.g. iOS8.1]
- - Browser [e.g. stock browser, safari]
- - Version [e.g. 22]
+  1.
+  1.
+  1.
 
-**Additional context**
-Add any other context about the problem here.
+## Screenshot(s) If Applicable
+
+
+## Specifications
+
+  - Platform: [e.g. iOS 11.4.1, Windows 20H1 (10.0.18975)]
+  - Browser: [e.g. Chrome 76.0.3, Safari 12.1.1]
+
+## Additional Notes
+
