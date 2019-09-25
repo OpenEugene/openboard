@@ -9,7 +9,7 @@ assignees: ''
 ## Desired Behavior
 
 
-## Potential Solution(s)
+## Suggested Solution(s)
 
 
 ## Screenshot(s) If Applicable
