@@ -37,7 +37,7 @@ message FndRolesReq {
     uint32 lapse = 4;
 }
 
-message UserResp {
+message User {
     uint32 id = 1;
     string username = 2;
     string email = 3;
@@ -52,6 +52,10 @@ message UserResp {
     google.protobuf.Timestamp updated = 12;
     google.protobuf.Timestamp deleted = 13;
     google.protobuf.Timestamp blocked = 14;
+}
+
+message UserResp {
+    User item = 1;
 }
 
 message AddUserReq {
@@ -72,7 +76,7 @@ message OvrUserReq {
 }
 
 message UsersResp {
-    repeated UserResp items = 1;
+    repeated User items = 1;
     uint32 total = 2;
 }
 
@@ -97,7 +101,7 @@ message RmvUserReq {
     uint32 id = 1;
 }
 
-service User {
+service UserSvc {
     rpc AddRole(AddRoleReq) returns (RoleResp) {
 
     }
