@@ -10,14 +10,14 @@ import (
 	"google.golang.org/grpc"
 )
 
-var _ pb.UserServer = &UserSvc{}
+var _ pb.UserSvcServer = &UserSvc{}
 
 //var _ grpcsrv.Registerable = &UserSvc{}
 //var _ sqlmig.DataProvider = &UserSvc{}
 //var _ sqlmig.Regularizer = &UserSvc{}
 
 type relDb interface {
-	pb.UserServer
+	pb.UserSvcServer
 }
 
 // UserSvc encapsulates dependencies and data required to implement the
@@ -42,7 +42,7 @@ func New(relDb *sql.DB, driver string, offset uint64) (*UserSvc, error) {
 
 // RegisterWithGRPCServer implements the grpcsrv.Registerable interface.
 func (s *UserSvc) RegisterWithGRPCServer(g *grpc.Server) error {
-	pb.RegisterUserServer(g, s)
+	pb.RegisterUserSvcServer(g, s)
 
 	return nil
 }

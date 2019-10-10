@@ -9,7 +9,7 @@ import (
 	"github.com/codemodus/uidgen"
 )
 
-var _ pb.UserServer = &UserDB{}
+var _ pb.UserSvcServer = &UserDB{}
 
 // UserDB encapsulates dependencies and data required to implement the
 // pb.UserServer interface.
