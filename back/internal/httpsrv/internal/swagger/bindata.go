@@ -170,7 +170,7 @@ var _apidocsSwaggerJson = []byte(`{
           }
         ],
         "tags": [
-          "User"
+          "UserSvc"
         ]
       }
     },
@@ -196,7 +196,7 @@ var _apidocsSwaggerJson = []byte(`{
           }
         ],
         "tags": [
-          "User"
+          "UserSvc"
         ]
       }
     },
@@ -221,7 +221,7 @@ var _apidocsSwaggerJson = []byte(`{
           }
         ],
         "tags": [
-          "User"
+          "UserSvc"
         ]
       },
       "put": {
@@ -252,7 +252,7 @@ var _apidocsSwaggerJson = []byte(`{
           }
         ],
         "tags": [
-          "User"
+          "UserSvc"
         ]
       }
     },
@@ -350,7 +350,7 @@ var _apidocsSwaggerJson = []byte(`{
           }
         ],
         "tags": [
-          "User"
+          "UserSvc"
         ]
       }
     },
@@ -503,7 +503,7 @@ var _apidocsSwaggerJson = []byte(`{
         }
       }
     },
-    "pbUserResp": {
+    "pbUser": {
       "type": "object",
       "properties": {
         "id": {
@@ -561,13 +561,21 @@ var _apidocsSwaggerJson = []byte(`{
         }
       }
     },
+    "pbUserResp": {
+      "type": "object",
+      "properties": {
+        "item": {
+          "$ref": "#/definitions/pbUser"
+        }
+      }
+    },
     "pbUsersResp": {
       "type": "object",
       "properties": {
         "items": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/pbUserResp"
+            "$ref": "#/definitions/pbUser"
           }
         },
         "total": {
@@ -590,7 +598,7 @@ func apidocsSwaggerJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "apidocs.swagger.json", size: 11778, mode: os.FileMode(436), modTime: time.Unix(1568941053, 0)}
+	info := bindataFileInfo{name: "apidocs.swagger.json", size: 11935, mode: os.FileMode(436), modTime: time.Unix(1570685779, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
