@@ -61,14 +61,14 @@ func (s *UserDB) upsertUser(ctx cx, sid string, x *pb.AddUserReq, y *pb.UserResp
 		return err
 	}
 
-	y.Id = uint32(intID)
-	y.Username = x.Username
-	y.Email = x.Email
-	y.EmailHold = x.EmailHold
-	y.Altmail = x.Altmail
-	y.AltmailHold = x.AltmailHold
-	y.FullName = x.FullName
-	y.Avatar = x.Avatar
+	y.Item.Id = uint32(intID)
+	y.Item.Username = x.Username
+	y.Item.Email = x.Email
+	y.Item.EmailHold = x.EmailHold
+	y.Item.Altmail = x.Altmail
+	y.Item.AltmailHold = x.AltmailHold
+	y.Item.FullName = x.FullName
+	y.Item.Avatar = x.Avatar
 	// todo: respond with user roles
 
 	return nil
@@ -109,7 +109,7 @@ func (s *UserDB) findUsers(ctx cx, x *pb.FndUsersReq, y *pb.UsersResp) error {
 	defer rows.Close()
 
 	for rows.Next() {
-		r := pb.UserResp{}
+		r := pb.User{}
 
 		var tl, tc, tu, td, tb mysql.NullTime
 		err := rows.Scan(
