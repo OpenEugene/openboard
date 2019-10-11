@@ -62,7 +62,7 @@ CREATE TABLE post (
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     deleted_at DATETIME DEFAULT NULL,
 
-    type_id VARCHAR(26) NOT NULL FOREIGN KEY,
+    type_id VARCHAR(26) NOT NULL,
     slug VARCHAR(255) NULL,
     title VARCHAR(255) NULL,
     body VARCHAR(255) NULL
@@ -82,7 +82,7 @@ func _0001_setup_post_tableSql() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "0001_setup_post_table.sql", size: 429, mode: os.FileMode(436), modTime: time.Unix(1570681154, 0)}
+	info := bindataFileInfo{name: "0001_setup_post_table.sql", size: 417, mode: os.FileMode(436), modTime: time.Unix(1570768596, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
