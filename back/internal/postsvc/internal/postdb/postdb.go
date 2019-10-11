@@ -31,7 +31,7 @@ func New(relDB *sql.DB, driver string, offset uint64) (*PostDB, error) {
 }
 
 // AddType implements part of the pb.PostServer interface.
-func (s *PostDB) AddType(ctx context.Context, req *pb.AddTypeReq) (*TypeResp, error) {
+func (s *PostDB) AddType(ctx context.Context, req *pb.AddTypeReq) (*pb.TypeResp, error) {
 	r := &pb.TypeResp{}
 	if err := s.upsertType(ctx, "", req, r); err != nil {
 		return nil, err
@@ -40,7 +40,7 @@ func (s *PostDB) AddType(ctx context.Context, req *pb.AddTypeReq) (*TypeResp, er
 }
 
 // AddPost implements part of the pb.PostServer interface.
-func (s *PostDB) AddPost(ctx context.Context, req *pb.AddPostReq) (*PostResp, error) {
+func (s *PostDB) AddPost(ctx context.Context, req *pb.AddPostReq) (*pb.PostResp, error) {
 	r := &pb.PostResp{}
 	if err := s.upsertPost(ctx, "", req, r); err != nil {
 		return nil, err
@@ -49,7 +49,7 @@ func (s *PostDB) AddPost(ctx context.Context, req *pb.AddPostReq) (*PostResp, er
 }
 
 // FndPosts implements part of the pb.PostServer interface.
-func (s *PostDB) FndPosts(ctx context.Context, req *pb.FndPostsReq) (*PostsResp, error) {
+func (s *PostDB) FndPosts(ctx context.Context, req *pb.FndPostsReq) (*pb.PostsResp, error) {
 	r := &pb.PostsResp{}
 	if err := s.findPosts(ctx, req, r); err != nil {
 		return nil, err
@@ -58,17 +58,17 @@ func (s *PostDB) FndPosts(ctx context.Context, req *pb.FndPostsReq) (*PostsResp,
 }
 
 // OvrPost implements part of the pb.PostServer interface.
-func (s *PostDB) OvrPost(ctx context.Context, req *pb.OvrPostReq) (*PostResp, error) {
+func (s *PostDB) OvrPost(ctx context.Context, req *pb.OvrPostReq) (*pb.PostResp, error) {
 	r := &pb.PostResp{}
-	if err := s.upsertPost(ctx, req.Id, req.Req, r); err != nil {
+	if err := s.upsertPost(ctx, string(req.Id), req.Req, r); err != nil {
 		return nil, err
 	}
 	return r, nil
 }
 
 // RmvPost implements part of the pb.PostServer interface.
-func (s *PostDB) RmvPost(ctx context.Context, req *pb.RmvPostReq) (*RmvPostResp, error) {
-	if err := s.deletePost(ctx, req.Id); err != nil {
+func (s *PostDB) RmvPost(ctx context.Context, req *pb.RmvPostReq) (*pb.RmvPostResp, error) {
+	if err := s.deletePost(ctx, string(req.Id)); err != nil {
 		return nil, err
 	}
 	return &pb.RmvPostResp{}, nil
