@@ -28,14 +28,13 @@ type PostSvc struct {
 
 // New returns a pointer to a PostSvc instance or an error.
 func New(relDb *sql.DB, driver string, offset uint64) (*PostSvc, error) {
-	db, err := postdb.New(relDB, driver, offset)
-
+	db, err := postdb.New(relDb, driver, offset)
 	if err != nil {
 		return nil, err
 	}
 
-	s := PostSvc {
-		db: db
+	s := PostSvc{
+		db: db,
 	}
 
 	return &s, nil
@@ -75,8 +74,8 @@ func (s *PostSvc) RegisterWithGRPCServer(g *grpc.Server) error {
 // MigrationData ...
 func (s *PostSvc) MigrationData() (string, map[string][]byte) {
 	name := "postsvc"
-	m := make(map[string][]byte) 
-	
+	m := make(map[string][]byte)
+
 	ids, err := mysqlmig.AssetDir("")
 	if err != nil {
 		return name, nil
@@ -95,6 +94,6 @@ func (s *PostSvc) MigrationData() (string, map[string][]byte) {
 }
 
 // Regularize ...
-func (s *PostSvc) Regularize (ctx context.Context) error {
+func (s *PostSvc) Regularize(ctx context.Context) error {
 	return nil
 }

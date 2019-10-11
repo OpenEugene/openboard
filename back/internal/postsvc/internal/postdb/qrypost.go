@@ -3,6 +3,7 @@ package postdb
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	"github.com/OpenEugene/openboard/back/internal/altr"
 	"github.com/OpenEugene/openboard/back/internal/pb"
@@ -37,14 +38,19 @@ func (s *PostDB) upsertType(ctx cx, sid string, x *pb.AddTypeReq, y *pb.TypeResp
 		return err
 	}
 
-	_, err = stmt.Exec(id, x.name)
+	_, err = stmt.Exec(id, x.Name)
 
 	if err != nil {
 		return err
 	}
 
-	y.id = id
-	y.name = x.name
+	intID, err := strconv.Atoi(id.String())
+	if err != nil {
+		return err
+	}
+
+	y.Id = uint32(intID)
+	y.Name = x.Name
 
 	return nil
 }
@@ -61,16 +67,21 @@ func (s *PostDB) upsertPost(ctx cx, sid string, x *pb.AddPostReq, y *pb.PostResp
 		return err
 	}
 
-	_, err = stmt.Exec(id, x.typeId, x.title, x.body)
+	_, err = stmt.Exec(id, x.TypeId, x.Title, x.Body)
 
 	if err != nil {
 		return err
 	}
 
-	y.id = id
-	y.typeId = x.typeId
-	y.title = x.title
-	y.body = x.body
+	intID, err := strconv.Atoi(id.String())
+	if err != nil {
+		return err
+	}
+
+	y.Id = uint32(intID)
+	y.TypeId = string(x.TypeId)
+	y.Title = x.Title
+	y.Body = x.Body
 
 	return nil
 }
@@ -86,7 +97,7 @@ func (s *PostDB) findPosts(ctx cx, x *pb.FndPostsReq, y *pb.PostsResp) error {
 
 	defer selStmt.Close()
 
-	rows, err := selStmt.Query(x.keywords[0], x.keywords[0])
+	rows, err := selStmt.Query(x.Keywords[0], x.Keywords[0])
 
 	if err != nil {
 		return err
@@ -95,7 +106,7 @@ func (s *PostDB) findPosts(ctx cx, x *pb.FndPostsReq, y *pb.PostsResp) error {
 	defer rows.Close()
 
 	for rows.Next() {
-		r := pb.PostResp
+		r := pb.PostResp{}
 
 		var tc, tu, td, tb mysql.NullTime
 		err := rows.Scan(&r.Id, &r.Slug, &r.Title, &r.TypeId)
@@ -116,11 +127,13 @@ func (s *PostDB) findPosts(ctx cx, x *pb.FndPostsReq, y *pb.PostsResp) error {
 		return err
 	}
 
-	err = db.QueryRow("SELECT COUNT(*) FROM post WHERE title LIKE '%?%' OR body like '%?%'").Scan(&y.Total)
+	err = s.db.QueryRow("SELECT COUNT(*) FROM post WHERE title LIKE '%?%' OR body like '%?%'").Scan(&y.Total)
 
 	if err != nil {
 		return err
 	}
+
+	return nil
 }
 
 func (s *PostDB) deletePost(ctx cx, sid string) error {
