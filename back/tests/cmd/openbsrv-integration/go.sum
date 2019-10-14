@@ -6,6 +6,8 @@ github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDk
 github.com/codemodus/chain/v2 v2.1.2/go.mod h1:NfEpk/YQCNWIwbx79PzdrfocwgXS14PwrDuCHUe54cw=
 github.com/codemodus/hedrs v0.1.1/go.mod h1:WqRMpBWXc9ysM283RlUR7X+dypQGR2K+uLwqwPAc6tM=
 github.com/codemodus/mixmux v0.2.1/go.mod h1:0lRIgwq/QGREoAiK+dLAxVXJE5pnFceJs0AS7scue0U=
+github.com/codemodus/relay v0.0.0-20190923033535-7e3d7567c3a7 h1:L5XrIPvOycCeP2QAlaGNZ5/FnG50jfsgP2mOjTnCelA=
+github.com/codemodus/relay v0.0.0-20190923033535-7e3d7567c3a7/go.mod h1:bED5Z7LcepohR8o+MGbl9jGio6Qsmjhm6lwr/Bc+Obs=
 github.com/codemodus/sqlo v0.2.1/go.mod h1:AvALahpyhhOyku8EzCb9eI3DmOX9fkBBjcREdyaYgsc=
 github.com/codemodus/swagui v0.3.0/go.mod h1:9eAe3Kix9k+v9SmeQ3I9CoTr5wn44vYk9FaZgHKGDMQ=
 github.com/codemodus/uidgen v0.1.0/go.mod h1:bUbKBvDWC6zE18ZzR2KOqvd40iFYy+gY7a5Qf5Qc1g4=
