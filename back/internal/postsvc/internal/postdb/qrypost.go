@@ -67,9 +67,7 @@ func (s *PostDB) upsertPost(ctx cx, sid string, x *pb.AddPostReq, y *pb.PostResp
 		return err
 	}
 
-	_, err = stmt.Exec(id, x.TypeId, x.Title, x.Body)
-
-	if err != nil {
+	if _, err = stmt.Exec(id, x.TypeId, x.Title, x.Body); err != nil {
 		return err
 	}
 
