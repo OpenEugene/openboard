@@ -75,7 +75,7 @@ func (s *UserDB) upsertUser(ctx cx, sid string, x *pb.AddUserReq, y *pb.UserResp
 }
 
 func (s *UserDB) deleteUser(ctx cx, sid string) error {
-	stmt, err := s.db.Prepare("DELETE FROM users WHERE user_id = ?")
+	stmt, err := s.db.Prepare("DELETE FROM user WHERE user_id = ?")
 	if err != nil {
 		return err
 	}
@@ -150,7 +150,7 @@ func (s *UserDB) upsertRole(ctx cx, sid string, x *pb.AddRoleReq, y *pb.RoleResp
 		return fmt.Errorf("invalid uid")
 	}
 
-	stmt, err := s.db.Prepare("INSERT INTO roles(role_id, role_name) VALUES(?, ?) ON DUPLICATE KEY UPDATE role_id = ?, role_name = ?")
+	stmt, err := s.db.Prepare("INSERT INTO role (role_id, role_name) VALUES(?, ?) ON DUPLICATE KEY UPDATE role_id = ?, role_name = ?")
 
 	if err != nil {
 		return err
