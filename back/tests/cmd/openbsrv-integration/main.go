@@ -9,18 +9,21 @@ import (
 )
 
 func main() {
+	userServiceTests()
+	postServiceTests()
+}
+
+func userServiceTests() {
 	check, ff := relay.New().Fns()
 	defer func() { ff(recover()) }()
 
 	cc, err := grpc.Dial(":4242", grpc.WithInsecure())
 	check(err)
-
 	defer cc.Close()
 
-	// Do one test with user service
-	uc := pb.NewUserSvcClient(cc)
+	c := pb.NewUserSvcClient(cc)
 
-	ur, err := uc.AddRole(
+	r, err := c.AddRole(
 		context.Background(),
 		&pb.AddRoleReq{
 			Name: "testRole",
@@ -28,12 +31,20 @@ func main() {
 	)
 	check(err)
 
-	fmt.Printf("Response from user service: %s\n", ur)
+	fmt.Printf("Response from user service: %s\n", r)
+}
 
-	// Do one test with post service
-	pc := pb.NewPostClient(cc)
+func postServiceTests() {
+	check, ff := relay.New().Fns()
+	defer func() { ff(recover()) }()
 
-	pr, err := pc.AddPost(
+	cc, err := grpc.Dial(":4242", grpc.WithInsecure())
+	check(err)
+	defer cc.Close()
+
+	c := pb.NewPostClient(cc)
+
+	r, err := c.AddPost(
 		context.Background(),
 		&pb.AddPostReq{
 			Title:  "test title",
@@ -43,5 +54,5 @@ func main() {
 	)
 	check(err)
 
-	fmt.Printf("Response from post service: %s\n", pr)
+	fmt.Printf("Response from post service: %s\n", r)
 }
