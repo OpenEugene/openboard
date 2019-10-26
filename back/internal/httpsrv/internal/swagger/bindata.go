@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 )
+
 type asset struct {
 	bytes []byte
 	info  os.FileInfo
@@ -598,7 +599,7 @@ func apidocsSwaggerJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "apidocs.swagger.json", size: 11935, mode: os.FileMode(436), modTime: time.Unix(1570685779, 0)}
+	info := bindataFileInfo{name: "apidocs.swagger.json", size: 11935, mode: os.FileMode(436), modTime: time.Unix(1571447090, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
