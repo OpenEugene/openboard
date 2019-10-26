@@ -17,9 +17,10 @@ func main() {
 
 	defer cc.Close()
 
-	c := pb.NewUserSvcClient(cc)
+	// Do one test with user service
+	uc := pb.NewUserSvcClient(cc)
 
-	r, err := c.AddRole(
+	ur, err := uc.AddRole(
 		context.Background(),
 		&pb.AddRoleReq{
 			Name: "testRole",
@@ -27,5 +28,20 @@ func main() {
 	)
 	check(err)
 
-	fmt.Printf("Response from server: %s", r)
+	fmt.Printf("Response from user service: %s\n", ur)
+
+	// Do one test with post service
+	pc := pb.NewPostClient(cc)
+
+	pr, err := pc.AddPost(
+		context.Background(),
+		&pb.AddPostReq{
+			Title:  "test title",
+			Body:   "test body",
+			TypeId: 4,
+		},
+	)
+	check(err)
+
+	fmt.Printf("Response from post service: %s\n", pr)
 }
