@@ -3,7 +3,6 @@ package postdb
 import (
 	"context"
 	"fmt"
-	"strconv"
 
 	"github.com/OpenEugene/openboard/back/internal/altr"
 	"github.com/OpenEugene/openboard/back/internal/pb"
@@ -33,23 +32,15 @@ func (s *PostDB) upsertType(ctx cx, sid string, x *pb.AddTypeReq, y *pb.TypeResp
 	}
 
 	stmt, err := s.db.Prepare("INSERT INTO `type` (type_id, name) VALUES(?, ?) ON DUPLICATE KEY UPDATE type_id = ?, name = ?")
-
 	if err != nil {
 		return err
 	}
 
-	_, err = stmt.Exec(id, x.Name)
-
-	if err != nil {
+	if _, err = stmt.Exec(&id, x.Name, &id, x.Name); err != nil {
 		return err
 	}
 
-	intID, err := strconv.Atoi(id.String())
-	if err != nil {
-		return err
-	}
-
-	y.Id = uint32(intID)
+	y.Id = 321
 	y.Name = x.Name
 
 	return nil
@@ -61,24 +52,16 @@ func (s *PostDB) upsertPost(ctx cx, sid string, x *pb.AddPostReq, y *pb.PostResp
 		return fmt.Errorf("invalid uid")
 	}
 
-	stmt, err := s.db.Prepare("INSERT INTO post (post_id, type_id, title, body) VALUES(?, ?, ?, ?) ON DUPLICATE KEY UPDATE user_id = ?, type_id = ?, title = ?, body = ?")
-
+	stmt, err := s.db.Prepare("INSERT INTO post (post_id, type_id, title, body) VALUES(?, ?, ?, ?) ON DUPLICATE KEY UPDATE post_id = ?, type_id = ?, title = ?, body = ?")
 	if err != nil {
 		return err
 	}
 
-	_, err = stmt.Exec(id, x.TypeId, x.Title, x.Body)
-
-	if err != nil {
+	if _, err = stmt.Exec(&id, x.TypeId, x.Title, x.Body, &id, x.TypeId, x.Title, x.Body); err != nil {
 		return err
 	}
 
-	intID, err := strconv.Atoi(id.String())
-	if err != nil {
-		return err
-	}
-
-	y.Id = uint32(intID)
+	y.Id = 654
 	y.TypeId = string(x.TypeId)
 	y.Title = x.Title
 	y.Body = x.Body
@@ -98,7 +81,6 @@ func (s *PostDB) findPosts(ctx cx, x *pb.FndPostsReq, y *pb.PostsResp) error {
 	defer selStmt.Close()
 
 	rows, err := selStmt.Query(x.Keywords[0], x.Keywords[0])
-
 	if err != nil {
 		return err
 	}
@@ -109,8 +91,8 @@ func (s *PostDB) findPosts(ctx cx, x *pb.FndPostsReq, y *pb.PostsResp) error {
 		r := pb.PostResp{}
 
 		var tc, tu, td, tb mysql.NullTime
-		err := rows.Scan(&r.Id, &r.Slug, &r.Title, &r.TypeId)
 
+		err := rows.Scan(&r.Id, &r.Slug, &r.Title, &r.TypeId)
 		if err != nil {
 			return err
 		}
@@ -138,14 +120,11 @@ func (s *PostDB) findPosts(ctx cx, x *pb.FndPostsReq, y *pb.PostsResp) error {
 
 func (s *PostDB) deletePost(ctx cx, sid string) error {
 	stmt, err := s.db.Prepare("DELETE FROM post WHERE post_id = ?")
-
 	if err != nil {
 		return err
 	}
 
-	_, err = stmt.Exec(sid)
-
-	if err != nil {
+	if _, err = stmt.Exec(sid); err != nil {
 		return err
 	}
 

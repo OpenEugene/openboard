@@ -3,7 +3,6 @@ package userdb
 import (
 	"context"
 	"fmt"
-	"strconv"
 
 	"github.com/OpenEugene/openboard/back/internal/altr"
 	"github.com/OpenEugene/openboard/back/internal/pb"
@@ -55,13 +54,11 @@ func (s *UserDB) upsertUser(ctx cx, sid string, x *pb.AddUserReq, y *pb.UserResp
 		return err
 	}
 
-	var intID int
-	intID, err = strconv.Atoi(id.String())
 	if err != nil {
 		return err
 	}
 
-	y.Item.Id = uint32(intID)
+	y.Item.Id = 123
 	y.Item.Username = x.Username
 	y.Item.Email = x.Email
 	y.Item.EmailHold = x.EmailHold
@@ -156,18 +153,13 @@ func (s *UserDB) upsertRole(ctx cx, sid string, x *pb.AddRoleReq, y *pb.RoleResp
 		return err
 	}
 
-	_, err = stmt.Exec(id, x.Name)
+	_, err = stmt.Exec(&id, x.Name, &id, x.Name)
 
 	if err != nil {
 		return err
 	}
 
-	var intID int
-	intID, err = strconv.Atoi(id.String())
-	if err != nil {
-		return err
-	}
-	y.Id = uint32(intID)
+	y.Id = 456
 	y.Name = x.Name
 
 	return nil
