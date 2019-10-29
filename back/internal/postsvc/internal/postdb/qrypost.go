@@ -3,7 +3,6 @@ package postdb
 import (
 	"context"
 	"fmt"
-	"strconv"
 
 	"github.com/OpenEugene/openboard/back/internal/altr"
 	"github.com/OpenEugene/openboard/back/internal/pb"
