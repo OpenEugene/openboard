@@ -32,7 +32,7 @@ func (s *UserDB) upsertUser(ctx cx, sid string, x *pb.AddUserReq, y *pb.UserResp
 	}
 
 	// todo: be able to link roleIDs to users.
-	stmt, err := s.db.Prepare("INSERT INTO users(user_id, username, email, email_hold, altmail, altmail_hold, full_name, avatar, password) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE user_id = ?, username = ?, email = ?, email_hold = ?, altmail = ?, altmail_hold = ?, full_name = ?, avatar = ?, password = ?")
+	stmt, err := s.db.Prepare("INSERT INTO user (user_id, username, email, email_hold, altmail, altmail_hold, full_name, avatar, password) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE user_id = ?, username = ?, email = ?, email_hold = ?, altmail = ?, altmail_hold = ?, full_name = ?, avatar = ?, password = ?")
 
 	if err != nil {
 		return err
