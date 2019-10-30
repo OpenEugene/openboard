@@ -33,12 +33,11 @@ func (s *UserDB) upsertUser(ctx cx, sid string, x *pb.AddUserReq, y *pb.UserResp
 
 	// todo: be able to link roleIDs to users.
 	stmt, err := s.db.Prepare("INSERT INTO user (user_id, username, email, email_hold, altmail, altmail_hold, full_name, avatar, password) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE user_id = ?, username = ?, email = ?, email_hold = ?, altmail = ?, altmail_hold = ?, full_name = ?, avatar = ?, password = ?")
-
 	if err != nil {
 		return err
 	}
 
-	_, err = stmt.Exec(
+	if _, err = stmt.Exec(
 		&id,
 		x.Username,
 		x.Email,
@@ -48,13 +47,7 @@ func (s *UserDB) upsertUser(ctx cx, sid string, x *pb.AddUserReq, y *pb.UserResp
 		x.FullName,
 		x.Avatar,
 		x.Password,
-	)
-
-	if err != nil {
-		return err
-	}
-
-	if err != nil {
+	); err != nil {
 		return err
 	}
 
@@ -77,8 +70,7 @@ func (s *UserDB) deleteUser(ctx cx, sid string) error {
 		return err
 	}
 
-	_, err = stmt.Exec(sid)
-	if err != nil {
+	if _, err = stmt.Exec(sid); err != nil {
 		return err
 	}
 
@@ -87,11 +79,11 @@ func (s *UserDB) deleteUser(ctx cx, sid string) error {
 
 func (s *UserDB) findUsers(ctx cx, x *pb.FndUsersReq, y *pb.UsersResp) error {
 	selStmt, err := s.db.Prepare("SELECT user_id, username, email, email_hold, altmail, altmail_hold, full_name, avatar, last_login, created_at, updated_at, deleted_at, blocked_at FROM user WHERE email IN ? OR email_hold = ? OR altmail in ? OR altmail_hold = ? LIMIT ? OFFSET ?")
-
 	if err != nil {
 		return err
 	}
 	defer selStmt.Close()
+
 	rows, err := selStmt.Query(
 		x.Emails,
 		x.EmailHold,
@@ -109,11 +101,10 @@ func (s *UserDB) findUsers(ctx cx, x *pb.FndUsersReq, y *pb.UsersResp) error {
 		r := pb.User{}
 
 		var tl, tc, tu, td, tb mysql.NullTime
-		err := rows.Scan(
-			&r.Id, &r.Username, &r.Email, &r.EmailHold, &r.Altmail, &r.AltmailHold, &r.FullName, &r.Avatar, &tl, &tc, &tu, &td, &tb,
-		)
 
-		if err != nil {
+		if err := rows.Scan(
+			&r.Id, &r.Username, &r.Email, &r.EmailHold, &r.Altmail, &r.AltmailHold, &r.FullName, &r.Avatar, &tl, &tc, &tu, &td, &tb,
+		); err != nil {
 			return err
 		}
 
@@ -132,7 +123,6 @@ func (s *UserDB) findUsers(ctx cx, x *pb.FndUsersReq, y *pb.UsersResp) error {
 	}
 
 	err = s.db.QueryRow("SELECT COUNT(*) FROM user WHERE email = ? OR email_hold = ? OR altmail = ? OR altmail_hold = ?").Scan(&y.Total)
-
 	if err != nil {
 		return err
 	}
@@ -148,14 +138,11 @@ func (s *UserDB) upsertRole(ctx cx, sid string, x *pb.AddRoleReq, y *pb.RoleResp
 	}
 
 	stmt, err := s.db.Prepare("INSERT INTO role (role_id, role_name) VALUES(?, ?) ON DUPLICATE KEY UPDATE role_id = ?, role_name = ?")
-
 	if err != nil {
 		return err
 	}
 
-	_, err = stmt.Exec(&id, x.Name, &id, x.Name)
-
-	if err != nil {
+	if _, err = stmt.Exec(&id, x.Name, &id, x.Name); err != nil {
 		return err
 	}
 
@@ -167,11 +154,11 @@ func (s *UserDB) upsertRole(ctx cx, sid string, x *pb.AddRoleReq, y *pb.RoleResp
 
 func (s *UserDB) findRoles(ctx cx, x *pb.FndRolesReq, y *pb.RolesResp) error {
 	selStmt, err := s.db.Prepare("SELECT role_id, role_name FROM role WHERE role_id in ? OR role_name in = ? LIMIT ? OFFSET ?")
-
 	if err != nil {
 		return err
 	}
 	defer selStmt.Close()
+
 	rows, err := selStmt.Query(x.RoleIds, x.RoleNames, x.Limit, x.Lapse)
 	if err != nil {
 		return err
@@ -196,9 +183,7 @@ func (s *UserDB) findRoles(ctx cx, x *pb.FndRolesReq, y *pb.RolesResp) error {
 		return err
 	}
 
-	err = s.db.QueryRow("SELECT COUNT(*) FROM role WHERE role_id in ? OR role_name in = ? LIMIT ? OFFSET ?").Scan(&y.Total)
-
-	if err != nil {
+	if err = s.db.QueryRow("SELECT COUNT(*) FROM role WHERE role_id in ? OR role_name in = ? LIMIT ? OFFSET ?").Scan(&y.Total); err != nil {
 		return err
 	}
 
