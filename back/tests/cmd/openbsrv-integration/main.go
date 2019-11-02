@@ -10,7 +10,7 @@ import (
 
 func main() {
 	userServiceTests()
-	postServiceTests()
+	//postServiceTests()
 }
 
 func userServiceTests() {
@@ -23,15 +23,30 @@ func userServiceTests() {
 
 	c := pb.NewUserSvcClient(cc)
 
-	r, err := c.AddRole(
+	r1, err := c.AddRole(
 		context.Background(),
 		&pb.AddRoleReq{
 			Name: "testRole",
 		},
 	)
 	check(err)
+	fmt.Printf("Response from user service add role: %s\n", r1)
 
-	fmt.Printf("Response from user service: %s\n", r)
+	r2, err := c.AddUser(
+		context.Background(),
+		&pb.AddUserReq{
+			Username:    "test user name a",
+			Email:       "test user email a",
+			EmailHold:   false,
+			Altmail:     "",
+			AltmailHold: false,
+			FullName:    "test user full name a",
+			Avatar:      "test user avatar a",
+			Password:    "test user password a",
+		},
+	)
+	check(err)
+	fmt.Printf("Response from user service add user: %s\n", r2)
 }
 
 func postServiceTests() {
