@@ -47,6 +47,15 @@ func (s *UserDB) upsertUser(ctx cx, sid string, x *pb.AddUserReq, y *pb.UserResp
 		x.FullName,
 		x.Avatar,
 		x.Password,
+		&id,
+		x.Username,
+		x.Email,
+		x.EmailHold,
+		x.Altmail,
+		x.AltmailHold,
+		x.FullName,
+		x.Avatar,
+		x.Password,
 	); err != nil {
 		return err
 	}
