@@ -60,14 +60,17 @@ func (s *UserDB) upsertUser(ctx cx, sid string, x *pb.AddUserReq, y *pb.UserResp
 		return err
 	}
 
-	y.Item.Id = 123
-	y.Item.Username = x.Username
-	y.Item.Email = x.Email
-	y.Item.EmailHold = x.EmailHold
-	y.Item.Altmail = x.Altmail
-	y.Item.AltmailHold = x.AltmailHold
-	y.Item.FullName = x.FullName
-	y.Item.Avatar = x.Avatar
+	item := pb.User{
+		Id:          123,
+		Username:    x.Username,
+		Email:       x.Email,
+		EmailHold:   x.EmailHold,
+		Altmail:     x.Altmail,
+		AltmailHold: x.AltmailHold,
+		FullName:    x.FullName,
+		Avatar:      x.Avatar,
+	}
+	y.Item = &item
 	// todo: respond with user roles
 
 	return nil
