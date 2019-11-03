@@ -90,19 +90,17 @@ func (s *UserDB) deleteUser(ctx cx, sid string) error {
 }
 
 func (s *UserDB) findUsers(ctx cx, x *pb.FndUsersReq, y *pb.UsersResp) error {
-	selStmt, err := s.db.Prepare("SELECT user_id, username, email, email_hold, altmail, altmail_hold, full_name, avatar, last_login, created_at, updated_at, deleted_at, blocked_at FROM user WHERE email IN ? OR email_hold = ? OR altmail in ? OR altmail_hold = ? LIMIT ? OFFSET ?")
+	selStmt, err := s.db.Prepare("SELECT user_id, username, email, email_hold, altmail, altmail_hold, full_name, avatar, last_login, created_at, updated_at, deleted_at, blocked_at FROM user WHERE (email = ? AND email_hold = ?) OR (altmail = ? AND altmail_hold = ?)")
 	if err != nil {
 		return err
 	}
 	defer selStmt.Close()
 
 	rows, err := selStmt.Query(
-		x.Emails,
+		x.Email,
 		x.EmailHold,
-		x.Altmails,
+		x.Altmail,
 		x.AltmailHold,
-		x.Limit,
-		x.Lapse,
 	)
 	if err != nil {
 		return err
