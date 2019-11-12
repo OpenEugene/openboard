@@ -1,7 +1,5 @@
 cloud.google.com/go v0.26.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
-github.com/OpenEugene/openboard/back/internal v0.0.0-20190926014330-eca0374adab8 h1:q4kj+A87jazKeSO4Lo2CQbsIjXyrfvNrYvCOVDll7bk=
-github.com/OpenEugene/openboard/back/internal v0.0.0-20190926014330-eca0374adab8/go.mod h1:aMAPnIBjULiyfgICpPhqoLLSfomG5ESyEgxTN7QEb4k=
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=
 github.com/codemodus/chain/v2 v2.1.2/go.mod h1:NfEpk/YQCNWIwbx79PzdrfocwgXS14PwrDuCHUe54cw=
 github.com/codemodus/hedrs v0.1.1/go.mod h1:WqRMpBWXc9ysM283RlUR7X+dypQGR2K+uLwqwPAc6tM=
