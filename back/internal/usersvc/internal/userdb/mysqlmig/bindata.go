@@ -57,7 +57,7 @@ func (fi bindataFileInfo) Sys() interface{} {
 var __0001_setup_user_tableSql = []byte(`-- +migrate Up
 
 CREATE TABLE user (
-    user_id BIGINT UNSIGNED NOT NULL PRIMARY KEY,
+    user_id VARCHAR(26) NOT NULL PRIMARY KEY,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     deleted_at DATETIME DEFAULT NULL,
@@ -90,7 +90,7 @@ func _0001_setup_user_tableSql() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "0001_setup_user_table.sql", size: 711, mode: os.FileMode(436), modTime: time.Unix(1568256810, 0)}
+	info := bindataFileInfo{name: "0001_setup_user_table.sql", size: 707, mode: os.FileMode(436), modTime: time.Unix(1573786616, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -98,7 +98,7 @@ func _0001_setup_user_tableSql() (*asset, error) {
 var __0002_setup_role_tableSql = []byte(`-- +migrate Up
 
 CREATE TABLE role (
-    role_id BIGINT UNSIGNED NOT NULL PRIMARY KEY,
+    role_id VARCHAR(26) NOT NULL PRIMARY KEY,
     role_name VARCHAR(255) NOT NULL UNIQUE
 );
 
@@ -117,7 +117,7 @@ func _0002_setup_role_tableSql() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "0002_setup_role_table.sql", size: 178, mode: os.FileMode(436), modTime: time.Unix(1568256778, 0)}
+	info := bindataFileInfo{name: "0002_setup_role_table.sql", size: 174, mode: os.FileMode(436), modTime: time.Unix(1573786649, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

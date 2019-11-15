@@ -1,7 +1,7 @@
 -- +migrate Up
 
 CREATE TABLE role (
-    role_id BIGINT UNSIGNED NOT NULL PRIMARY KEY,
+    role_id VARCHAR(26) NOT NULL PRIMARY KEY,
     role_name VARCHAR(255) NOT NULL UNIQUE
 );
 
