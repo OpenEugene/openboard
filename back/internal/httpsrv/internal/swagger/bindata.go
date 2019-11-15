@@ -139,8 +139,7 @@ var _apidocsSwaggerJson = []byte(`{
             "required": false,
             "type": "array",
             "items": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string"
             },
             "collectionFormat": "multi"
           },
@@ -216,8 +215,7 @@ var _apidocsSwaggerJson = []byte(`{
             "name": "id",
             "in": "path",
             "required": true,
-            "type": "integer",
-            "format": "int64"
+            "type": "string"
           }
         ],
         "tags": [
@@ -239,8 +237,7 @@ var _apidocsSwaggerJson = []byte(`{
             "name": "id",
             "in": "path",
             "required": true,
-            "type": "integer",
-            "format": "int64"
+            "type": "string"
           },
           {
             "name": "body",
@@ -274,8 +271,7 @@ var _apidocsSwaggerJson = []byte(`{
             "required": false,
             "type": "array",
             "items": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string"
             },
             "collectionFormat": "multi"
           },
@@ -425,8 +421,7 @@ var _apidocsSwaggerJson = []byte(`{
         "roleIds": {
           "type": "array",
           "items": {
-            "type": "integer",
-            "format": "int64"
+            "type": "string"
           }
         }
       }
@@ -462,8 +457,7 @@ var _apidocsSwaggerJson = []byte(`{
       "type": "object",
       "properties": {
         "id": {
-          "type": "integer",
-          "format": "int64"
+          "type": "string"
         },
         "req": {
           "$ref": "#/definitions/pbAddUserReq"
@@ -480,8 +474,7 @@ var _apidocsSwaggerJson = []byte(`{
       "type": "object",
       "properties": {
         "id": {
-          "type": "integer",
-          "format": "int64"
+          "type": "string"
         },
         "name": {
           "type": "string"
@@ -507,8 +500,7 @@ var _apidocsSwaggerJson = []byte(`{
       "type": "object",
       "properties": {
         "id": {
-          "type": "integer",
-          "format": "int64"
+          "type": "string"
         },
         "username": {
           "type": "string"
@@ -598,7 +590,7 @@ func apidocsSwaggerJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "apidocs.swagger.json", size: 11935, mode: os.FileMode(436), modTime: time.Unix(1571447090, 0)}
+	info := bindataFileInfo{name: "apidocs.swagger.json", size: 11681, mode: os.FileMode(436), modTime: time.Unix(1573786405, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
