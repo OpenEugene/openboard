@@ -17,7 +17,7 @@ import "google/api/annotations.proto";
 import "google/protobuf/timestamp.proto";
 
 message RoleResp {
-    uint32 id = 1;
+    string id = 1;
     string name = 2;
 }
 
@@ -31,14 +31,14 @@ message RolesResp {
 }
 
 message FndRolesReq {
-    repeated uint32 roleIds = 1;
+    repeated string roleIds = 1;
     repeated string roleNames = 2;
     uint32 limit = 3;
     uint32 lapse = 4;
 }
 
 message User {
-    uint32 id = 1;
+    string id = 1;
     string username = 2;
     string email = 3;
     bool emailHold = 4;
@@ -67,11 +67,11 @@ message AddUserReq {
     string fullName = 6;
     string avatar = 7;
     string password = 8;
-    repeated uint32 roleIds = 9;
+    repeated string roleIds = 9;
 }
 
 message OvrUserReq {
-    uint32 id = 1;
+    string id = 1;
     AddUserReq req = 2;
 }
 
@@ -81,7 +81,7 @@ message UsersResp {
 }
 
 message FndUsersReq {
-    repeated uint32 roleIds = 1;
+    repeated string roleIds = 1;
     repeated string emails = 2;
     bool emailHold = 3;
     repeated string altmails = 4;
@@ -98,7 +98,7 @@ message RmvUserResp {
 }
 
 message RmvUserReq {
-    uint32 id = 1;
+    string id = 1;
 }
 
 service UserSvc {
