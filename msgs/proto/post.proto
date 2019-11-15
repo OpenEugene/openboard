@@ -25,7 +25,7 @@ message AddCommentResp {
 }
 
 message TypeResp {
-	uint32 id = 1;
+	string id = 1;
 	string name = 2;
 }
 
@@ -44,7 +44,7 @@ message FndTypesReq {
 }
 
 message PostResp {
-	uint32 id = 1;
+	string id = 1;
 	string slug = 2;
 	string title = 3;
 	string body = 4;
@@ -58,11 +58,11 @@ message PostResp {
 message AddPostReq {
 	string title = 1;
 	string body = 2;
-	uint32 typeId = 3;
+	string typeId = 3;
 }
 
 message OvrPostReq {
-	uint32 id = 1;
+	string id = 1;
 	AddPostReq req = 2;
 }
 
@@ -79,7 +79,7 @@ message FndPostsReq {
 }
 
 message RmvPostReq {
-	uint32 id = 1;
+	string id = 1;
 }
 
 message RmvPostResp {}
