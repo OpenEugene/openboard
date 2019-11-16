@@ -140,7 +140,7 @@ func (s *UserDB) upsertRole(ctx cx, sid string, x *pb.AddRoleReq, y *pb.RoleResp
 		return fmt.Errorf("invalid uid")
 	}
 
-	stmt, err := s.db.Prepare("INSERT INTO roles(role_id, role_name) VALUES(?, ?) ON DUPLICATE KEY UPDATE role_id = ?, role_name = ?")
+	stmt, err := s.db.Prepare("INSERT INTO role (role_id, role_name) VALUES (?, ?) ON DUPLICATE KEY UPDATE role_id = ?, role_name = ?")
 	if err != nil {
 		return err
 	}
