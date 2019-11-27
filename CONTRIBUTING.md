@@ -11,7 +11,6 @@ will need contributions for creating/improving documentation and marketing help.
 
 ### Ground Rules
 
-* Ensure that code that goes into core meets all requirements in this checklist: https://gist.github.com/champagneabuelo/5a0a1753a430dfe50167b1fad4395596
 * Create issues for any major changes and enhancements that you wish to make. Discuss things transparently and get community feedback.
 * Keep feature versions as small as possible, preferably one new feature per version.
 * Be welcoming to newcomers and encourage diverse new contributors from all backgrounds. See the [Python Community Code of Conduct](https://www.python.org/psf/codeofconduct/).
@@ -60,5 +59,4 @@ When filing an issue, make sure to answer these five questions:
 We welcome any suggestions for improvement! Please open an issue and add a 'improvement' tag to it.
 
 ### Community
-If you would like to discuss anything pertaining this project, join the [Eugene Tech slack](eugslack.com) and the #open-eugene-projects channel.
-
+If you would like to discuss anything pertaining this project, join the [Eugene Tech Slack](http://eugslack.com) and the #openboard channel.
