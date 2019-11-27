@@ -3,7 +3,6 @@ package postdb
 import (
 	"context"
 	"fmt"
-	"strconv"
 
 	"github.com/OpenEugene/openboard/back/internal/altr"
 	"github.com/OpenEugene/openboard/back/internal/pb"
@@ -32,7 +31,7 @@ func (s *PostDB) upsertType(ctx cx, sid string, x *pb.AddTypeReq, y *pb.TypeResp
 		return fmt.Errorf("invalid uid")
 	}
 
-	stmt, err := s.db.Prepare("INSERT INTO `type` (type_id, name) VALUES(?, ?) ON DUPLICATE KEY UPDATE type_id = ?, name = ?")
+	stmt, err := s.db.Prepare("INSERT INTO `type` (type_id, name) VALUES (?, ?) ON DUPLICATE KEY UPDATE type_id = ?, name = ?")
 	if err != nil {
 		return err
 	}
@@ -41,12 +40,7 @@ func (s *PostDB) upsertType(ctx cx, sid string, x *pb.AddTypeReq, y *pb.TypeResp
 		return err
 	}
 
-	intID, err := strconv.Atoi(id.String())
-	if err != nil {
-		return err
-	}
-
-	y.Id = uint32(intID)
+	y.Id = id.String()
 	y.Name = x.Name
 
 	return nil
@@ -58,7 +52,7 @@ func (s *PostDB) upsertPost(ctx cx, sid string, x *pb.AddPostReq, y *pb.PostResp
 		return fmt.Errorf("invalid uid")
 	}
 
-	stmt, err := s.db.Prepare("INSERT INTO post (post_id, type_id, title, body) VALUES(?, ?, ?, ?) ON DUPLICATE KEY UPDATE user_id = ?, type_id = ?, title = ?, body = ?")
+	stmt, err := s.db.Prepare("INSERT INTO post (post_id, type_id, title, body) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE user_id = ?, type_id = ?, title = ?, body = ?")
 	if err != nil {
 		return err
 	}
@@ -67,13 +61,8 @@ func (s *PostDB) upsertPost(ctx cx, sid string, x *pb.AddPostReq, y *pb.PostResp
 		return err
 	}
 
-	intID, err := strconv.Atoi(id.String())
-	if err != nil {
-		return err
-	}
-
-	y.Id = uint32(intID)
-	y.TypeId = string(x.TypeId)
+	y.Id = id.String()
+	y.TypeId = x.TypeId
 	y.Title = x.Title
 	y.Body = x.Body
 
@@ -87,14 +76,12 @@ func (s *PostDB) findPosts(ctx cx, x *pb.FndPostsReq, y *pb.PostsResp) error {
 	if err != nil {
 		return err
 	}
-
 	defer selStmt.Close()
 
 	rows, err := selStmt.Query(x.Keywords[0], x.Keywords[0])
 	if err != nil {
 		return err
 	}
-
 	defer rows.Close()
 
 	for rows.Next() {
