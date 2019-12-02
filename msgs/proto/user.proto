@@ -82,9 +82,9 @@ message UsersResp {
 
 message FndUsersReq {
     repeated string roleIds = 1;
-    repeated string emails = 2;
+    string email = 2;
     bool emailHold = 3;
-    repeated string altmails = 4;
+    string altmail = 4;
     bool altmailHold = 5;
     google.protobuf.Timestamp createdFirst = 6;
     google.protobuf.Timestamp createdFinal = 7;
