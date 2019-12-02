@@ -96,9 +96,9 @@ func (s *UserDB) findUsers(ctx cx, x *pb.FndUsersReq, y *pb.UsersResp) error {
 	defer selStmt.Close()
 
 	rows, err := selStmt.Query(
-		x.Emails,
+		x.Email,
 		x.EmailHold,
-		x.Altmails,
+		x.Altmail,
 		x.AltmailHold,
 		x.Limit,
 		x.Lapse,
