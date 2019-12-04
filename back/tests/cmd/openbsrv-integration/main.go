@@ -9,6 +9,7 @@ import (
 
 func main() {
 	userServiceTests()
+	postServiceTests()
 }
 
 func userServiceTests() {
@@ -30,5 +31,48 @@ func userServiceTests() {
 		fmt.Println(err)
 	}
 
-	fmt.Printf("Response from server: %s\n", r)
+	fmt.Printf("Response from user service add role: %s\n", r)
+
+	r2, err := clnt.AddUser(
+		context.Background(),
+		&pb.AddUserReq{
+			Username:    "test username a",
+			Email:       "test user email a",
+			EmailHold:   false,
+			Altmail:     "",
+			AltmailHold: false,
+			FullName:    "test user full name a",
+			Avatar:      "test user avatar a",
+			Password:    "test user password a",
+		},
+	)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Printf("Rsponse from user service add user: %s\n", r2.Item)
+}
+
+func postServiceTests() {
+	conn, err := grpc.Dial(":4242", grpc.WithInsecure())
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer conn.Close()
+
+	clnt := pb.NewPostClient(conn)
+
+	r, err := clnt.AddPost(
+		context.Background(),
+		&pb.AddPostReq{
+			Title:  "test title",
+			Body:   "test body",
+			TypeId: "2",
+		},
+	)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Printf("Response from post service: %s\n", r)
 }
