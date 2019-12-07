@@ -8,19 +8,24 @@ import (
 )
 
 func main() {
-	userServiceTests()
-	postServiceTests()
-}
-
-func userServiceTests() {
 	conn, err := grpc.Dial(":4242", grpc.WithInsecure())
 	if err != nil {
 		fmt.Println(err)
 	}
 	defer conn.Close()
 
-	clnt := pb.NewUserSvcClient(conn)
+	userClnt := pb.NewUserSvcClient(conn)
+	fmt.Println("=====================Start User Service Tests=====================")
+	userSvcAddRoles(conn, userClnt)
+	userSvcAddUsers(conn, userClnt)
+	userSvcFndUsers(conn, userClnt)
 
+	fmt.Println("=====================Start Post Service Tests=====================")
+	postClnt := pb.NewPostClient(conn)
+	postSvcAddPosts(conn, postClnt)
+}
+
+func userSvcAddRoles(conn *grpc.ClientConn, clnt pb.UserSvcClient) {
 	r, err := clnt.AddRole(
 		context.Background(),
 		&pb.AddRoleReq{
@@ -31,9 +36,11 @@ func userServiceTests() {
 		fmt.Println(err)
 	}
 
-	fmt.Printf("Response from user service add role: %s\n", r)
+	fmt.Printf("Response from user service add role:\n%s\n\n", r)
+}
 
-	r2, err := clnt.AddUser(
+func userSvcAddUsers(conn *grpc.ClientConn, clnt pb.UserSvcClient) {
+	r, err := clnt.AddUser(
 		context.Background(),
 		&pb.AddUserReq{
 			Username:    "test username a",
@@ -50,9 +57,11 @@ func userServiceTests() {
 		fmt.Println(err)
 	}
 
-	fmt.Printf("Response from user service add user: %s\n", r2.Item)
+	fmt.Printf("Response from user service add user:\n%s\n\n", r.Item)
+}
 
-	r3, err := clnt.FndUsers(
+func userSvcFndUsers(conn *grpc.ClientConn, clnt pb.UserSvcClient) {
+	r, err := clnt.FndUsers(
 		context.Background(),
 		&pb.FndUsersReq{
 			RoleIds:     []string{},
@@ -68,18 +77,10 @@ func userServiceTests() {
 		fmt.Println(err)
 	}
 
-	fmt.Printf("Response from user service find user a: %s\n", r3)
+	fmt.Printf("Response from user service find user a:\n%s\n\n", r)
 }
 
-func postServiceTests() {
-	conn, err := grpc.Dial(":4242", grpc.WithInsecure())
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer conn.Close()
-
-	clnt := pb.NewPostClient(conn)
-
+func postSvcAddPosts(conn *grpc.ClientConn, clnt pb.PostClient) {
 	r, err := clnt.AddPost(
 		context.Background(),
 		&pb.AddPostReq{
@@ -92,5 +93,5 @@ func postServiceTests() {
 		fmt.Println(err)
 	}
 
-	fmt.Printf("Response from post service: %s\n", r)
+	fmt.Printf("Response from post service:\n%s\n\n", r)
 }
