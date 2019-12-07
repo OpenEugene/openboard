@@ -93,7 +93,7 @@ func (s *UserDB) deleteUser(ctx cx, sid string) error {
 }
 
 func (s *UserDB) findUsers(ctx cx, x *pb.FndUsersReq, y *pb.UsersResp) error {
-	selStmt, err := s.db.Prepare("SELECT user_id, username, email, email_hold, altmail, altmail_hold, full_name, avatar, last_login, created_at, updated_at, deleted_at, blocked_at FROM user WHERE email IN ? OR email_hold = ? OR altmail in ? OR altmail_hold = ? LIMIT ? OFFSET ?")
+	selStmt, err := s.db.Prepare("SELECT user_id, username, email, email_hold, altmail, altmail_hold, full_name, avatar, last_login, created_at, updated_at, deleted_at, blocked_at FROM user WHERE email = ? OR email_hold = ? OR altmail = ? OR altmail_hold = ? LIMIT ? OFFSET ?")
 	if err != nil {
 		return err
 	}
@@ -138,7 +138,13 @@ func (s *UserDB) findUsers(ctx cx, x *pb.FndUsersReq, y *pb.UsersResp) error {
 		return err
 	}
 
-	err = s.db.QueryRow("SELECT COUNT(*) FROM user WHERE email = ? OR email_hold = ? OR altmail = ? OR altmail_hold = ?").Scan(&y.Total)
+	err = s.db.QueryRow(
+		"SELECT COUNT(*) FROM user WHERE email = ? OR email_hold = ? OR altmail = ? OR altmail_hold = ?",
+		x.Email,
+		x.Altmail,
+		x.Limit,
+		x.Lapse,
+	).Scan(&y.Total)
 	if err != nil {
 		return err
 	}
