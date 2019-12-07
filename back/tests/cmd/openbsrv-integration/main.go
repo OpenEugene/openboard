@@ -50,7 +50,25 @@ func userServiceTests() {
 		fmt.Println(err)
 	}
 
-	fmt.Printf("Rsponse from user service add user: %s\n", r2.Item)
+	fmt.Printf("Response from user service add user: %s\n", r2.Item)
+
+	r3, err := clnt.FndUsers(
+		context.Background(),
+		&pb.FndUsersReq{
+			RoleIds:     []string{},
+			Email:       "test user email a",
+			EmailHold:   false,
+			Altmail:     "",
+			AltmailHold: false,
+			Limit:       100,
+			Lapse:       0,
+		},
+	)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Printf("Response from user service find user a: %s\n", r3)
 }
 
 func postServiceTests() {
