@@ -65,7 +65,7 @@ CREATE TABLE user (
     username VARCHAR(255) NOT NULL UNIQUE,
     email VARCHAR(255) NOT NULL UNIQUE,
     email_hold BOOL NOT NULL DEFAULT TRUE,
-    altmail VARCHAR(255) NOT NULL UNIQUE,
+    altmail VARCHAR(255) NOT NULL,
     altmail_hold BOOL NOT NULL DEFAULT TRUE,
     full_name VARCHAR(255) NOT NULL,
     avatar VARCHAR(255) NOT NULL DEFAULT "",
@@ -90,7 +90,7 @@ func _0001_setup_user_tableSql() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "0001_setup_user_table.sql", size: 707, mode: os.FileMode(436), modTime: time.Unix(1573786616, 0)}
+	info := bindataFileInfo{name: "0001_setup_user_table.sql", size: 700, mode: os.FileMode(436), modTime: time.Unix(1575744428, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -117,7 +117,7 @@ func _0002_setup_role_tableSql() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "0002_setup_role_table.sql", size: 174, mode: os.FileMode(436), modTime: time.Unix(1573786649, 0)}
+	info := bindataFileInfo{name: "0002_setup_role_table.sql", size: 174, mode: os.FileMode(436), modTime: time.Unix(1573881816, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
