@@ -32,7 +32,7 @@ func (s *UserDB) upsertUser(ctx cx, sid string, x *pb.AddUserReq, y *pb.UserResp
 	}
 
 	// todo: be able to link roleIDs to users.
-	stmt, err := s.db.Prepare("INSERT INTO user (user_id, username, email, email_hold, altmail, altmail_hold, full_name, avatar, password) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE user_id = ?, username = ?, email = ?, email_hold = ?, altmail = ?, altmail_hold = ?, full_name = ?, avatar = ?, password = ?")
+	stmt, err := s.db.Prepare("INSERT INTO user (user_id, username, email, email_hold, altmail, altmail_hold, full_name, avatar, password) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE user_id = ?, username = ?, email = ?, email_hold = ?, altmail = ?, altmail_hold = ?, full_name = ?, avatar = ?, password = ?")
 	if err != nil {
 		return err
 	}
@@ -93,7 +93,7 @@ func (s *UserDB) deleteUser(ctx cx, sid string) error {
 }
 
 func (s *UserDB) findUsers(ctx cx, x *pb.FndUsersReq, y *pb.UsersResp) error {
-	selStmt, err := s.db.Prepare("SELECT user_id, username, email, email_hold, altmail, altmail_hold, full_name, avatar, last_login, created_at, updated_at, deleted_at, blocked_at FROM user WHERE email = ? OR email_hold = ? OR altmail = ? OR altmail_hold = ? LIMIT ? OFFSET ?")
+	selStmt, err := s.db.Prepare("SELECT user_id, username, email, email_hold, altmail, altmail_hold, full_name, avatar, last_login, created_at, updated_at, deleted_at, blocked_at FROM user WHERE email = ? AND email_hold = ? LIMIT ? OFFSET ?")
 	if err != nil {
 		return err
 	}
@@ -102,8 +102,6 @@ func (s *UserDB) findUsers(ctx cx, x *pb.FndUsersReq, y *pb.UsersResp) error {
 	rows, err := selStmt.Query(
 		x.Email,
 		x.EmailHold,
-		x.Altmail,
-		x.AltmailHold,
 		x.Limit,
 		x.Lapse,
 	)
@@ -139,11 +137,9 @@ func (s *UserDB) findUsers(ctx cx, x *pb.FndUsersReq, y *pb.UsersResp) error {
 	}
 
 	err = s.db.QueryRow(
-		"SELECT COUNT(*) FROM user WHERE email = ? OR email_hold = ? OR altmail = ? OR altmail_hold = ?",
+		"SELECT COUNT(*) FROM user WHERE email = ? AND email_hold = ?",
 		x.Email,
-		x.Altmail,
-		x.Limit,
-		x.Lapse,
+		x.EmailHold,
 	).Scan(&y.Total)
 	if err != nil {
 		return err
