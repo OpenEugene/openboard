@@ -19,6 +19,9 @@ func main() {
 	userSvcAddRoles(conn, userClnt)
 	userSvcAddUsers(conn, userClnt)
 	userSvcFndUsers(conn, userClnt)
+	userAID := userSvcFndUserA(conn, userClnt)
+	userSvcDelUserA(conn, userClnt, userAID)
+	_ = userSvcFndUserA(conn, userClnt)
 
 	fmt.Println("=====================Start Post Service Tests=====================")
 	postClnt := pb.NewPostClient(conn)
@@ -104,6 +107,8 @@ func userSvcFndUsers(conn *grpc.ClientConn, clnt pb.UserSvcClient) {
 		fmt.Println(err)
 	}
 
+	fmt.Printf("Response from user service find one existing user b:\n%s\n\n", r1)
+
 	r2, err := clnt.FndUsers(
 		context.Background(),
 		&pb.FndUsersReq{
@@ -120,7 +125,46 @@ func userSvcFndUsers(conn *grpc.ClientConn, clnt pb.UserSvcClient) {
 		fmt.Println(err)
 	}
 
-	fmt.Printf("Response from user service find one existing user and one not:\n%s\n%s\n\n", r1, r2)
+	fmt.Printf("Response from user service find no such user c:\n%s\n\n", r2)
+}
+
+func userSvcFndUserA(conn *grpc.ClientConn, clnt pb.UserSvcClient) string {
+	r, err := clnt.FndUsers(
+		context.Background(),
+		&pb.FndUsersReq{
+			RoleIds:     []string{},
+			Email:       "user_a@email.com",
+			EmailHold:   false,
+			Altmail:     "",
+			AltmailHold: false,
+			Limit:       100,
+			Lapse:       0,
+		},
+	)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Printf("Response from user service find user A:\n%s\n\n", r)
+
+	if len(r.Items) > 0 {
+		return r.Items[0].Id
+	}
+	return ""
+}
+
+func userSvcDelUserA(conn *grpc.ClientConn, clnt pb.UserSvcClient, userID string) {
+	r, err := clnt.RmvUser(
+		context.Background(),
+		&pb.RmvUserReq{
+			Id: userID,
+		},
+	)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Printf("Response from user service delete user A:\n%s\n\n", r)
 }
 
 func postSvcAddPosts(conn *grpc.ClientConn, clnt pb.PostClient) {
