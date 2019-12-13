@@ -25,6 +25,8 @@ func main() {
 
 	fmt.Println("=====================Start Post Service Tests=====================")
 	postClnt := pb.NewPostClient(conn)
+	postSvcAddTypes(conn, postClnt)
+	// postSvcFndTypes(conn, postClnt)
 	postSvcAddPosts(conn, postClnt)
 }
 
@@ -167,12 +169,38 @@ func userSvcDelUserA(conn *grpc.ClientConn, clnt pb.UserSvcClient, userID string
 	fmt.Printf("Response from user service delete user A:\n%s\n\n", r)
 }
 
+func postSvcAddTypes(conn *grpc.ClientConn, clnt pb.PostClient) {
+	r1, err := clnt.AddType(
+		context.Background(),
+		&pb.AddTypeReq{
+			Name: "testTypeA",
+		},
+	)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Printf("Response from post service add typeA:\n%s\n\n", r1)
+
+	r2, err := clnt.AddType(
+		context.Background(),
+		&pb.AddTypeReq{
+			Name: "testTypeB",
+		},
+	)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Printf("Response from post service add typeB:\n%s\n\n", r2)
+}
+
 func postSvcAddPosts(conn *grpc.ClientConn, clnt pb.PostClient) {
-	r, err := clnt.AddPost(
+	r1, err := clnt.AddPost(
 		context.Background(),
 		&pb.AddPostReq{
-			Title:  "test title",
-			Body:   "test body",
+			Title:  "test title post first",
+			Body:   "test body of first post",
 			TypeId: "2",
 		},
 	)
@@ -180,5 +208,35 @@ func postSvcAddPosts(conn *grpc.ClientConn, clnt pb.PostClient) {
 		fmt.Println(err)
 	}
 
-	fmt.Printf("Response from post service:\n%s\n\n", r)
+	fmt.Printf("Response from post service add post:\n%s\n\n", r1)
+
+	r2, err := clnt.AddPost(
+		context.Background(),
+		&pb.AddPostReq{
+			Title:  "test title post second",
+			Body:   "test body of second post",
+			TypeId: "3",
+		},
+	)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Printf("Response from post service add post:\n%s\n\n", r2)
 }
+
+// FndTypes function will need to be added to postdb.go for below test to work.
+// func postSvcFndTypes(conn *grpc.ClientConn, clnt pb.PostClient) {
+// 	r, err := clnt.FndTypes(
+// 		context.Background(),
+// 		&pb.FndTypeReq{
+// 			Limit: 100,
+// 			Lapse: 0,
+// 		},
+// 	)
+// 	if err != nil {
+// 		fmt.Println(err)
+// 	}
+
+// 	fmt.Printf("Response from post service find types:\n%s\n\n", r)
+// }
