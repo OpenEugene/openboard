@@ -28,6 +28,7 @@ func main() {
 	postSvcAddTypes(conn, postClnt)
 	// postSvcFndTypes(conn, postClnt)
 	postSvcAddPosts(conn, postClnt)
+	postSvcFndPosts(conn, postClnt)
 }
 
 func userSvcAddRoles(conn *grpc.ClientConn, clnt pb.UserSvcClient) {
@@ -195,6 +196,20 @@ func postSvcAddTypes(conn *grpc.ClientConn, clnt pb.PostClient) {
 	fmt.Printf("Response from post service add typeB:\n%s\n\n", r2)
 }
 
+// FndTypes function will need to be added to postdb.go for below test to work.
+// func postSvcFndTypes(conn *grpc.ClientConn, clnt pb.PostClient) {
+// 	r, err := clnt.FndTypes(
+// 		context.Background(),
+// 		&pb.FndTypeReq{
+// 			Limit: 100,
+// 			Lapse: 0,
+// 		},
+// 	)
+// 	if err != nil {
+// 		fmt.Println(err)
+// 	fmt.Printf("Response from post service find types:\n%s\n\n", r)
+// }
+
 func postSvcAddPosts(conn *grpc.ClientConn, clnt pb.PostClient) {
 	r1, err := clnt.AddPost(
 		context.Background(),
@@ -225,18 +240,28 @@ func postSvcAddPosts(conn *grpc.ClientConn, clnt pb.PostClient) {
 	fmt.Printf("Response from post service add post:\n%s\n\n", r2)
 }
 
-// FndTypes function will need to be added to postdb.go for below test to work.
-// func postSvcFndTypes(conn *grpc.ClientConn, clnt pb.PostClient) {
-// 	r, err := clnt.FndTypes(
-// 		context.Background(),
-// 		&pb.FndTypeReq{
-// 			Limit: 100,
-// 			Lapse: 0,
-// 		},
-// 	)
-// 	if err != nil {
-// 		fmt.Println(err)
-// 	}
+func postSvcFndPosts(conn *grpc.ClientConn, clnt pb.PostClient) {
+	r1, err := clnt.FndPosts(
+		context.Background(),
+		&pb.FndPostsReq{
+			Keywords: []string{"second", "multiple", "keywords", "not", "available", "yet"},
+		},
+	)
+	if err != nil {
+		fmt.Println(err)
+	}
 
-// 	fmt.Printf("Response from post service find types:\n%s\n\n", r)
-// }
+	fmt.Printf("Response from post service find post with keyword 'second':\n%s\n\n", r1)
+
+	r2, err := clnt.FndPosts(
+		context.Background(),
+		&pb.FndPostsReq{
+			Keywords: []string{"third"},
+		},
+	)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Printf("Response from post service find post with keyword 'third':\n%s\n\n", r2)
+}
