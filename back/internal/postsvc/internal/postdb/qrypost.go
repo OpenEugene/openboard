@@ -74,13 +74,16 @@ func (s *PostDB) upsertPost(ctx cx, sid string, x *pb.AddPostReq, y *pb.PostResp
 // TODO: make it such that if given a list of multiple keywords, we can search the
 // title and body for those keywords.
 func (s *PostDB) findPosts(ctx cx, x *pb.FndPostsReq, y *pb.PostsResp) error {
-	selStmt, err := s.db.Prepare("SELECT post_id, type_id, slug, title, body FROM post WHERE title LIKE '%?%' OR body like '%?%'")
+	selStmt, err := s.db.Prepare("SELECT post_id, type_id, slug, title, body FROM post WHERE title LIKE ? OR body LIKE ?")
 	if err != nil {
 		return err
 	}
 	defer selStmt.Close()
 
-	rows, err := selStmt.Query(x.Keywords[0], x.Keywords[0])
+	rows, err := selStmt.Query(
+		"%"+x.Keywords[0]+"%",
+		"%"+x.Keywords[0]+"%",
+	)
 	if err != nil {
 		return err
 	}
@@ -88,10 +91,9 @@ func (s *PostDB) findPosts(ctx cx, x *pb.FndPostsReq, y *pb.PostsResp) error {
 
 	for rows.Next() {
 		r := pb.PostResp{}
-
 		var tc, tu, td, tb mysql.NullTime
 
-		err := rows.Scan(&r.Id, &r.Slug, &r.Title, &r.TypeId)
+		err := rows.Scan(&r.Id, &r.TypeId, &r.Slug, &r.Title, &r.Body)
 		if err != nil {
 			return err
 		}
@@ -108,7 +110,11 @@ func (s *PostDB) findPosts(ctx cx, x *pb.FndPostsReq, y *pb.PostsResp) error {
 		return err
 	}
 
-	err = s.db.QueryRow("SELECT COUNT(*) FROM post WHERE title LIKE '%?%' OR body like '%?%'").Scan(&y.Total)
+	err = s.db.QueryRow(
+		"SELECT COUNT(*) FROM post WHERE title LIKE ? OR body LIKE ?",
+		"%"+x.Keywords[0]+"%",
+		"%"+x.Keywords[0]+"%",
+	).Scan(&y.Total)
 	if err != nil {
 		return err
 	}
