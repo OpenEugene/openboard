@@ -53,12 +53,12 @@ func (s *PostDB) upsertPost(ctx cx, sid string, x *pb.AddPostReq, y *pb.PostResp
 		return fmt.Errorf("invalid uid")
 	}
 
-	stmt, err := s.db.Prepare("INSERT INTO post (post_id, type_id, title, body) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE post_id = ?, type_id = ?, title = ?, body = ?")
+	stmt, err := s.db.Prepare("INSERT INTO post (post_id, type_id, slug, title, body) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE post_id = ?, type_id = ?, slug = ?, title = ?, body = ?")
 	if err != nil {
 		return err
 	}
 
-	_, err = stmt.Exec(&id, x.TypeId, x.Title, x.Body, &id, x.TypeId, x.Title, x.Body)
+	_, err = stmt.Exec(&id, x.TypeId, "", x.Title, x.Body, &id, x.TypeId, "", x.Title, x.Body)
 	if err != nil {
 		return err
 	}
