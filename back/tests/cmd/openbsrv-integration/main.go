@@ -29,6 +29,9 @@ func main() {
 	// postSvcFndTypes(conn, postClnt)
 	postSvcAddPosts(conn, postClnt)
 	postSvcFndPosts(conn, postClnt)
+	postID := postSvcFndPostA(conn, postClnt)
+	postSvcEdtPostA(conn, postClnt, postID)
+	_ = postSvcFndPostA(conn, postClnt)
 }
 
 func userSvcAddRoles(conn *grpc.ClientConn, clnt pb.UserSvcClient) {
@@ -214,8 +217,8 @@ func postSvcAddPosts(conn *grpc.ClientConn, clnt pb.PostClient) {
 	r1, err := clnt.AddPost(
 		context.Background(),
 		&pb.AddPostReq{
-			Title:  "test title post first",
-			Body:   "test body of first post",
+			Title:  "test title postA first",
+			Body:   "test body of first postA",
 			TypeId: "2",
 		},
 	)
@@ -223,13 +226,13 @@ func postSvcAddPosts(conn *grpc.ClientConn, clnt pb.PostClient) {
 		fmt.Println(err)
 	}
 
-	fmt.Printf("Response from post service add post:\n%s\n\n", r1)
+	fmt.Printf("Response from post service add postA:\n%s\n\n", r1)
 
 	r2, err := clnt.AddPost(
 		context.Background(),
 		&pb.AddPostReq{
-			Title:  "test title post second",
-			Body:   "test body of second post",
+			Title:  "test title postB second",
+			Body:   "test body of second postB",
 			TypeId: "3",
 		},
 	)
@@ -237,31 +240,70 @@ func postSvcAddPosts(conn *grpc.ClientConn, clnt pb.PostClient) {
 		fmt.Println(err)
 	}
 
-	fmt.Printf("Response from post service add post:\n%s\n\n", r2)
+	fmt.Printf("Response from post service add postB:\n%s\n\n", r2)
 }
 
 func postSvcFndPosts(conn *grpc.ClientConn, clnt pb.PostClient) {
-	r1, err := clnt.FndPosts(
-		context.Background(),
-		&pb.FndPostsReq{
-			Keywords: []string{"second", "multiple", "keywords", "not", "available", "yet"},
+	r1, err := clnt.FndPosts(context.Background(),
+		&pb.FndPostsReq{Keywords: []string{
+			"postB",
+			"second",
+			"multiple",
+			"keywords",
+			"not",
+			"available",
+			"yet",
+		},
 		},
 	)
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	fmt.Printf("Response from post service find post with keyword 'second':\n%s\n\n", r1)
+	fmt.Printf("Response from post service find postB:\n%s\n\n", r1)
 
 	r2, err := clnt.FndPosts(
 		context.Background(),
 		&pb.FndPostsReq{
-			Keywords: []string{"third"},
+			Keywords: []string{"PostC"},
 		},
 	)
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	fmt.Printf("Response from post service find post with keyword 'third':\n%s\n\n", r2)
+	fmt.Printf("Response from post service find non-existant PostC:\n%s\n\n", r2)
+}
+
+func postSvcFndPostA(conn *grpc.ClientConn, clnt pb.PostClient) string {
+	postAID, err := clnt.FndPosts(
+		context.Background(),
+		&pb.FndPostsReq{Keywords: []string{"postA"}})
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Printf("Response from post service find postA:\n%s\n\n", postAID)
+	return postAID.Posts[0].Id
+}
+
+func postSvcEdtPostA(conn *grpc.ClientConn, clnt pb.PostClient, postID string) {
+	addPostReq := &pb.AddPostReq{
+		Title:  "Post A Edited",
+		Body:   "This first postA has been edited from the original.",
+		TypeId: "2",
+	}
+
+	r, err := clnt.OvrPost(
+		context.Background(),
+		&pb.OvrPostReq{
+			Id:  postID,
+			Req: addPostReq,
+		},
+	)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Printf("Response from post service edit postA:\n%s\n\n", r)
 }
