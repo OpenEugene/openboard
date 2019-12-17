@@ -45,6 +45,23 @@ func request_Post_AddType_0(ctx context.Context, marshaler runtime.Marshaler, cl
 
 }
 
+var (
+	filter_Post_FndTypes_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
+)
+
+func request_Post_FndTypes_0(ctx context.Context, marshaler runtime.Marshaler, client PostClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq FndTypesReq
+	var metadata runtime.ServerMetadata
+
+	if err := runtime.PopulateQueryParameters(&protoReq, req.URL.Query(), filter_Post_FndTypes_0); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+
+	msg, err := client.FndTypes(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	return msg, metadata, err
+
+}
+
 func request_Post_AddPost_0(ctx context.Context, marshaler runtime.Marshaler, client PostClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq AddPostReq
 	var metadata runtime.ServerMetadata
@@ -199,6 +216,26 @@ func RegisterPostHandlerClient(ctx context.Context, mux *runtime.ServeMux, clien
 
 	})
 
+	mux.Handle("GET", pattern_Post_FndTypes_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		rctx, err := runtime.AnnotateContext(ctx, mux, req)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_Post_FndTypes_0(rctx, inboundMarshaler, client, req, pathParams)
+		ctx = runtime.NewServerMetadataContext(ctx, md)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+
+		forward_Post_FndTypes_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+
+	})
+
 	mux.Handle("POST", pattern_Post_AddPost_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
@@ -285,6 +322,8 @@ func RegisterPostHandlerClient(ctx context.Context, mux *runtime.ServeMux, clien
 var (
 	pattern_Post_AddType_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"type"}, ""))
 
+	pattern_Post_FndTypes_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"types"}, ""))
+
 	pattern_Post_AddPost_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"post"}, ""))
 
 	pattern_Post_FndPosts_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"posts"}, ""))
@@ -296,6 +335,8 @@ var (
 
 var (
 	forward_Post_AddType_0 = runtime.ForwardResponseMessage
+
+	forward_Post_FndTypes_0 = runtime.ForwardResponseMessage
 
 	forward_Post_AddPost_0 = runtime.ForwardResponseMessage
 

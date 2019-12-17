@@ -92,6 +92,12 @@ service Post {
         };
 	}
 
+	rpc FndTypes(FndTypesReq) returns (TypesResp) {
+		option(google.api.http) = {
+            get: "/types"
+        };
+	}
+
 	rpc AddPost(AddPostReq) returns (PostResp) {
 		option(google.api.http) = {
             post: "/post"
