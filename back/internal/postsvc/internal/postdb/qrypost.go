@@ -47,6 +47,42 @@ func (s *PostDB) upsertType(ctx cx, sid string, x *pb.AddTypeReq, y *pb.TypeResp
 	return nil
 }
 
+func (s *PostDB) findTypes(ctx cx, x *pb.FndTypesReq, y *pb.TypesResp) error {
+	selStmt, err := s.db.Prepare("SELECT type_id, name FROM type LIMIT ? OFFSET ?")
+	if err != nil {
+		return err
+	}
+	defer selStmt.Close()
+
+	rows, err := selStmt.Query(x.Limit, x.Lapse)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		r := pb.TypeResp{}
+
+		err := rows.Scan(&r.Id, &r.Name)
+		if err != nil {
+			return err
+		}
+
+		y.Items = append(y.Items, &r)
+	}
+
+	if err = rows.Err(); err != nil {
+		return err
+	}
+
+	err = s.db.QueryRow("SELECT COUNT(*) FROM type").Scan(&y.Total)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (s *PostDB) upsertPost(ctx cx, sid string, x *pb.AddPostReq, y *pb.PostResp) error {
 	id, ok := parseOrUID(s.ug, sid)
 	if !ok {

@@ -39,6 +39,15 @@ func (s *PostDB) AddType(ctx context.Context, req *pb.AddTypeReq) (*pb.TypeResp,
 	return r, nil
 }
 
+// FndTypes implements part of the pb.PostServer interface.
+func (s *PostDB) FndTypes(ctx context.Context, req *pb.FndTypesReq) (*pb.TypesResp, error) {
+	r := &pb.TypesResp{}
+	if err := s.findTypes(ctx, req, r); err != nil {
+		return nil, err
+	}
+	return r, nil
+}
+
 // AddPost implements part of the pb.PostServer interface.
 func (s *PostDB) AddPost(ctx context.Context, req *pb.AddPostReq) (*pb.PostResp, error) {
 	r := &pb.PostResp{}
