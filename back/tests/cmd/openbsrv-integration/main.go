@@ -26,7 +26,7 @@ func main() {
 	fmt.Println("=====================Start Post Service Tests=====================")
 	postClnt := pb.NewPostClient(conn)
 	postSvcAddTypes(conn, postClnt)
-	// postSvcFndTypes(conn, postClnt)
+	postSvcFndTypes(conn, postClnt)
 	postSvcAddPosts(conn, postClnt)
 	postSvcFndPosts(conn, postClnt)
 	postID := postSvcFndPostA(conn, postClnt)
@@ -201,19 +201,17 @@ func postSvcAddTypes(conn *grpc.ClientConn, clnt pb.PostClient) {
 	fmt.Printf("Response from post service add typeB:\n%s\n\n", r2)
 }
 
-// FndTypes function will need to be added to postdb.go for below test to work.
-// func postSvcFndTypes(conn *grpc.ClientConn, clnt pb.PostClient) {
-// 	r, err := clnt.FndTypes(
-// 		context.Background(),
-// 		&pb.FndTypeReq{
-// 			Limit: 100,
-// 			Lapse: 0,
-// 		},
-// 	)
-// 	if err != nil {
-// 		fmt.Println(err)
-// 	fmt.Printf("Response from post service find types:\n%s\n\n", r)
-// }
+func postSvcFndTypes(conn *grpc.ClientConn, clnt pb.PostClient) {
+	r, err := clnt.FndTypes(
+		context.Background(),
+		&pb.FndTypesReq{Limit: 100, Lapse: 0},
+	)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Printf("Response from post service find types:\n%s\n\n", r)
+}
 
 func postSvcAddPosts(conn *grpc.ClientConn, clnt pb.PostClient) {
 	r1, err := clnt.AddPost(
