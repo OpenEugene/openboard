@@ -32,6 +32,8 @@ func main() {
 	postID := postSvcFndPostA(conn, postClnt)
 	postSvcEdtPostA(conn, postClnt, postID)
 	_ = postSvcFndPostA(conn, postClnt)
+	postSvcDelPostA(conn, postClnt, postID)
+	_ = postSvcFndPostA(conn, postClnt)
 }
 
 func userSvcAddRoles(conn *grpc.ClientConn, clnt pb.UserSvcClient) {
@@ -284,7 +286,10 @@ func postSvcFndPostA(conn *grpc.ClientConn, clnt pb.PostClient) string {
 	}
 
 	fmt.Printf("Response from post service find postA:\n%s\n\n", postAID)
-	return postAID.Posts[0].Id
+	if len(postAID.Posts) > 0 {
+		return postAID.Posts[0].Id
+	}
+	return ""
 }
 
 func postSvcEdtPostA(conn *grpc.ClientConn, clnt pb.PostClient, postID string) {
@@ -306,4 +311,16 @@ func postSvcEdtPostA(conn *grpc.ClientConn, clnt pb.PostClient, postID string) {
 	}
 
 	fmt.Printf("Response from post service edit postA:\n%s\n\n", r)
+}
+
+func postSvcDelPostA(conn *grpc.ClientConn, clnt pb.PostClient, postID string) {
+	r, err := clnt.RmvPost(
+		context.Background(),
+		&pb.RmvPostReq{Id: postID},
+	)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Printf("Response from post service delete postA:\n%s\n\n", r)
 }
