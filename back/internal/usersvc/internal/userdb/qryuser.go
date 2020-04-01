@@ -171,13 +171,24 @@ func (s *UserDB) upsertRole(ctx cx, sid string, x *pb.AddRoleReq, y *pb.RoleResp
 }
 
 func (s *UserDB) findRoles(ctx cx, x *pb.FndRolesReq, y *pb.RolesResp) error {
-	selStmt, err := s.db.Prepare("SELECT role_id, role_name FROM role WHERE role_id in ? OR role_name in = ? LIMIT ? OFFSET ?")
+	selStmt, err := s.db.Prepare("SELECT role_id, role_name FROM role WHERE role_id = ? OR role_name = ? LIMIT ? OFFSET ?")
 	if err != nil {
 		return err
 	}
 	defer selStmt.Close()
 
-	rows, err := selStmt.Query(x.RoleIds, x.RoleNames, x.Limit, x.Lapse)
+	var roleIDs, roleNames string
+
+	// TODO: enable search of more than one role ID
+	if len(x.RoleIds) > 0 {
+		roleIDs = x.RoleIds[0]
+	}
+	// TODO: enable search of more than one role name
+	if len(x.RoleNames) > 0 {
+		roleNames = x.RoleNames[0]
+	}
+
+	rows, err := selStmt.Query(roleIDs, roleNames, x.Limit, x.Lapse)
 	if err != nil {
 		return err
 	}
@@ -200,7 +211,13 @@ func (s *UserDB) findRoles(ctx cx, x *pb.FndRolesReq, y *pb.RolesResp) error {
 		return err
 	}
 
-	err = s.db.QueryRow("SELECT COUNT(*) FROM role WHERE role_id in ? OR role_name in = ? LIMIT ? OFFSET ?").Scan(&y.Total)
+	err = s.db.QueryRow(
+		"SELECT COUNT(*) FROM role WHERE role_id = ? OR role_name = ? LIMIT ? OFFSET ?",
+		roleIDs,
+		roleNames,
+		x.Limit,
+		x.Lapse,
+	).Scan(&y.Total)
 	if err != nil {
 		return err
 	}
