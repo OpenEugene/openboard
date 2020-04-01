@@ -582,7 +582,7 @@ func apidocsSwaggerJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "apidocs.swagger.json", size: 11461, mode: os.FileMode(436), modTime: time.Unix(1575250838, 0)}
+	info := bindataFileInfo{name: "apidocs.swagger.json", size: 11461, mode: os.FileMode(436), modTime: time.Unix(1585794740, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
