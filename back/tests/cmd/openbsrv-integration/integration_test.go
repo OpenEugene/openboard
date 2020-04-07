@@ -48,9 +48,7 @@ func userSvcAddAndFndRoleFunc(ctx context.Context, conn *grpc.ClientConn, clnt p
 			Lapse:     0,
 		})
 
-		if len(r.Items) > 0 && r.Items[0].Name == want {
-			t.Logf("got expected role name: %s", want)
-		} else {
+		if len(r.Items) != 1 || r.Items[0].Name != want {
 			t.Logf("got: %v, want: %s", r, want)
 			t.Fail()
 		}
@@ -152,9 +150,7 @@ func userSvcAddAndFndUsersFunc(ctx context.Context, conn *grpc.ClientConn, clnt 
 				FullName:    r.Item.FullName,
 				Avatar:      r.Item.Avatar,
 			}
-			if got == tc.want {
-				t.Logf("got expected user: %v", got)
-			} else {
+			if got != tc.want {
 				t.Logf("got: %v, want: %v", got, tc.want)
 				t.Fail()
 			}
@@ -164,9 +160,7 @@ func userSvcAddAndFndUsersFunc(ctx context.Context, conn *grpc.ClientConn, clnt 
 				t.Logf("unable to find user: %v", err)
 				t.Fail()
 			}
-			if r.Item.Id == userID {
-				t.Logf("got expected userID: %s", userID)
-			} else {
+			if r.Item.Id != userID {
 				t.Logf("got: %s, want: %s", userID, r.Item.Id)
 				t.Fail()
 			}
@@ -203,9 +197,7 @@ func userSvcDelUserFunc(ctx context.Context, conn *grpc.ClientConn, clnt pb.User
 			t.Fail()
 		}
 
-		if userID != "" {
-			t.Logf("user %s found", userID)
-		} else {
+		if userID == "" {
 			t.Logf("unable to find userID")
 			t.Fail()
 		}
@@ -214,8 +206,6 @@ func userSvcDelUserFunc(ctx context.Context, conn *grpc.ClientConn, clnt pb.User
 		if err != nil {
 			t.Log(err)
 			t.Fail()
-		} else {
-			t.Logf("user %s was removed", userID)
 		}
 
 		userID, err = userSvcFndUser(ctx, conn, clnt, req)
@@ -226,8 +216,6 @@ func userSvcDelUserFunc(ctx context.Context, conn *grpc.ClientConn, clnt pb.User
 		if userID != "" {
 			t.Logf("expected userID to be empty string, got: %s", userID)
 			t.Fail()
-		} else {
-			t.Logf("userID %s was not found, as expected", userID)
 		}
 	}
 }
@@ -262,9 +250,7 @@ func postSvcAddAndFndTypesFunc(ctx context.Context, conn *grpc.ClientConn, clnt 
 				t.Log(err)
 				t.Fail()
 			}
-			if r1.Name == tc.wantType {
-				t.Logf("got expected response for adding type %s", r1.Name)
-			} else {
+			if r1.Name != tc.wantType {
 				t.Logf("want: %s, got: %s", tc.wantType, r1.Name)
 				t.Fail()
 			}
@@ -274,16 +260,13 @@ func postSvcAddAndFndTypesFunc(ctx context.Context, conn *grpc.ClientConn, clnt 
 				t.Log(err)
 				t.Fail()
 			}
-			if len(r2.Items) == tc.wantCount {
-				t.Logf("expected number of types found: %d", tc.wantCount)
-			} else {
+			if len(r2.Items) != tc.wantCount {
 				t.Logf("want %d items, got %d", tc.wantCount, len(r2.Items))
 				t.Fail()
 			}
-			if r2.Items[tc.wantCount-1].Name == tc.wantType {
-				t.Logf("got expected type name: %s", tc.wantType)
-			} else {
+			if r2.Items[tc.wantCount-1].Name != tc.wantType {
 				t.Logf("got: %s, want: %s", r2.Items[tc.wantCount-1], tc.wantType)
+				t.Fail()
 			}
 		}
 	}
@@ -351,9 +334,7 @@ func postSvcAddAndFndPostsFunc(ctx context.Context, conn *grpc.ClientConn, clnt 
 				body:   r.Body,
 				typeId: r.TypeId,
 			}
-			if got == tc.want {
-				t.Logf("got expected post: %v", got)
-			} else {
+			if got != tc.want {
 				t.Logf("got: %v, want: %v", got, tc.want)
 				t.Fail()
 			}
@@ -364,9 +345,7 @@ func postSvcAddAndFndPostsFunc(ctx context.Context, conn *grpc.ClientConn, clnt 
 				t.Fail()
 			}
 
-			if r.Id == postID {
-				t.Logf("got expected postID: %s", postID)
-			} else {
+			if r.Id != postID {
 				t.Logf("got: %s, want: %s", postID, r.Id)
 				t.Fail()
 			}
@@ -430,9 +409,7 @@ func postSvcEdtPostFunc(ctx context.Context, conn *grpc.ClientConn, clnt pb.Post
 			body:   r.Body,
 			typeId: r.TypeId,
 		}
-		if got == want {
-			t.Logf("got expected post title: %v", got)
-		} else {
+		if got != want {
 			t.Logf("got: %v, want: %v", got, want)
 			t.Fail()
 		}
@@ -464,6 +441,5 @@ func postSvcDelPostFunc(ctx context.Context, conn *grpc.ClientConn, clnt pb.Post
 			t.Logf("Expected userID to be empty string, got: %s", postID)
 			t.Fail()
 		}
-		t.Log("got expected postID to be empty string")
 	}
 }
