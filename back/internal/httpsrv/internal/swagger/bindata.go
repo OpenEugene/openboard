@@ -121,6 +121,135 @@ var _apidocsSwaggerJson = []byte(`{
         ]
       }
     },
+    "/post": {
+      "post": {
+        "operationId": "AddPost",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/pbPostResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/pbAddPostReq"
+            }
+          }
+        ],
+        "tags": [
+          "Post"
+        ]
+      }
+    },
+    "/post/{id}": {
+      "delete": {
+        "operationId": "RmvPost",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/pbRmvPostResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Post"
+        ]
+      },
+      "put": {
+        "operationId": "OvrPost",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/pbPostResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/pbOvrPostReq"
+            }
+          }
+        ],
+        "tags": [
+          "Post"
+        ]
+      }
+    },
+    "/posts": {
+      "get": {
+        "operationId": "FndPosts",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/pbPostsResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "keywords",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "multi"
+          },
+          {
+            "name": "created",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "updated",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "deleted",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "date-time"
+          }
+        ],
+        "tags": [
+          "Post"
+        ]
+      }
+    },
     "/roles": {
       "get": {
         "operationId": "FndRoles",
@@ -170,6 +299,64 @@ var _apidocsSwaggerJson = []byte(`{
         ],
         "tags": [
           "UserSvc"
+        ]
+      }
+    },
+    "/type": {
+      "post": {
+        "operationId": "AddType",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/pbTypeResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/pbAddTypeReq"
+            }
+          }
+        ],
+        "tags": [
+          "Post"
+        ]
+      }
+    },
+    "/types": {
+      "get": {
+        "operationId": "FndTypes",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/pbTypesResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "name": "lapse",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "Post"
         ]
       }
     },
@@ -381,6 +568,28 @@ var _apidocsSwaggerJson = []byte(`{
         }
       }
     },
+    "pbAddPostReq": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "body": {
+          "type": "string"
+        },
+        "typeId": {
+          "type": "string"
+        }
+      }
+    },
+    "pbAddTypeReq": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        }
+      }
+    },
     "pbAddUserReq": {
       "type": "object",
       "properties": {
@@ -445,6 +654,17 @@ var _apidocsSwaggerJson = []byte(`{
         }
       }
     },
+    "pbOvrPostReq": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "req": {
+          "$ref": "#/definitions/pbAddPostReq"
+        }
+      }
+    },
     "pbOvrUserReq": {
       "type": "object",
       "properties": {
@@ -456,7 +676,61 @@ var _apidocsSwaggerJson = []byte(`{
         }
       }
     },
+    "pbPostResp": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "slug": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "body": {
+          "type": "string"
+        },
+        "typeId": {
+          "type": "string"
+        },
+        "created": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "deleted": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "blocked": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "pbPostsResp": {
+      "type": "object",
+      "properties": {
+        "posts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/pbPostResp"
+          }
+        },
+        "total": {
+          "type": "integer",
+          "format": "int64"
+        }
+      }
+    },
     "pbRmvAuthResp": {
+      "type": "object"
+    },
+    "pbRmvPostResp": {
       "type": "object"
     },
     "pbRmvUserResp": {
@@ -480,6 +754,32 @@ var _apidocsSwaggerJson = []byte(`{
           "type": "array",
           "items": {
             "$ref": "#/definitions/pbRoleResp"
+          }
+        },
+        "total": {
+          "type": "integer",
+          "format": "int64"
+        }
+      }
+    },
+    "pbTypeResp": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      }
+    },
+    "pbTypesResp": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/pbTypeResp"
           }
         },
         "total": {
@@ -582,7 +882,7 @@ func apidocsSwaggerJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "apidocs.swagger.json", size: 11461, mode: os.FileMode(436), modTime: time.Unix(1585794740, 0)}
+	info := bindataFileInfo{name: "apidocs.swagger.json", size: 17820, mode: os.FileMode(436), modTime: time.Unix(1586233024, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
