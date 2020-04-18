@@ -4,7 +4,9 @@ import (
 	"context"
 	"fmt"
 	"github.com/OpenEugene/openboard/back/internal/pb"
+	"github.com/golang/protobuf/ptypes/timestamp"
 	"google.golang.org/grpc"
+	"reflect"
 	"testing"
 )
 
@@ -56,21 +58,11 @@ func userSvcAddAndFndRoleFn(ctx context.Context, conn *grpc.ClientConn, clnt pb.
 	}
 }
 
-type user struct {
-	Username    string
-	Email       string
-	EmailHold   bool
-	Altmail     string
-	AltmailHold bool
-	FullName    string
-	Avatar      string
-}
-
 func userSvcAddAndFndUsersFn(ctx context.Context, conn *grpc.ClientConn, clnt pb.UserSvcClient) func(*testing.T) {
 	return func(t *testing.T) {
 		tests := []struct {
 			addReq *pb.AddUserReq
-			want   user
+			want   *pb.User
 			fndReq pb.FndUsersReq
 		}{
 			{
@@ -84,7 +76,7 @@ func userSvcAddAndFndUsersFn(ctx context.Context, conn *grpc.ClientConn, clnt pb
 					Avatar:      "test user avatar A",
 					Password:    "test user password A",
 				},
-				user{
+				&pb.User{
 					Username:    "test username A",
 					Email:       "user_a@email.com",
 					EmailHold:   false,
@@ -114,7 +106,7 @@ func userSvcAddAndFndUsersFn(ctx context.Context, conn *grpc.ClientConn, clnt pb
 					Avatar:      "test user avatar B",
 					Password:    "test user password B",
 				},
-				user{
+				&pb.User{
 					Username:    "test username B",
 					Email:       "userB@email.com",
 					EmailHold:   false,
@@ -141,25 +133,24 @@ func userSvcAddAndFndUsersFn(ctx context.Context, conn *grpc.ClientConn, clnt pb
 				t.Fatal(err)
 			}
 
-			got := user{
-				Username:    r.Item.Username,
-				Email:       r.Item.Email,
-				EmailHold:   r.Item.EmailHold,
-				Altmail:     r.Item.Altmail,
-				AltmailHold: r.Item.AltmailHold,
-				FullName:    r.Item.FullName,
-				Avatar:      r.Item.Avatar,
-			}
-			if got != tc.want {
+			got := r.Item
+			wantUserID := got.Id
+
+			// Unset fields that aren't being tested.
+			got.Id = ""
+			got.XXX_unrecognized = []byte{}
+			got.XXX_sizecache = 0
+
+			if reflect.DeepEqual(got, tc.want) {
 				t.Fatalf("got: %v, want: %v", got, tc.want)
 			}
 
-			userID, err := userSvcFndUser(ctx, conn, clnt, tc.fndReq)
+			gotUserID, err := userSvcFndUser(ctx, conn, clnt, tc.fndReq)
 			if err != nil {
 				t.Errorf("unable to find user: %v", err)
 			}
-			if r.Item.Id != userID {
-				t.Fatalf("got: %s, want: %s", userID, r.Item.Id)
+			if gotUserID != wantUserID {
+				t.Fatalf("got: %s, want: %s", gotUserID, wantUserID)
 			}
 		}
 	}
@@ -242,35 +233,34 @@ func postSvcAddAndFndTypesFn(ctx context.Context, conn *grpc.ClientConn, clnt pb
 			if err != nil {
 				t.Error(err)
 			}
-			if r1.Name != tc.wantType {
-				t.Fatalf("want: %s, got: %s", tc.wantType, r1.Name)
+
+			gotType := r1.Name
+			if gotType != tc.wantType {
+				t.Fatalf("got: %s, want: %s", gotType, tc.wantType)
 			}
 
 			r2, err := clnt.FndTypes(ctx, tc.fndTypeReq)
 			if err != nil {
 				t.Error(err)
 			}
-			if len(r2.Items) != tc.wantCount {
-				t.Errorf("want %d items, got %d", tc.wantCount, len(r2.Items))
+
+			gotCount := len(r2.Items)
+			if gotCount != tc.wantCount {
+				t.Errorf("got %d items, want %d", gotCount, tc.wantCount)
 			}
-			if r2.Items[tc.wantCount-1].Name != tc.wantType {
-				t.Fatalf("got: %s, want: %s", r2.Items[tc.wantCount-1], tc.wantType)
+			gotType = r2.Items[tc.wantCount-1].Name
+			if gotType != tc.wantType {
+				t.Fatalf("got: %s, want: %s", gotType, tc.wantType)
 			}
 		}
 	}
-}
-
-type post struct {
-	title  string
-	body   string
-	typeId string
 }
 
 func postSvcAddAndFndPostsFn(ctx context.Context, conn *grpc.ClientConn, clnt pb.PostClient) func(*testing.T) {
 	return func(t *testing.T) {
 		tests := []struct {
 			addReq *pb.AddPostReq
-			want   post
+			want   *pb.PostResp
 			fndReq *pb.FndPostsReq
 		}{
 			{
@@ -279,10 +269,10 @@ func postSvcAddAndFndPostsFn(ctx context.Context, conn *grpc.ClientConn, clnt pb
 					Body:   "test body of first post",
 					TypeId: "2",
 				},
-				post{
-					"test title postA first",
-					"test body of first post",
-					"2",
+				&pb.PostResp{
+					Title:  "test title postA first",
+					Body:   "test body of first post",
+					TypeId: "2",
 				},
 				&pb.FndPostsReq{Keywords: []string{
 					"postA",
@@ -301,10 +291,10 @@ func postSvcAddAndFndPostsFn(ctx context.Context, conn *grpc.ClientConn, clnt pb
 					Body:   "test body of second postB",
 					TypeId: "3",
 				},
-				post{
-					"test title postB second",
-					"test body of second postB",
-					"3",
+				&pb.PostResp{
+					Title:  "test title postB second",
+					Body:   "test body of second postB",
+					TypeId: "3",
 				},
 				&pb.FndPostsReq{Keywords: []string{"postB"}},
 			},
@@ -316,22 +306,30 @@ func postSvcAddAndFndPostsFn(ctx context.Context, conn *grpc.ClientConn, clnt pb
 				t.Fatal(err)
 			}
 
-			got := post{
-				title:  r.Title,
-				body:   r.Body,
-				typeId: r.TypeId,
-			}
-			if got != tc.want {
+			got := r
+			wantPostID := got.Id
+
+			// Unset fields that aren't being tested.
+			got.Id = ""
+			got.Slug = ""
+			got.Created = &timestamp.Timestamp{}
+			got.Updated = &timestamp.Timestamp{}
+			got.Deleted = &timestamp.Timestamp{}
+			got.Blocked = &timestamp.Timestamp{}
+			got.XXX_unrecognized = []byte{}
+			got.XXX_sizecache = 0
+
+			if reflect.DeepEqual(got, tc.want) {
 				t.Errorf("got: %v, want: %v", got, tc.want)
 			}
 
-			postID, err := postSvcFndPost(ctx, conn, clnt, tc.fndReq)
+			gotPostID, err := postSvcFndPost(ctx, conn, clnt, tc.fndReq)
 			if err != nil {
 				t.Error(err)
 			}
 
-			if r.Id != postID {
-				t.Fatalf("got: %s, want: %s", postID, r.Id)
+			if gotPostID != wantPostID {
+				t.Fatalf("got: %s, want: %s", gotPostID, wantPostID)
 			}
 		}
 	}
@@ -379,18 +377,25 @@ func postSvcEdtPostFn(ctx context.Context, conn *grpc.ClientConn, clnt pb.PostCl
 			t.Error(err)
 		}
 
-		want := post{
-			editReq.Title,
-			editReq.Body,
-			editReq.TypeId,
+		want := &pb.PostResp{
+			Title:  editReq.Title,
+			Body:   editReq.Body,
+			TypeId: editReq.TypeId,
 		}
 
-		got := post{
-			title:  r.Title,
-			body:   r.Body,
-			typeId: r.TypeId,
-		}
-		if got != want {
+		got := r
+
+		// Unset fields that aren't being tested.
+		got.Id = ""
+		got.Slug = ""
+		got.Created = &timestamp.Timestamp{}
+		got.Updated = &timestamp.Timestamp{}
+		got.Deleted = &timestamp.Timestamp{}
+		got.Blocked = &timestamp.Timestamp{}
+		got.XXX_unrecognized = []byte{}
+		got.XXX_sizecache = 0
+
+		if reflect.DeepEqual(got, want) {
 			t.Fatalf("got: %v, want: %v", got, want)
 		}
 	}
