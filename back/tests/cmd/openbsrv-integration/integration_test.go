@@ -12,8 +12,7 @@ func TestClientServices(t *testing.T) {
 	ctx := context.Background()
 	conn, err := grpc.Dial(":4242", grpc.WithInsecure())
 	if err != nil {
-		t.Log(err)
-		t.Fail()
+		t.Fatal(err)
 	}
 	defer conn.Close()
 
@@ -37,8 +36,7 @@ func userSvcAddAndFndRoleFunc(ctx context.Context, conn *grpc.ClientConn, clnt p
 
 		_, err := clnt.AddRole(ctx, &pb.AddRoleReq{Name: want})
 		if err != nil {
-			t.Log(err)
-			t.Fail()
+			t.Fatal(err)
 		}
 
 		r, err := clnt.FndRoles(ctx, &pb.FndRolesReq{
@@ -48,9 +46,12 @@ func userSvcAddAndFndRoleFunc(ctx context.Context, conn *grpc.ClientConn, clnt p
 			Lapse:     0,
 		})
 
-		if len(r.Items) != 1 || r.Items[0].Name != want {
-			t.Logf("got: %v, want: %s", r, want)
-			t.Fail()
+		if len(r.Items) != 1 {
+			t.Fatalf("got: no items, want: %s", want)
+		}
+
+		if got := r.Items[0].Name; got != want {
+			t.Fatalf("got: %v, want: %s", got, want)
 		}
 	}
 }
@@ -137,8 +138,7 @@ func userSvcAddAndFndUsersFunc(ctx context.Context, conn *grpc.ClientConn, clnt 
 		for _, tc := range tests {
 			r, err := clnt.AddUser(ctx, tc.addReq)
 			if err != nil {
-				t.Log(err)
-				t.Fail()
+				t.Fatal(err)
 			}
 
 			got := user{
@@ -151,18 +151,15 @@ func userSvcAddAndFndUsersFunc(ctx context.Context, conn *grpc.ClientConn, clnt 
 				Avatar:      r.Item.Avatar,
 			}
 			if got != tc.want {
-				t.Logf("got: %v, want: %v", got, tc.want)
-				t.Fail()
+				t.Fatalf("got: %v, want: %v", got, tc.want)
 			}
 
 			userID, err := userSvcFndUser(ctx, conn, clnt, tc.fndReq)
 			if err != nil {
-				t.Logf("unable to find user: %v", err)
-				t.Fail()
+				t.Errorf("unable to find user: %v", err)
 			}
 			if r.Item.Id != userID {
-				t.Logf("got: %s, want: %s", userID, r.Item.Id)
-				t.Fail()
+				t.Fatalf("got: %s, want: %s", userID, r.Item.Id)
 			}
 		}
 	}
@@ -193,28 +190,24 @@ func userSvcDelUserFunc(ctx context.Context, conn *grpc.ClientConn, clnt pb.User
 
 		userID, err := userSvcFndUser(ctx, conn, clnt, req)
 		if err != nil {
-			t.Log(err)
-			t.Fail()
+			t.Error(err)
 		}
 
 		if userID == "" {
-			t.Logf("unable to find userID")
-			t.Fail()
+			t.Fatal("unable to find userID")
 		}
 
 		_, err = clnt.RmvUser(ctx, &pb.RmvUserReq{Id: userID})
 		if err != nil {
-			t.Log(err)
-			t.Fail()
+			t.Error(err)
 		}
 
 		userID, err = userSvcFndUser(ctx, conn, clnt, req)
 		if err != nil {
-			t.Log(err)
-			t.Fail()
+			t.Error(err)
 		}
 		if userID != "" {
-			t.Logf("expected userID to be empty string, got: %s", userID)
+			t.Fatalf("expected userID to be empty string, got: %s", userID)
 			t.Fail()
 		}
 	}
@@ -247,26 +240,21 @@ func postSvcAddAndFndTypesFunc(ctx context.Context, conn *grpc.ClientConn, clnt 
 		for _, tc := range tests {
 			r1, err := clnt.AddType(ctx, tc.addTypeReq)
 			if err != nil {
-				t.Log(err)
-				t.Fail()
+				t.Error(err)
 			}
 			if r1.Name != tc.wantType {
-				t.Logf("want: %s, got: %s", tc.wantType, r1.Name)
-				t.Fail()
+				t.Fatalf("want: %s, got: %s", tc.wantType, r1.Name)
 			}
 
 			r2, err := clnt.FndTypes(ctx, tc.fndTypeReq)
 			if err != nil {
-				t.Log(err)
-				t.Fail()
+				t.Error(err)
 			}
 			if len(r2.Items) != tc.wantCount {
-				t.Logf("want %d items, got %d", tc.wantCount, len(r2.Items))
-				t.Fail()
+				t.Errorf("want %d items, got %d", tc.wantCount, len(r2.Items))
 			}
 			if r2.Items[tc.wantCount-1].Name != tc.wantType {
-				t.Logf("got: %s, want: %s", r2.Items[tc.wantCount-1], tc.wantType)
-				t.Fail()
+				t.Fatalf("got: %s, want: %s", r2.Items[tc.wantCount-1], tc.wantType)
 			}
 		}
 	}
@@ -325,8 +313,7 @@ func postSvcAddAndFndPostsFunc(ctx context.Context, conn *grpc.ClientConn, clnt 
 		for _, tc := range tests {
 			r, err := clnt.AddPost(ctx, tc.addReq)
 			if err != nil {
-				t.Log(err)
-				t.Fail()
+				t.Fatal(err)
 			}
 
 			got := post{
@@ -335,19 +322,16 @@ func postSvcAddAndFndPostsFunc(ctx context.Context, conn *grpc.ClientConn, clnt 
 				typeId: r.TypeId,
 			}
 			if got != tc.want {
-				t.Logf("got: %v, want: %v", got, tc.want)
-				t.Fail()
+				t.Errorf("got: %v, want: %v", got, tc.want)
 			}
 
 			postID, err := postSvcFndPost(ctx, conn, clnt, tc.fndReq)
 			if err != nil {
-				t.Log(err)
-				t.Fail()
+				t.Error(err)
 			}
 
 			if r.Id != postID {
-				t.Logf("got: %s, want: %s", postID, r.Id)
-				t.Fail()
+				t.Fatalf("got: %s, want: %s", postID, r.Id)
 			}
 		}
 	}
@@ -374,15 +358,13 @@ func postSvcEdtPostFunc(ctx context.Context, conn *grpc.ClientConn, clnt pb.Post
 		}
 		_, err := clnt.AddPost(ctx, addReq)
 		if err != nil {
-			t.Log(err)
-			t.Fail()
+			t.Fatal(err)
 		}
 
 		fndReq := &pb.FndPostsReq{Keywords: []string{"post D"}}
 		postID, err := postSvcFndPost(ctx, conn, clnt, fndReq)
 		if err != nil {
-			t.Log(err)
-			t.Fail()
+			t.Error(err)
 		}
 
 		editReq := &pb.AddPostReq{
@@ -394,8 +376,7 @@ func postSvcEdtPostFunc(ctx context.Context, conn *grpc.ClientConn, clnt pb.Post
 		ovrReq := &pb.OvrPostReq{Id: postID, Req: editReq}
 		r, err := clnt.OvrPost(ctx, ovrReq)
 		if err != nil {
-			t.Log(err)
-			t.Fail()
+			t.Error(err)
 		}
 
 		want := post{
@@ -410,8 +391,7 @@ func postSvcEdtPostFunc(ctx context.Context, conn *grpc.ClientConn, clnt pb.Post
 			typeId: r.TypeId,
 		}
 		if got != want {
-			t.Logf("got: %v, want: %v", got, want)
-			t.Fail()
+			t.Fatalf("got: %v, want: %v", got, want)
 		}
 	}
 }
@@ -421,25 +401,21 @@ func postSvcDelPostFunc(ctx context.Context, conn *grpc.ClientConn, clnt pb.Post
 		req := &pb.FndPostsReq{Keywords: []string{"postC"}}
 		postID, err := postSvcFndPost(ctx, conn, clnt, req)
 		if err != nil {
-			t.Log(err)
-			t.Fail()
+			t.Fatal(err)
 		}
 
 		_, err = clnt.RmvPost(ctx, &pb.RmvPostReq{Id: postID})
 		if err != nil {
-			t.Log(err)
-			t.Fail()
+			t.Error(err)
 		}
 
 		postID, err = postSvcFndPost(ctx, conn, clnt, req)
 		if err != nil {
-			t.Log(err)
-			t.Fail()
+			t.Error(err)
 		}
 
 		if postID != "" {
-			t.Logf("Expected userID to be empty string, got: %s", postID)
-			t.Fail()
+			t.Fatalf("Expected userID to be empty string, got: %s", postID)
 		}
 	}
 }
