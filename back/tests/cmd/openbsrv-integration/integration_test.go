@@ -18,19 +18,19 @@ func TestClientServices(t *testing.T) {
 
 	// User Service Tests
 	userClnt := pb.NewUserSvcClient(conn)
-	t.Run("Add and find user role", userSvcAddAndFndRoleFunc(ctx, conn, userClnt))
-	t.Run("Add and find users", userSvcAddAndFndUsersFunc(ctx, conn, userClnt))
-	t.Run("Find and delete user", userSvcDelUserFunc(ctx, conn, userClnt))
+	t.Run("Add and find user role", userSvcAddAndFndRoleFn(ctx, conn, userClnt))
+	t.Run("Add and find users", userSvcAddAndFndUsersFn(ctx, conn, userClnt))
+	t.Run("Find and delete user", userSvcDelUserFn(ctx, conn, userClnt))
 
 	// Post Service Tests
 	postClnt := pb.NewPostClient(conn)
-	t.Run("Add type", postSvcAddAndFndTypesFunc(ctx, conn, postClnt))
-	t.Run("Add and find posts", postSvcAddAndFndPostsFunc(ctx, conn, postClnt))
-	t.Run("Add, find and edit post", postSvcEdtPostFunc(ctx, conn, postClnt))
-	t.Run("Find and delete post", postSvcDelPostFunc(ctx, conn, postClnt))
+	t.Run("Add type", postSvcAddAndFndTypesFn(ctx, conn, postClnt))
+	t.Run("Add and find posts", postSvcAddAndFndPostsFn(ctx, conn, postClnt))
+	t.Run("Add, find and edit post", postSvcEdtPostFn(ctx, conn, postClnt))
+	t.Run("Find and delete post", postSvcDelPostFn(ctx, conn, postClnt))
 }
 
-func userSvcAddAndFndRoleFunc(ctx context.Context, conn *grpc.ClientConn, clnt pb.UserSvcClient) func(*testing.T) {
+func userSvcAddAndFndRoleFn(ctx context.Context, conn *grpc.ClientConn, clnt pb.UserSvcClient) func(*testing.T) {
 	return func(t *testing.T) {
 		want := "testRole"
 
@@ -66,7 +66,7 @@ type user struct {
 	Avatar      string
 }
 
-func userSvcAddAndFndUsersFunc(ctx context.Context, conn *grpc.ClientConn, clnt pb.UserSvcClient) func(*testing.T) {
+func userSvcAddAndFndUsersFn(ctx context.Context, conn *grpc.ClientConn, clnt pb.UserSvcClient) func(*testing.T) {
 	return func(t *testing.T) {
 		tests := []struct {
 			addReq *pb.AddUserReq
@@ -176,7 +176,7 @@ func userSvcFndUser(ctx context.Context, conn *grpc.ClientConn, clnt pb.UserSvcC
 	return "", nil
 }
 
-func userSvcDelUserFunc(ctx context.Context, conn *grpc.ClientConn, clnt pb.UserSvcClient) func(*testing.T) {
+func userSvcDelUserFn(ctx context.Context, conn *grpc.ClientConn, clnt pb.UserSvcClient) func(*testing.T) {
 	return func(t *testing.T) {
 		req := pb.FndUsersReq{
 			RoleIds:     []string{},
@@ -213,7 +213,7 @@ func userSvcDelUserFunc(ctx context.Context, conn *grpc.ClientConn, clnt pb.User
 	}
 }
 
-func postSvcAddAndFndTypesFunc(ctx context.Context, conn *grpc.ClientConn, clnt pb.PostClient) func(*testing.T) {
+func postSvcAddAndFndTypesFn(ctx context.Context, conn *grpc.ClientConn, clnt pb.PostClient) func(*testing.T) {
 	return func(t *testing.T) {
 		ctx := context.Background()
 
@@ -266,7 +266,7 @@ type post struct {
 	typeId string
 }
 
-func postSvcAddAndFndPostsFunc(ctx context.Context, conn *grpc.ClientConn, clnt pb.PostClient) func(*testing.T) {
+func postSvcAddAndFndPostsFn(ctx context.Context, conn *grpc.ClientConn, clnt pb.PostClient) func(*testing.T) {
 	return func(t *testing.T) {
 		tests := []struct {
 			addReq *pb.AddPostReq
@@ -349,7 +349,7 @@ func postSvcFndPost(ctx context.Context, conn *grpc.ClientConn, clnt pb.PostClie
 	return "", nil
 }
 
-func postSvcEdtPostFunc(ctx context.Context, conn *grpc.ClientConn, clnt pb.PostClient) func(*testing.T) {
+func postSvcEdtPostFn(ctx context.Context, conn *grpc.ClientConn, clnt pb.PostClient) func(*testing.T) {
 	return func(t *testing.T) {
 		addReq := &pb.AddPostReq{
 			Title:  "Post D",
@@ -396,7 +396,7 @@ func postSvcEdtPostFunc(ctx context.Context, conn *grpc.ClientConn, clnt pb.Post
 	}
 }
 
-func postSvcDelPostFunc(ctx context.Context, conn *grpc.ClientConn, clnt pb.PostClient) func(*testing.T) {
+func postSvcDelPostFn(ctx context.Context, conn *grpc.ClientConn, clnt pb.PostClient) func(*testing.T) {
 	return func(t *testing.T) {
 		req := &pb.FndPostsReq{Keywords: []string{"postC"}}
 		postID, err := postSvcFndPost(ctx, conn, clnt, req)
