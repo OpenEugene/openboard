@@ -312,10 +312,10 @@ func postSvcAddAndFndPostsFn(ctx context.Context, conn *grpc.ClientConn, clnt pb
 			// Unset fields that aren't being tested.
 			got.Id = ""
 			got.Slug = ""
-			got.Created = &timestamp.Timestamp{}
-			got.Updated = &timestamp.Timestamp{}
-			got.Deleted = &timestamp.Timestamp{}
-			got.Blocked = &timestamp.Timestamp{}
+			got.Created = nil
+			got.Updated = nil
+			got.Deleted = nil
+			got.Blocked = nil
 			got.XXX_unrecognized = []byte{}
 			got.XXX_sizecache = 0
 
