@@ -9,7 +9,7 @@ CREATE TABLE user (
     username VARCHAR(255) NOT NULL UNIQUE,
     email VARCHAR(255) NOT NULL UNIQUE,
     email_hold BOOL NOT NULL DEFAULT TRUE,
-    altmail VARCHAR(255) NOT NULL UNIQUE,
+    altmail VARCHAR(255) NOT NULL,
     altmail_hold BOOL NOT NULL DEFAULT TRUE,
     full_name VARCHAR(255) NOT NULL,
     avatar VARCHAR(255) NOT NULL DEFAULT "",

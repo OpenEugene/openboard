@@ -36,12 +36,49 @@ func (s *PostDB) upsertType(ctx cx, sid string, x *pb.AddTypeReq, y *pb.TypeResp
 		return err
 	}
 
-	if _, err = stmt.Exec(id, x.Name); err != nil {
+	_, err = stmt.Exec(&id, x.Name, &id, x.Name)
+	if err != nil {
 		return err
 	}
 
 	y.Id = id.String()
 	y.Name = x.Name
+
+	return nil
+}
+
+func (s *PostDB) findTypes(ctx cx, x *pb.FndTypesReq, y *pb.TypesResp) error {
+	selStmt, err := s.db.Prepare("SELECT type_id, name FROM type LIMIT ? OFFSET ?")
+	if err != nil {
+		return err
+	}
+	defer selStmt.Close()
+
+	rows, err := selStmt.Query(x.Limit, x.Lapse)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		r := pb.TypeResp{}
+
+		err := rows.Scan(&r.Id, &r.Name)
+		if err != nil {
+			return err
+		}
+
+		y.Items = append(y.Items, &r)
+	}
+
+	if err = rows.Err(); err != nil {
+		return err
+	}
+
+	err = s.db.QueryRow("SELECT COUNT(*) FROM type").Scan(&y.Total)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -52,12 +89,13 @@ func (s *PostDB) upsertPost(ctx cx, sid string, x *pb.AddPostReq, y *pb.PostResp
 		return fmt.Errorf("invalid uid")
 	}
 
-	stmt, err := s.db.Prepare("INSERT INTO post (post_id, type_id, title, body) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE user_id = ?, type_id = ?, title = ?, body = ?")
+	stmt, err := s.db.Prepare("INSERT INTO post (post_id, type_id, slug, title, body) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE post_id = ?, type_id = ?, slug = ?, title = ?, body = ?")
 	if err != nil {
 		return err
 	}
 
-	if _, err = stmt.Exec(id, x.TypeId, x.Title, x.Body); err != nil {
+	_, err = stmt.Exec(&id, x.TypeId, "", x.Title, x.Body, &id, x.TypeId, "", x.Title, x.Body)
+	if err != nil {
 		return err
 	}
 
@@ -72,13 +110,16 @@ func (s *PostDB) upsertPost(ctx cx, sid string, x *pb.AddPostReq, y *pb.PostResp
 // TODO: make it such that if given a list of multiple keywords, we can search the
 // title and body for those keywords.
 func (s *PostDB) findPosts(ctx cx, x *pb.FndPostsReq, y *pb.PostsResp) error {
-	selStmt, err := s.db.Prepare("SELECT post_id, type_id, slug, title, body FROM post WHERE title LIKE '%?%' OR body like '%?%'")
+	selStmt, err := s.db.Prepare("SELECT post_id, type_id, slug, title, body FROM post WHERE title LIKE ? OR body LIKE ?")
 	if err != nil {
 		return err
 	}
 	defer selStmt.Close()
 
-	rows, err := selStmt.Query(x.Keywords[0], x.Keywords[0])
+	rows, err := selStmt.Query(
+		"%"+x.Keywords[0]+"%",
+		"%"+x.Keywords[0]+"%",
+	)
 	if err != nil {
 		return err
 	}
@@ -86,10 +127,10 @@ func (s *PostDB) findPosts(ctx cx, x *pb.FndPostsReq, y *pb.PostsResp) error {
 
 	for rows.Next() {
 		r := pb.PostResp{}
-
 		var tc, tu, td, tb mysql.NullTime
 
-		if err := rows.Scan(&r.Id, &r.Slug, &r.Title, &r.TypeId); err != nil {
+		err := rows.Scan(&r.Id, &r.TypeId, &r.Slug, &r.Title, &r.Body)
+		if err != nil {
 			return err
 		}
 
@@ -105,7 +146,11 @@ func (s *PostDB) findPosts(ctx cx, x *pb.FndPostsReq, y *pb.PostsResp) error {
 		return err
 	}
 
-	err = s.db.QueryRow("SELECT COUNT(*) FROM post WHERE title LIKE '%?%' OR body like '%?%'").Scan(&y.Total)
+	err = s.db.QueryRow(
+		"SELECT COUNT(*) FROM post WHERE title LIKE ? OR body LIKE ?",
+		"%"+x.Keywords[0]+"%",
+		"%"+x.Keywords[0]+"%",
+	).Scan(&y.Total)
 	if err != nil {
 		return err
 	}

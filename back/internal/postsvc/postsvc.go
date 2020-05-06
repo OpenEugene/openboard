@@ -45,6 +45,11 @@ func (s *PostSvc) AddType(ctx context.Context, req *pb.AddTypeReq) (*pb.TypeResp
 	return s.db.AddType(ctx, req)
 }
 
+// FndTypes implements part of the pb.PostServer interface.
+func (s *PostSvc) FndTypes(ctx context.Context, req *pb.FndTypesReq) (*pb.TypesResp, error) {
+	return s.db.FndTypes(ctx, req)
+}
+
 // AddPost implements part of the pb.PostServer interface.
 func (s *PostSvc) AddPost(ctx context.Context, req *pb.AddPostReq) (*pb.PostResp, error) {
 	return s.db.AddPost(ctx, req)

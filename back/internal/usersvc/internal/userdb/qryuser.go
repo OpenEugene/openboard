@@ -32,8 +32,7 @@ func (s *UserDB) upsertUser(ctx cx, sid string, x *pb.AddUserReq, y *pb.UserResp
 	}
 
 	// todo: be able to link roleIDs to users.
-	stmt, err := s.db.Prepare("INSERT INTO user (user_id, username, email, email_hold, altmail, altmail_hold, full_name, avatar, password) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE user_id = ?, username = ?, email = ?, email_hold = ?, altmail = ?, altmail_hold = ?, full_name = ?, avatar = ?, password = ?")
-
+	stmt, err := s.db.Prepare("INSERT INTO user (user_id, username, email, email_hold, altmail, altmail_hold, full_name, avatar, password) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE user_id = ?, username = ?, email = ?, email_hold = ?, altmail = ?, altmail_hold = ?, full_name = ?, avatar = ?, password = ?")
 	if err != nil {
 		return err
 	}
@@ -48,19 +47,32 @@ func (s *UserDB) upsertUser(ctx cx, sid string, x *pb.AddUserReq, y *pb.UserResp
 		x.FullName,
 		x.Avatar,
 		x.Password,
+		&id,
+		x.Username,
+		x.Email,
+		x.EmailHold,
+		x.Altmail,
+		x.AltmailHold,
+		x.FullName,
+		x.Avatar,
+		x.Password,
 	)
 	if err != nil {
 		return err
 	}
 
-	y.Item.Id = id.String()
-	y.Item.Username = x.Username
-	y.Item.Email = x.Email
-	y.Item.EmailHold = x.EmailHold
-	y.Item.Altmail = x.Altmail
-	y.Item.AltmailHold = x.AltmailHold
-	y.Item.FullName = x.FullName
-	y.Item.Avatar = x.Avatar
+	r := pb.User{}
+
+	r.Id = id.String()
+	r.Username = x.Username
+	r.Email = x.Email
+	r.EmailHold = x.EmailHold
+	r.Altmail = x.Altmail
+	r.AltmailHold = x.AltmailHold
+	r.FullName = x.FullName
+	r.Avatar = x.Avatar
+
+	y.Item = &r
 	// todo: respond with user roles
 
 	return nil
@@ -81,17 +93,15 @@ func (s *UserDB) deleteUser(ctx cx, sid string) error {
 }
 
 func (s *UserDB) findUsers(ctx cx, x *pb.FndUsersReq, y *pb.UsersResp) error {
-	selStmt, err := s.db.Prepare("SELECT user_id, username, email, email_hold, altmail, altmail_hold, full_name, avatar, last_login, created_at, updated_at, deleted_at, blocked_at FROM user WHERE email IN ? OR email_hold = ? OR altmail in ? OR altmail_hold = ? LIMIT ? OFFSET ?")
+	selStmt, err := s.db.Prepare("SELECT user_id, username, email, email_hold, altmail, altmail_hold, full_name, avatar, last_login, created_at, updated_at, deleted_at, blocked_at FROM user WHERE email = ? AND email_hold = ? LIMIT ? OFFSET ?")
 	if err != nil {
 		return err
 	}
 	defer selStmt.Close()
 
 	rows, err := selStmt.Query(
-		x.Emails,
+		x.Email,
 		x.EmailHold,
-		x.Altmails,
-		x.AltmailHold,
 		x.Limit,
 		x.Lapse,
 	)
@@ -126,7 +136,11 @@ func (s *UserDB) findUsers(ctx cx, x *pb.FndUsersReq, y *pb.UsersResp) error {
 		return err
 	}
 
-	err = s.db.QueryRow("SELECT COUNT(*) FROM user WHERE email = ? OR email_hold = ? OR altmail = ? OR altmail_hold = ?").Scan(&y.Total)
+	err = s.db.QueryRow(
+		"SELECT COUNT(*) FROM user WHERE email = ? AND email_hold = ?",
+		x.Email,
+		x.EmailHold,
+	).Scan(&y.Total)
 	if err != nil {
 		return err
 	}
@@ -145,7 +159,7 @@ func (s *UserDB) upsertRole(ctx cx, sid string, x *pb.AddRoleReq, y *pb.RoleResp
 		return err
 	}
 
-	_, err = stmt.Exec(id, x.Name)
+	_, err = stmt.Exec(&id, x.Name, &id, x.Name)
 	if err != nil {
 		return err
 	}
@@ -157,13 +171,24 @@ func (s *UserDB) upsertRole(ctx cx, sid string, x *pb.AddRoleReq, y *pb.RoleResp
 }
 
 func (s *UserDB) findRoles(ctx cx, x *pb.FndRolesReq, y *pb.RolesResp) error {
-	selStmt, err := s.db.Prepare("SELECT role_id, role_name FROM role WHERE role_id in ? OR role_name in = ? LIMIT ? OFFSET ?")
+	selStmt, err := s.db.Prepare("SELECT role_id, role_name FROM role WHERE role_id = ? OR role_name = ? LIMIT ? OFFSET ?")
 	if err != nil {
 		return err
 	}
 	defer selStmt.Close()
 
-	rows, err := selStmt.Query(x.RoleIds, x.RoleNames, x.Limit, x.Lapse)
+	var roleIDs, roleNames string
+
+	// TODO: enable search of more than one role ID
+	if len(x.RoleIds) > 0 {
+		roleIDs = x.RoleIds[0]
+	}
+	// TODO: enable search of more than one role name
+	if len(x.RoleNames) > 0 {
+		roleNames = x.RoleNames[0]
+	}
+
+	rows, err := selStmt.Query(roleIDs, roleNames, x.Limit, x.Lapse)
 	if err != nil {
 		return err
 	}
@@ -186,7 +211,13 @@ func (s *UserDB) findRoles(ctx cx, x *pb.FndRolesReq, y *pb.RolesResp) error {
 		return err
 	}
 
-	err = s.db.QueryRow("SELECT COUNT(*) FROM role WHERE role_id in ? OR role_name in = ? LIMIT ? OFFSET ?").Scan(&y.Total)
+	err = s.db.QueryRow(
+		"SELECT COUNT(*) FROM role WHERE role_id = ? OR role_name = ? LIMIT ? OFFSET ?",
+		roleIDs,
+		roleNames,
+		x.Limit,
+		x.Lapse,
+	).Scan(&y.Total)
 	if err != nil {
 		return err
 	}
