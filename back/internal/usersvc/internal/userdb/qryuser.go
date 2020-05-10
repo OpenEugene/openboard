@@ -3,6 +3,7 @@ package userdb
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/OpenEugene/openboard/back/internal/altr"
 	"github.com/OpenEugene/openboard/back/internal/pb"
@@ -79,12 +80,11 @@ func (s *UserDB) upsertUser(ctx cx, sid string, x *pb.AddUserReq, y *pb.UserResp
 }
 
 func (s *UserDB) deleteUser(ctx cx, sid string) error {
-	stmt, err := s.db.Prepare("DELETE FROM user WHERE user_id = ?")
-	if err != nil {
-		return err
-	}
-
-	_, err = stmt.Exec(sid)
+	_, err := s.db.Exec(
+		"UPDATE user SET deleted_at = ? WHERE user_id = ?",
+		time.Now(),
+		sid,
+	)
 	if err != nil {
 		return err
 	}
