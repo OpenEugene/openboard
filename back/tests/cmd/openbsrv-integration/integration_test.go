@@ -185,7 +185,7 @@ func userSvcDelUserFn(ctx context.Context, conn *grpc.ClientConn, clnt pb.UserSv
 		}
 
 		if userID == "" {
-			t.Fatal("unable to find userID")
+			t.Fatalf("unable to find user %s", userID)
 		}
 
 		_, err = clnt.RmvUser(ctx, &pb.RmvUserReq{Id: userID})
@@ -193,12 +193,13 @@ func userSvcDelUserFn(ctx context.Context, conn *grpc.ClientConn, clnt pb.UserSv
 			t.Error(err)
 		}
 
-		userID, err = userSvcFndUser(ctx, conn, clnt, req)
+		resp, err := clnt.FndUsers(ctx, &req)
 		if err != nil {
 			t.Error(err)
 		}
-		if userID != "" {
-			t.Fatalf("expected userID to be empty string, got: %s", userID)
+
+		if resp.Items[0].Deleted == nil {
+			t.Fatalf("expected user %s deleted_at to not be nil", resp.Items[0].Id)
 			t.Fail()
 		}
 	}
@@ -328,6 +329,7 @@ func postSvcAddAndFndPostsFn(ctx context.Context, conn *grpc.ClientConn, clnt pb
 				t.Error(err)
 			}
 
+			t.Logf("got: %s, want: %s", gotPostID, wantPostID)
 			if gotPostID != wantPostID {
 				t.Fatalf("got: %s, want: %s", gotPostID, wantPostID)
 			}
@@ -350,8 +352,8 @@ func postSvcFndPost(ctx context.Context, conn *grpc.ClientConn, clnt pb.PostClie
 func postSvcEdtPostFn(ctx context.Context, conn *grpc.ClientConn, clnt pb.PostClient) func(*testing.T) {
 	return func(t *testing.T) {
 		addReq := &pb.AddPostReq{
-			Title:  "Post D",
-			Body:   "This is post D.",
+			Title:  "Post C",
+			Body:   "This is post C.",
 			TypeId: "2",
 		}
 		_, err := clnt.AddPost(ctx, addReq)
@@ -359,15 +361,15 @@ func postSvcEdtPostFn(ctx context.Context, conn *grpc.ClientConn, clnt pb.PostCl
 			t.Fatal(err)
 		}
 
-		fndReq := &pb.FndPostsReq{Keywords: []string{"post D"}}
+		fndReq := &pb.FndPostsReq{Keywords: []string{"post C"}}
 		postID, err := postSvcFndPost(ctx, conn, clnt, fndReq)
 		if err != nil {
 			t.Error(err)
 		}
 
 		editReq := &pb.AddPostReq{
-			Title:  "Post D (edited)",
-			Body:   "This is post D after edits.",
+			Title:  "Post C (edited)",
+			Body:   "This is post C after edits.",
 			TypeId: "2",
 		}
 
@@ -403,24 +405,46 @@ func postSvcEdtPostFn(ctx context.Context, conn *grpc.ClientConn, clnt pb.PostCl
 
 func postSvcDelPostFn(ctx context.Context, conn *grpc.ClientConn, clnt pb.PostClient) func(*testing.T) {
 	return func(t *testing.T) {
-		req := &pb.FndPostsReq{Keywords: []string{"postC"}}
-		postID, err := postSvcFndPost(ctx, conn, clnt, req)
+		addReq := &pb.AddPostReq{
+			Title:  "test title postD first",
+			Body:   "test body of fourth post",
+			TypeId: "4",
+		}
+
+		_, err := clnt.AddPost(ctx, addReq)
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		_, err = clnt.RmvPost(ctx, &pb.RmvPostReq{Id: postID})
+		fndReq := &pb.FndPostsReq{Keywords: []string{"postD"}}
+
+		fndResp, err := clnt.FndPosts(ctx, fndReq)
+		if err != nil {
+			t.Error(err)
+		}
+		t.Log(fndResp)
+		if fndResp.Posts[0].Deleted != nil {
+			t.Fatalf(
+				"expected post %s deleted_at to be nil, got %v",
+				fndResp.Posts[0].Id,
+				fndResp.Posts[0].Deleted,
+			)
+			t.Fail()
+		}
+
+		_, err = clnt.RmvPost(ctx, &pb.RmvPostReq{Id: fndResp.Posts[0].Id})
 		if err != nil {
 			t.Error(err)
 		}
 
-		postID, err = postSvcFndPost(ctx, conn, clnt, req)
+		fndResp, err = clnt.FndPosts(ctx, fndReq)
 		if err != nil {
 			t.Error(err)
 		}
 
-		if postID != "" {
-			t.Fatalf("Expected userID to be empty string, got: %s", postID)
+		if fndResp.Posts[0].Deleted == nil {
+			t.Fatalf("expected post %s deleted_at to not be nil", fndResp.Posts[0].Id)
+			t.Fail()
 		}
 	}
 }
