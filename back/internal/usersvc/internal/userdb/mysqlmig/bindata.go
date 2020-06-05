@@ -2,6 +2,7 @@
 // sources:
 // mysql/0001_setup_user_table.sql
 // mysql/0002_setup_role_table.sql
+// mysql/0003_setup_join_user_role_join_table.sql
 package mysqlmig
 
 import (
@@ -90,7 +91,7 @@ func _0001_setup_user_tableSql() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "0001_setup_user_table.sql", size: 700, mode: os.FileMode(436), modTime: time.Unix(1575744428, 0)}
+	info := bindataFileInfo{name: "0001_setup_user_table.sql", size: 700, mode: os.FileMode(436), modTime: time.Unix(1589655841, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -118,6 +119,34 @@ func _0002_setup_role_tableSql() (*asset, error) {
 	}
 
 	info := bindataFileInfo{name: "0002_setup_role_table.sql", size: 174, mode: os.FileMode(436), modTime: time.Unix(1573881816, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
+var __0003_setup_join_user_role_join_tableSql = []byte(`-- +migrate Up
+
+CREATE TABLE user_role (
+    user_id VARCHAR(26) NOT NULL,
+    role_id VARCHAR(26) NOT NULL,
+    PRIMARY KEY (user_id, role_id)
+);
+
+-- +migrate Down
+
+DROP TABLE IF EXISTS user_role;
+`)
+
+func _0003_setup_join_user_role_join_tableSqlBytes() ([]byte, error) {
+	return __0003_setup_join_user_role_join_tableSql, nil
+}
+
+func _0003_setup_join_user_role_join_tableSql() (*asset, error) {
+	bytes, err := _0003_setup_join_user_role_join_tableSqlBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "0003_setup_join_user_role_join_table.sql", size: 198, mode: os.FileMode(436), modTime: time.Unix(1591062238, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -174,8 +203,9 @@ func AssetNames() []string {
 
 // _bindata is a table, holding each asset generator, mapped to its name.
 var _bindata = map[string]func() (*asset, error){
-	"0001_setup_user_table.sql": _0001_setup_user_tableSql,
-	"0002_setup_role_table.sql": _0002_setup_role_tableSql,
+	"0001_setup_user_table.sql":                _0001_setup_user_tableSql,
+	"0002_setup_role_table.sql":                _0002_setup_role_tableSql,
+	"0003_setup_join_user_role_join_table.sql": _0003_setup_join_user_role_join_tableSql,
 }
 
 // AssetDir returns the file names below a certain
@@ -219,8 +249,9 @@ type bintree struct {
 }
 
 var _bintree = &bintree{nil, map[string]*bintree{
-	"0001_setup_user_table.sql": &bintree{_0001_setup_user_tableSql, map[string]*bintree{}},
-	"0002_setup_role_table.sql": &bintree{_0002_setup_role_tableSql, map[string]*bintree{}},
+	"0001_setup_user_table.sql":                &bintree{_0001_setup_user_tableSql, map[string]*bintree{}},
+	"0002_setup_role_table.sql":                &bintree{_0002_setup_role_tableSql, map[string]*bintree{}},
+	"0003_setup_join_user_role_join_table.sql": &bintree{_0003_setup_join_user_role_join_tableSql, map[string]*bintree{}},
 }}
 
 // RestoreAsset restores an asset under the given directory
