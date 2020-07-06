@@ -3,11 +3,12 @@ package integrationTests
 import (
 	"context"
 	"fmt"
+	"reflect"
+	"testing"
+
 	"github.com/OpenEugene/openboard/back/internal/pb"
 	"github.com/golang/protobuf/ptypes/timestamp"
 	"google.golang.org/grpc"
-	"reflect"
-	"testing"
 )
 
 func TestClientServices(t *testing.T) {
@@ -75,6 +76,7 @@ func userSvcAddAndFndUsersFn(ctx context.Context, conn *grpc.ClientConn, clnt pb
 					FullName:    "test user full name A",
 					Avatar:      "test user avatar A",
 					Password:    "test user password A",
+					RoleIds:     []string{"user"},
 				},
 				&pb.User{
 					Username:    "test username A",
@@ -84,6 +86,7 @@ func userSvcAddAndFndUsersFn(ctx context.Context, conn *grpc.ClientConn, clnt pb
 					AltmailHold: false,
 					FullName:    "test user full name A",
 					Avatar:      "test user avatar A",
+					Roles:       []*pb.RoleResp{{Name: "user"}},
 				},
 				pb.FndUsersReq{
 					RoleIds:     []string{},
@@ -105,6 +108,7 @@ func userSvcAddAndFndUsersFn(ctx context.Context, conn *grpc.ClientConn, clnt pb
 					FullName:    "test user full name B",
 					Avatar:      "test user avatar B",
 					Password:    "test user password B",
+					RoleIds:     []string{"user", "admin"},
 				},
 				&pb.User{
 					Username:    "test username B",
@@ -114,6 +118,10 @@ func userSvcAddAndFndUsersFn(ctx context.Context, conn *grpc.ClientConn, clnt pb
 					AltmailHold: false,
 					FullName:    "test user full name B",
 					Avatar:      "test user avatar B",
+					Roles: []*pb.RoleResp{
+						{Name: "user"},
+						{Name: "admin"},
+					},
 				},
 				pb.FndUsersReq{
 					RoleIds:     []string{},
@@ -140,6 +148,12 @@ func userSvcAddAndFndUsersFn(ctx context.Context, conn *grpc.ClientConn, clnt pb
 			got.Id = ""
 			got.XXX_unrecognized = []byte{}
 			got.XXX_sizecache = 0
+
+			for i := 0; i < len(got.Roles); i++ {
+				got.Roles[i].Id = ""
+				got.Roles[i].XXX_unrecognized = []byte{}
+				got.Roles[i].XXX_sizecache = 0
+			}
 
 			if reflect.DeepEqual(got, tc.want) {
 				t.Fatalf("got: %v, want: %v", got, tc.want)

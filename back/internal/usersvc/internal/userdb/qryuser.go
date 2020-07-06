@@ -32,13 +32,15 @@ func (s *UserDB) upsertUser(ctx cx, sid string, x *pb.AddUserReq, y *pb.UserResp
 		return fmt.Errorf("invalid uid")
 	}
 
-	// todo: be able to link roleIDs to users.
-	stmt, err := s.db.Prepare("INSERT INTO user (user_id, username, email, email_hold, altmail, altmail_hold, full_name, avatar, password) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE user_id = ?, username = ?, email = ?, email_hold = ?, altmail = ?, altmail_hold = ?, full_name = ?, avatar = ?, password = ?")
-	if err != nil {
-		return err
-	}
+	qry := `
+		INSERT INTO user (user_id, username, email, email_hold, altmail, altmail_hold,
+			full_name, avatar, password) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) 
+		ON DUPLICATE KEY UPDATE user_id = ?, username = ?, email = ?, email_hold = ?,
+			altmail = ?, altmail_hold = ?, full_name = ?, avatar = ?, password = ?
+	`
 
-	_, err = stmt.Exec(
+	_, err := s.db.Exec(
+		qry,
 		&id,
 		x.Username,
 		x.Email,
@@ -62,8 +64,8 @@ func (s *UserDB) upsertUser(ctx cx, sid string, x *pb.AddUserReq, y *pb.UserResp
 		return err
 	}
 
+	// TODO execute another query that will return the user fields.
 	r := pb.User{}
-
 	r.Id = id.String()
 	r.Username = x.Username
 	r.Email = x.Email
@@ -74,7 +76,20 @@ func (s *UserDB) upsertUser(ctx cx, sid string, x *pb.AddUserReq, y *pb.UserResp
 	r.Avatar = x.Avatar
 
 	y.Item = &r
-	// todo: respond with user roles
+
+	// Add role and user to user_role join table.
+	stmt, err := s.db.Prepare("INSERT into user_role (user_id, role_id) VALUES (?, ?)")
+	if err != nil {
+		return err
+	}
+
+	// Add entries to role table for every role
+	for _, rid := range x.RoleIds {
+		_, err = stmt.Exec(&id, rid)
+		if err != nil {
+			return err
+		}
+	}
 
 	return nil
 }
@@ -92,45 +107,47 @@ func (s *UserDB) deleteUser(ctx cx, sid string) error {
 	return nil
 }
 
-type userAndRole struct {
-	rid, uid, username, email, altmail, fullName, avatar, rolename string
+type userTemp struct {
+	uid, username, email, altmail, fullName, avatar, rid, rolename string
 	emailHold, altmailHold                                         bool
-	rids                                                           []string
 	tl, tc, tu, td, tb                                             mysql.NullTime
 }
 
 func (s *UserDB) findUsers(ctx cx, x *pb.FndUsersReq, y *pb.UsersResp) error {
-	qry := "SELECT u.user_id, u.username, u.email, u.email_hold, u.altmail, "
-	qry += "u.altmail_hold, u.full_name, u.avatar, r.role_id, r.role_name, u.last_login, u.created_at, "
-	qry += "u.updated_at, u.deleted_at, u.blocked_at "
-	qry += "FROM user u "
-	qry += "LEFT JOIN user_role ur ON u.user_id = ur.user_id "
-	qry += "LEFT JOIN role r ON r.role_id = ur.role_id "
-	qry += "WHERE u.email = ? AND u.email_hold = ? LIMIT ? OFFSET ?"
+	// TODO: Set LIMIT/OFFSET such that the unique users are limited, not all users found.
+	qry := `
+		SELECT u.user_id, u.username, u.email, u.email_hold, u.altmail,
+			u.altmail_hold, u.full_name, u.avatar, r.role_id, r.role_name, u.last_login, 
+			u.created_at, u.updated_at, u.deleted_at, u.blocked_at
+		FROM user u
+		LEFT JOIN user_role ur ON u.user_id = ur.user_id
+		LEFT JOIN role r ON r.role_id = ur.role_id 
+		WHERE u.email = ? AND u.email_hold = ? LIMIT ? OFFSET ?
+	`
 
 	rows, err := s.db.Query(qry, x.Email, x.EmailHold, x.Limit, x.Lapse)
+	defer rows.Close()
 	if err != nil {
 		return err
 	}
-	defer rows.Close()
 
 	var tl, tc, tu, td, tb mysql.NullTime
-	urs := []userAndRole{}
+	temps := []userTemp{}
 
 	for rows.Next() {
-		ur := userAndRole{}
+		u := userTemp{}
 
 		err := rows.Scan(
-			&ur.uid,
-			&ur.username,
-			&ur.email,
-			&ur.emailHold,
-			&ur.altmail,
-			&ur.altmailHold,
-			&ur.fullName,
-			&ur.avatar,
-			&ur.rid,
-			&ur.rolename,
+			&u.uid,
+			&u.username,
+			&u.email,
+			&u.emailHold,
+			&u.altmail,
+			&u.altmailHold,
+			&u.fullName,
+			&u.avatar,
+			&u.rid,
+			&u.rolename,
 			&tl,
 			&tc,
 			&tu,
@@ -141,17 +158,16 @@ func (s *UserDB) findUsers(ctx cx, x *pb.FndUsersReq, y *pb.UsersResp) error {
 			return err
 		}
 
-		urs = append(urs, ur)
+		temps = append(temps, u)
 	}
-
 	if err = rows.Err(); err != nil {
 		return err
 	}
 
-	userRespMap := condenseUsersAndRoles(urs)
+	users := squashUsers(temps)
 
-	for _, resp := range userRespMap {
-		y.Items = append(y.Items, resp)
+	for _, u := range users {
+		y.Items = append(y.Items, &u)
 	}
 
 	err = s.db.QueryRow(
@@ -166,43 +182,63 @@ func (s *UserDB) findUsers(ctx cx, x *pb.FndUsersReq, y *pb.UsersResp) error {
 	return nil
 }
 
-type userRespMap map[string]*pb.User
+// squashUsers combines user information so there are no duplicate user IDs in slice.
+func squashUsers(uts []userTemp) []pb.User {
+	var users []pb.User
 
-// concenseUsersAndRoles takes a list of repeated users (with different roles)
-// and condenses them into a map, putting their associated roles into a slice in a struct.
-func condenseUsersAndRoles(urs []userAndRole) userRespMap {
-	urm := make(userRespMap)
-	user := pb.User{}
-	role := pb.RoleResp{}
+	for _, ut := range uts {
+		i := userIndex(ut, users)
 
-	// Collect roles for each user
-	for _, ur := range urs {
-		// This set of data only needed for new user keys in map.
-		if _, ok := urm[user.Id]; !ok {
-			urm[user.Id].Id = ur.uid
-			urm[user.Id].Username = ur.username
-			urm[user.Id].Email = ur.email
-			urm[user.Id].EmailHold = ur.emailHold
-			urm[user.Id].Altmail = ur.altmail
-			urm[user.Id].AltmailHold = ur.altmailHold
-			urm[user.Id].FullName = ur.fullName
-			urm[user.Id].Avatar = ur.avatar
-			urm[user.Id].LastLogin = asTS(ur.tl.Time, ur.tl.Valid)
-			urm[user.Id].Created = asTS(ur.tc.Time, ur.tc.Valid)
-			urm[user.Id].Updated = asTS(ur.tu.Time, ur.tu.Valid)
-			urm[user.Id].Deleted = asTS(ur.td.Time, ur.td.Valid)
-			urm[user.Id].Blocked = asTS(ur.tb.Time, ur.tb.Valid)
-		}
+		if i < -1 {
+			usr := convertUserTemp(ut)
+			users = append(users, usr)
+		} else {
+			r := pb.RoleResp{
+				Id:   ut.rid,
+				Name: ut.rolename,
+			}
 
-		// The role data can only be set if user is a key in the map.
-		if _, ok := urm[user.Id]; ok && role.Id != "" {
-			role.Id = ur.rid
-			role.Name = ur.rolename
-			urm[user.Id].Roles = append(urm[user.Id].Roles, &role)
+			users[i].Roles = append(users[i].Roles, &r)
 		}
 	}
 
-	return urm
+	return users
+}
+
+// userIndex gets the index of a user in []pb.User, or -1 if not found.
+func userIndex(ut userTemp, users []pb.User) int {
+	for i, u := range users {
+		if u.Id == ut.uid {
+			return i
+		}
+	}
+
+	return -1
+}
+
+// convertUserTemp transfers information from userTemp to pb.User.
+func convertUserTemp(ut userTemp) pb.User {
+	var u pb.User
+
+	r := pb.RoleResp{
+		Id:   ut.rid,
+		Name: ut.rolename,
+	}
+
+	u.Id = ut.uid
+	u.Username = ut.username
+	u.Email = ut.email
+	u.EmailHold = ut.emailHold
+	u.Altmail = ut.altmail
+	u.AltmailHold = ut.altmailHold
+	u.FullName = ut.fullName
+	u.Avatar = ut.avatar
+	u.Roles = append(u.Roles, &r)
+	u.LastLogin = ut.tl
+	u.Created = ut.tc
+	u.Updated = ut.tu
+
+	return u
 }
 
 func (s *UserDB) upsertRole(ctx cx, sid string, x *pb.AddRoleReq, y *pb.RoleResp) error {
@@ -211,12 +247,13 @@ func (s *UserDB) upsertRole(ctx cx, sid string, x *pb.AddRoleReq, y *pb.RoleResp
 		return fmt.Errorf("invalid uid")
 	}
 
-	stmt, err := s.db.Prepare("INSERT INTO role (role_id, role_name) VALUES (?, ?) ON DUPLICATE KEY UPDATE role_id = ?, role_name = ?")
-	if err != nil {
-		return err
-	}
+	qry := `
+		INSERT INTO role (role_id, role_name) 
+		VALUES (?, ?) 
+		ON DUPLICATE KEY UPDATE role_id = ?, role_name = ?
+	`
 
-	_, err = stmt.Exec(&id, x.Name, &id, x.Name)
+	_, err := s.db.Exec(qry, &id, x.Name, &id, x.Name)
 	if err != nil {
 		return err
 	}
@@ -228,12 +265,6 @@ func (s *UserDB) upsertRole(ctx cx, sid string, x *pb.AddRoleReq, y *pb.RoleResp
 }
 
 func (s *UserDB) findRoles(ctx cx, x *pb.FndRolesReq, y *pb.RolesResp) error {
-	selStmt, err := s.db.Prepare("SELECT role_id, role_name FROM role WHERE role_id = ? OR role_name = ? LIMIT ? OFFSET ?")
-	if err != nil {
-		return err
-	}
-	defer selStmt.Close()
-
 	var roleIDs, roleNames string
 
 	// TODO: enable search of more than one role ID
@@ -245,19 +276,22 @@ func (s *UserDB) findRoles(ctx cx, x *pb.FndRolesReq, y *pb.RolesResp) error {
 		roleNames = x.RoleNames[0]
 	}
 
-	rows, err := selStmt.Query(roleIDs, roleNames, x.Limit, x.Lapse)
+	qry := `
+		SELECT role_id, role_name 
+		FROM role 
+		WHERE role_id = ? OR role_name = ? LIMIT ? OFFSET ?
+	`
+
+	rows, err := s.db.Query(qry, roleIDs, roleNames, x.Limit, x.Lapse)
+	defer rows.Close()
 	if err != nil {
 		return err
 	}
-	defer rows.Close()
 
 	for rows.Next() {
 		r := pb.RoleResp{}
 
-		err := rows.Scan(
-			&r.Id, &r.Name,
-		)
-		if err != nil {
+		if err := rows.Scan(&r.Id, &r.Name); err != nil {
 			return err
 		}
 
@@ -269,11 +303,9 @@ func (s *UserDB) findRoles(ctx cx, x *pb.FndRolesReq, y *pb.RolesResp) error {
 	}
 
 	err = s.db.QueryRow(
-		"SELECT COUNT(*) FROM role WHERE role_id = ? OR role_name = ? LIMIT ? OFFSET ?",
+		"SELECT COUNT(*) FROM role WHERE role_id = ? OR role_name = ?",
 		roleIDs,
 		roleNames,
-		x.Limit,
-		x.Lapse,
 	).Scan(&y.Total)
 	if err != nil {
 		return err
