@@ -35,38 +35,100 @@ func TestClientServices(t *testing.T) {
 
 func userSvcAddAndFndRoleFn(ctx context.Context, conn *grpc.ClientConn, clnt pb.UserSvcClient) func(*testing.T) {
 	return func(t *testing.T) {
-		want := "testRole"
-
-		_, err := clnt.AddRole(ctx, &pb.AddRoleReq{Name: want})
-		if err != nil {
-			t.Fatal(err)
+		tests := []struct {
+			want   string
+			addReq *pb.AddRoleReq
+			fndReq *pb.FndRolesReq
+		}{
+			{
+				"user",
+				&pb.AddRoleReq{Name: "user"},
+				&pb.FndRolesReq{
+					RoleIds:   []string{},
+					RoleNames: []string{"user"},
+					Limit:     100,
+					Lapse:     0,
+				},
+			},
+			{
+				"admin",
+				&pb.AddRoleReq{Name: "admin"},
+				&pb.FndRolesReq{
+					RoleIds:   []string{},
+					RoleNames: []string{"admin"},
+					Limit:     100,
+					Lapse:     0,
+				},
+			},
 		}
 
-		r, err := clnt.FndRoles(ctx, &pb.FndRolesReq{
-			RoleIds:   []string{},
-			RoleNames: []string{want},
-			Limit:     100,
-			Lapse:     0,
-		})
+		for _, tt := range tests {
+			_, err := clnt.AddRole(ctx, tt.addReq)
+			if err != nil {
+				t.Fatal(err)
+			}
 
-		if len(r.Items) != 1 {
-			t.Fatalf("got: no items, want: %s", want)
+			r, err := clnt.FndRoles(ctx, tt.fndReq)
+
+			if len(r.Items) != 1 {
+				t.Fatalf("got: no items, want: %s", tt.want)
+			}
+
+			if got := r.Items[0].Name; got != tt.want {
+				t.Fatalf("got: %v, want: %s", got, tt.want)
+			}
 		}
 
-		if got := r.Items[0].Name; got != want {
-			t.Fatalf("got: %v, want: %s", got, want)
-		}
 	}
+}
+
+func roleID(ctx context.Context, conn *grpc.ClientConn, clnt pb.UserSvcClient, req *pb.FndRolesReq) (string, error) {
+	r, err := clnt.FndRoles(ctx, req)
+	if err != nil {
+		return "", err
+	}
+
+	if len(r.Items) == 0 {
+		return "", nil
+	}
+
+	return r.Items[0].Id, nil
 }
 
 func userSvcAddAndFndUsersFn(ctx context.Context, conn *grpc.ClientConn, clnt pb.UserSvcClient) func(*testing.T) {
 	return func(t *testing.T) {
+		fndAdminRoleIdReq := &pb.FndRolesReq{
+			RoleIds:   []string{},
+			RoleNames: []string{"admin"},
+			Limit:     100,
+			Lapse:     0,
+		}
+
+		fndUserRoleIdReq := &pb.FndRolesReq{
+			RoleIds:   []string{},
+			RoleNames: []string{"user"},
+			Limit:     100,
+			Lapse:     0,
+		}
+
+		adminRoleID, err := roleID(ctx, conn, clnt, fndAdminRoleIdReq)
+		if err != nil {
+			t.Fatalf("retrieving role ID from role name: %v", err)
+		}
+
+		userRoleID, err := roleID(ctx, conn, clnt, fndUserRoleIdReq)
+		if err != nil {
+			t.Fatalf("retrieving role ID from role name: %v", err)
+		}
+
 		tests := []struct {
-			addReq *pb.AddUserReq
-			want   *pb.User
-			fndReq pb.FndUsersReq
+			desc       string
+			addUserReq *pb.AddUserReq
+			want       *pb.User
+			fndUserReq pb.FndUsersReq
 		}{
 			{
+				"Add and find user A",
 				&pb.AddUserReq{
 					Username:    "test username A",
 					Email:       "user_a@email.com",
@@ -76,7 +138,7 @@ func userSvcAddAndFndUsersFn(ctx context.Context, conn *grpc.ClientConn, clnt pb
 					FullName:    "test user full name A",
 					Avatar:      "test user avatar A",
 					Password:    "test user password A",
-					RoleIds:     []string{"user"},
+					RoleIds:     []string{userRoleID},
 				},
 				&pb.User{
 					Username:    "test username A",
@@ -99,6 +161,7 @@ func userSvcAddAndFndUsersFn(ctx context.Context, conn *grpc.ClientConn, clnt pb
 				},
 			},
 			{
+				"Add and find user B",
 				&pb.AddUserReq{
 					Username:    "test username B",
 					Email:       "userB@email.com",
@@ -108,7 +171,7 @@ func userSvcAddAndFndUsersFn(ctx context.Context, conn *grpc.ClientConn, clnt pb
 					FullName:    "test user full name B",
 					Avatar:      "test user avatar B",
 					Password:    "test user password B",
-					RoleIds:     []string{"user", "admin"},
+					RoleIds:     []string{userRoleID, adminRoleID},
 				},
 				&pb.User{
 					Username:    "test username B",
@@ -136,7 +199,8 @@ func userSvcAddAndFndUsersFn(ctx context.Context, conn *grpc.ClientConn, clnt pb
 		}
 
 		for _, tc := range tests {
-			r, err := clnt.AddUser(ctx, tc.addReq)
+			t.Log(tc.desc)
+			r, err := clnt.AddUser(ctx, tc.addUserReq)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -159,7 +223,7 @@ func userSvcAddAndFndUsersFn(ctx context.Context, conn *grpc.ClientConn, clnt pb
 				t.Fatalf("got: %v, want: %v", got, tc.want)
 			}
 
-			gotUserID, err := userSvcFndUser(ctx, conn, clnt, tc.fndReq)
+			gotUserID, err := userSvcFndUser(ctx, conn, clnt, tc.fndUserReq)
 			if err != nil {
 				t.Errorf("unable to find user: %v", err)
 			}

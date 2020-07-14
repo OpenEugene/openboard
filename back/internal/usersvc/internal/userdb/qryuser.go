@@ -131,7 +131,6 @@ func (s *UserDB) findUsers(ctx cx, x *pb.FndUsersReq, y *pb.UsersResp) error {
 		return err
 	}
 
-	var tl, tc, tu, td, tb mysql.NullTime
 	temps := []userTemp{}
 
 	for rows.Next() {
@@ -148,11 +147,11 @@ func (s *UserDB) findUsers(ctx cx, x *pb.FndUsersReq, y *pb.UsersResp) error {
 			&u.avatar,
 			&u.rid,
 			&u.rolename,
-			&tl,
-			&tc,
-			&tu,
-			&td,
-			&tb,
+			&u.tl,
+			&u.tc,
+			&u.tu,
+			&u.td,
+			&u.tb,
 		)
 		if err != nil {
 			return err
@@ -187,9 +186,9 @@ func squashUsers(uts []userTemp) []pb.User {
 	var users []pb.User
 
 	for _, ut := range uts {
-		i := userIndex(ut, users)
+		i := fndUserIndex(ut, users)
 
-		if i < -1 {
+		if i == -1 {
 			usr := convertUserTemp(ut)
 			users = append(users, usr)
 		} else {
@@ -206,7 +205,7 @@ func squashUsers(uts []userTemp) []pb.User {
 }
 
 // userIndex gets the index of a user in []pb.User, or -1 if not found.
-func userIndex(ut userTemp, users []pb.User) int {
+func fndUserIndex(ut userTemp, users []pb.User) int {
 	for i, u := range users {
 		if u.Id == ut.uid {
 			return i
@@ -234,9 +233,10 @@ func convertUserTemp(ut userTemp) pb.User {
 	u.FullName = ut.fullName
 	u.Avatar = ut.avatar
 	u.Roles = append(u.Roles, &r)
-	u.LastLogin = ut.tl
-	u.Created = ut.tc
-	u.Updated = ut.tu
+	u.LastLogin = asTS(ut.tl.Time, ut.tl.Valid)
+	u.Created = asTS(ut.tc.Time, ut.tc.Valid)
+	u.Updated = asTS(ut.tu.Time, ut.tu.Valid)
+	u.Deleted = asTS(ut.td.Time, ut.td.Valid)
 
 	return u
 }
