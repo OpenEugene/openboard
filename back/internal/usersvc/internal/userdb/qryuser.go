@@ -114,17 +114,22 @@ type userTemp struct {
 }
 
 func (s *UserDB) findUsers(ctx cx, x *pb.FndUsersReq, y *pb.UsersResp) error {
-	// TODO: Set LIMIT/OFFSET such that the unique users are limited, not all users found.
 	qry := `
-		SELECT u.user_id, u.username, u.email, u.email_hold, u.altmail,
-			u.altmail_hold, u.full_name, u.avatar, r.role_id, r.role_name, u.last_login, 
-			u.created_at, u.updated_at, u.deleted_at, u.blocked_at
-		FROM user u
-		LEFT JOIN user_role ur ON u.user_id = ur.user_id
-		LEFT JOIN role r ON r.role_id = ur.role_id 
-		WHERE u.email = ? AND u.email_hold = ? LIMIT ? OFFSET ?
+		SELECT u.user_id, u.username, u.email, u.email_hold, u.altmail, 
+			u.altmail_hold, u.full_name, u.avatar, r.role_id, r.role_name, 
+			u.last_login, u.created_at, u.updated_at, u.deleted_at, u.blocked_at 
+		FROM (
+			SELECT user_id, username, email, email_hold, altmail, altmail_hold, 
+				full_name, avatar, last_login, created_at, updated_at, deleted_at, 
+				blocked_at 
+			FROM user WHERE email = ? AND email_hold = ? 
+			LIMIT ? OFFSET ?
+		) u 
+		LEFT JOIN user_role ur 
+			ON u.user_id = ur.user_id 
+		LEFT JOIN role r 
+			ON r.role_id = ur.role_id
 	`
-
 	rows, err := s.db.Query(qry, x.Email, x.EmailHold, x.Limit, x.Lapse)
 	defer rows.Close()
 	if err != nil {
