@@ -2,6 +2,7 @@ package userdb
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -38,7 +39,6 @@ func (s *UserDB) upsertUser(ctx cx, sid string, x *pb.AddUserReq, y *pb.UserResp
 		ON DUPLICATE KEY UPDATE user_id = ?, username = ?, email = ?, email_hold = ?,
 			altmail = ?, altmail_hold = ?, full_name = ?, avatar = ?, password = ?
 	`
-
 	_, err := s.db.Exec(
 		qry,
 		&id,
@@ -64,19 +64,6 @@ func (s *UserDB) upsertUser(ctx cx, sid string, x *pb.AddUserReq, y *pb.UserResp
 		return err
 	}
 
-	// TODO execute another query that will return the user fields.
-	r := pb.User{}
-	r.Id = id.String()
-	r.Username = x.Username
-	r.Email = x.Email
-	r.EmailHold = x.EmailHold
-	r.Altmail = x.Altmail
-	r.AltmailHold = x.AltmailHold
-	r.FullName = x.FullName
-	r.Avatar = x.Avatar
-
-	y.Item = &r
-
 	// Add role and user to user_role join table.
 	stmt, err := s.db.Prepare("INSERT into user_role (user_id, role_id) VALUES (?, ?)")
 	if err != nil {
@@ -90,6 +77,29 @@ func (s *UserDB) upsertUser(ctx cx, sid string, x *pb.AddUserReq, y *pb.UserResp
 			return err
 		}
 	}
+
+	// Execute another query that will return the user fields.
+	req := pb.FndUsersReq{
+		RoleIds:     []string{},
+		Email:       x.Email,
+		EmailHold:   false,
+		Altmail:     "",
+		AltmailHold: false,
+		Limit:       1,
+		Lapse:       0,
+	}
+	resp := pb.UsersResp{}
+
+	if err = s.findUsers(ctx, &req, &resp); err != nil {
+		return err
+	}
+
+	if resp.Items == nil {
+		return errors.New("expected user to be found, but found none")
+	}
+
+	// There is only one user (Item) expected to be found.
+	y.Item = resp.Items[0]
 
 	return nil
 }
@@ -130,6 +140,7 @@ func (s *UserDB) findUsers(ctx cx, x *pb.FndUsersReq, y *pb.UsersResp) error {
 		LEFT JOIN role r 
 			ON r.role_id = ur.role_id
 	`
+
 	rows, err := s.db.Query(qry, x.Email, x.EmailHold, x.Limit, x.Lapse)
 	defer rows.Close()
 	if err != nil {
