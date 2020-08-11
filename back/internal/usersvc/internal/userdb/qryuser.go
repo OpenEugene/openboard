@@ -34,10 +34,19 @@ func (s *UserDB) upsertUser(ctx cx, sid string, x *pb.AddUserReq, y *pb.UserResp
 	}
 
 	qry := `
-		INSERT INTO user (user_id, username, email, email_hold, altmail, altmail_hold,
-			full_name, avatar, password) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) 
-		ON DUPLICATE KEY UPDATE user_id = ?, username = ?, email = ?, email_hold = ?,
-			altmail = ?, altmail_hold = ?, full_name = ?, avatar = ?, password = ?
+		INSERT INTO user (
+			user_id, username, email, email_hold, altmail, altmail_hold, full_name, avatar, password
+		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) 
+		ON DUPLICATE KEY UPDATE 
+			user_id = ?,
+			username = ?, 
+			email = ?, 
+			email_hold = ?, 
+			altmail = ?, 
+			altmail_hold = ?, 
+			full_name = ?, 
+			avatar = ?, 
+			password = ?
 	`
 	_, err := s.db.Exec(
 		qry,

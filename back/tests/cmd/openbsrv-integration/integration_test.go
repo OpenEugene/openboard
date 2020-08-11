@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	"github.com/OpenEugene/openboard/back/internal/pb"
-	"github.com/golang/protobuf/ptypes/timestamp"
 	"google.golang.org/grpc"
 )
 
@@ -70,15 +69,18 @@ func userSvcAddAndFndRoleFn(ctx context.Context, conn *grpc.ClientConn, clnt pb.
 
 			r, err := clnt.FndRoles(ctx, tt.fndReq)
 
-			if len(r.Items) != 1 {
-				t.Fatalf("got: no items, want: %s", tt.want)
+			if len(r.Items) == 0 {
+				t.Fatal("got: no items, want: one item")
+			}
+
+			if len(r.Items) > 1 {
+				t.Fatalf("got: %+v, want: %s", r, tt.want)
 			}
 
 			if got := r.Items[0].Name; got != tt.want {
 				t.Fatalf("got: %v, want: %s", got, tt.want)
 			}
 		}
-
 	}
 }
 
@@ -199,7 +201,6 @@ func userSvcAddAndFndUsersFn(ctx context.Context, conn *grpc.ClientConn, clnt pb
 		}
 
 		for _, tc := range tests {
-			t.Log(tc.desc)
 			r, err := clnt.AddUser(ctx, tc.addUserReq)
 			if err != nil {
 				t.Fatal(err)
@@ -208,19 +209,14 @@ func userSvcAddAndFndUsersFn(ctx context.Context, conn *grpc.ClientConn, clnt pb
 			got := r.Item
 			wantUserID := got.Id
 
-			// Unset fields that aren't being tested.
-			got.Id = ""
-			got.XXX_unrecognized = []byte{}
-			got.XXX_sizecache = 0
+			unsetUntestedFields(got)
 
 			for i := 0; i < len(got.Roles); i++ {
-				got.Roles[i].Id = ""
-				got.Roles[i].XXX_unrecognized = []byte{}
-				got.Roles[i].XXX_sizecache = 0
+				unsetUntestedFields(got.Roles[i])
 			}
 
 			if reflect.DeepEqual(got, tc.want) {
-				t.Fatalf("got: %v, want: %v", got, tc.want)
+				t.Fatalf("%s: got: %v, want: %v", tc.desc, got, tc.want)
 			}
 
 			gotUserID, err := userSvcFndUser(ctx, conn, clnt, tc.fndUserReq)
@@ -389,14 +385,7 @@ func postSvcAddAndFndPostsFn(ctx context.Context, conn *grpc.ClientConn, clnt pb
 			wantPostID := got.Id
 
 			// Unset fields that aren't being tested.
-			got.Id = ""
-			got.Slug = ""
-			got.Created = nil
-			got.Updated = nil
-			got.Deleted = nil
-			got.Blocked = nil
-			got.XXX_unrecognized = []byte{}
-			got.XXX_sizecache = 0
+			unsetUntestedFields(got)
 
 			if reflect.DeepEqual(got, tc.want) {
 				t.Errorf("got: %v, want: %v", got, tc.want)
@@ -407,7 +396,6 @@ func postSvcAddAndFndPostsFn(ctx context.Context, conn *grpc.ClientConn, clnt pb
 				t.Error(err)
 			}
 
-			t.Logf("got: %s, want: %s", gotPostID, wantPostID)
 			if gotPostID != wantPostID {
 				t.Fatalf("got: %s, want: %s", gotPostID, wantPostID)
 			}
@@ -465,15 +453,7 @@ func postSvcEdtPostFn(ctx context.Context, conn *grpc.ClientConn, clnt pb.PostCl
 
 		got := r
 
-		// Unset fields that aren't being tested.
-		got.Id = ""
-		got.Slug = ""
-		got.Created = &timestamp.Timestamp{}
-		got.Updated = &timestamp.Timestamp{}
-		got.Deleted = &timestamp.Timestamp{}
-		got.Blocked = &timestamp.Timestamp{}
-		got.XXX_unrecognized = []byte{}
-		got.XXX_sizecache = 0
+		unsetUntestedFields(got)
 
 		if reflect.DeepEqual(got, want) {
 			t.Fatalf("got: %v, want: %v", got, want)
@@ -500,7 +480,7 @@ func postSvcDelPostFn(ctx context.Context, conn *grpc.ClientConn, clnt pb.PostCl
 		if err != nil {
 			t.Error(err)
 		}
-		t.Log(fndResp)
+
 		if fndResp.Posts[0].Deleted != nil {
 			t.Fatalf(
 				"expected post %s deleted_at to be nil, got %v",
@@ -524,5 +504,35 @@ func postSvcDelPostFn(ctx context.Context, conn *grpc.ClientConn, clnt pb.PostCl
 			t.Fatalf("expected post %s deleted_at to not be nil", fndResp.Posts[0].Id)
 			t.Fail()
 		}
+	}
+}
+
+func unsetUntestedFields(item interface{}) {
+	t := reflect.TypeOf(item)
+
+	switch t.String() {
+	case "*pb.User":
+		itm := item.(*pb.User)
+
+		itm.XXX_unrecognized = []byte{}
+		itm.XXX_sizecache = 0
+		itm.Id = ""
+	case "*pb.RoleResp":
+		itm := item.(*pb.RoleResp)
+
+		itm.XXX_unrecognized = []byte{}
+		itm.XXX_sizecache = 0
+		itm.Id = ""
+	case "*pb.PostResp":
+		itm := item.(*pb.PostResp)
+
+		itm.Slug = ""
+		itm.Created = nil
+		itm.Updated = nil
+		itm.Deleted = nil
+		itm.Blocked = nil
+		itm.XXX_unrecognized = []byte{}
+		itm.XXX_sizecache = 0
+		itm.Id = ""
 	}
 }
