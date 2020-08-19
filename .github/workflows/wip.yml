@@ -34,14 +34,18 @@ jobs:
             origin/master..origin/"${BRANCH_NAME}" >> "${infoFile}"
           echo >> "${infoFile}" # add missing newline
           tac "${infoFile}" > "rev_${infoFile}" && mv "rev_${infoFile}" "${infoFile}" # reverse data
+          cat "${infoFile}"
 
           wipLineNum="$(cat "${infoFile}" | grep "^> WIP" -n | head -n 1 | cut -d: -f1)"
           nowipLineNum="$(cat "${infoFile}" | grep "^> NOWIP" -n | head -n 1 | cut -d: -f1)"
           prList="$(hub pr list --head "${BRANCH_NAME}" --state=open --format="%i %t")"
           prCt="$(echo "${prList}" | wc -l)"
 
+          echo wip:"${wipLineNum}" nowip:"${nowipLineNum}" list:"${prList}" ct:"${prCt}"
+
           case "${prCt}" in
           0)
+            echo 0
             title="$(hub issue show --format="%t" "${BRANCH_ISSUE}")"
             if [[ -z "${nowipLineNum}" || "${nowipLineNum}" -ge "${wipLineNum}" ]]; then
               title="WIP: ${title}"
@@ -56,6 +60,7 @@ jobs:
             ;;
 
           1)
+            echo 1
             if [[ -n "${nowipLineNum}" && "${nowipLineNum}" -lt "${wipLineNum}" ]]; then
               prTitle="$(echo "${prList}" | cut -d" " -f2-)"
               if [[ "${prTitle}" =~ ^WIP: ]]; then
@@ -72,6 +77,7 @@ jobs:
             ;;
 
           *)
+            echo default
             echo "multiple PRs were found based on the same branch"
             echo "taking no action"
             ;;
