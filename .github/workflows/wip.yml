@@ -24,6 +24,8 @@ jobs:
         run: |
           set -e
 
+          echo branch issue: "${BRANCH_ISSUE}" # debug
+
           infoFile="commits_info"
           git log \
             --left-right \
@@ -34,40 +36,50 @@ jobs:
             origin/master..origin/"${BRANCH_NAME}" >> "${infoFile}"
           echo >> "${infoFile}" # add missing newline
           tac "${infoFile}" > "rev_${infoFile}" && mv "rev_${infoFile}" "${infoFile}" # reverse data
-          cat "${infoFile}"
+
+          cat "${infoFile}" # debug
 
           wipLineNum="$(cat "${infoFile}" | grep "^> WIP" -n | head -n 1 | cut -d: -f1)"
           nowipLineNum="$(cat "${infoFile}" | grep "^> NOWIP" -n | head -n 1 | cut -d: -f1)"
           prList="$(hub pr list --head "${BRANCH_NAME}" --state=open --format="%i %t")"
           prCt="$(echo "${prList}" | wc -l)"
 
-          echo wip:"${wipLineNum}" nowip:"${nowipLineNum}" list:"${prList}" ct:"${prCt}"
+          echo wip:"${wipLineNum}" nowip:"${nowipLineNum}" # debug
+          echo pr list...                                  # debug
+          echo "${prList}"                                 # debug
+
+          echo "${prCt} existing pr(s) for the branch issue number ${BRANCH_ISSUE}" # debug
 
           case "${prCt}" in
           0)
-            echo 0
-            title="$(hub issue show --format="%t" "${BRANCH_ISSUE}")"
-            if [[ -z "${nowipLineNum}" || "${nowipLineNum}" -ge "${wipLineNum}" ]]; then
-              title="WIP: ${title}"
+            prTitle="$(hub issue show --format="%t" "${BRANCH_ISSUE}")"
+            if [[ -z "${nowipLineNum}" || "${nowipLineNum}" -le "${wipLineNum}" ]]; then
+              prTitle="WIP: ${prTitle}"
             fi
 
+            echo pr title: "${prTitle}" # debug
+
             hub pull-request \
-              --message "${title}"
+              --message "${prTitle}"
               --message "Closes #${BRANCH_ISSUE}"
+
+            echo github actor: "${GITHUB_ACTOR}" # debug
 
             hub issue update "${BRANCH_ISSUE}" \
               --assignee "${GITHUB_ACTOR}"
             ;;
 
           1)
-            echo 1
-            if [[ -n "${nowipLineNum}" && "${nowipLineNum}" -lt "${wipLineNum}" ]]; then
+            if [[ -n "${nowipLineNum}" && "${nowipLineNum}" -gt "${wipLineNum}" ]]; then
               prTitle="$(echo "${prList}" | cut -d" " -f2-)"
               if [[ "${prTitle}" =~ ^WIP: ]]; then
                 prIssue="$(echo "${prList}" | grep -o "#[0-9]*" | tr -d "#")"
                 prTitle="${prTitle#WIP:}"
                 prTitle="${prTitle# }"
                 prBody="$(hub pr list --head "${BRANCH_NAME}" --state=open --format="%b")"
+
+                echo pr title: "${prTitle}" # debug
+                echo pr body: "${prBody}"   # debug
 
                 hub issue update "${prIssue}" \
                   --message "${prTitle}" \
@@ -77,7 +89,6 @@ jobs:
             ;;
 
           *)
-            echo default
             echo "multiple PRs were found based on the same branch"
             echo "taking no action"
             ;;
