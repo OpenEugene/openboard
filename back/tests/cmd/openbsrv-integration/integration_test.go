@@ -35,11 +35,13 @@ func TestClientServices(t *testing.T) {
 func userSvcAddAndFndRoleFn(ctx context.Context, conn *grpc.ClientConn, clnt pb.UserSvcClient) func(*testing.T) {
 	return func(t *testing.T) {
 		tests := []struct {
+			desc   string
 			want   string
 			addReq *pb.AddRoleReq
 			fndReq *pb.FndRolesReq
 		}{
 			{
+				"add and find user role",
 				"user",
 				&pb.AddRoleReq{Name: "user"},
 				&pb.FndRolesReq{
@@ -50,6 +52,7 @@ func userSvcAddAndFndRoleFn(ctx context.Context, conn *grpc.ClientConn, clnt pb.
 				},
 			},
 			{
+				"add and find admin role",
 				"admin",
 				&pb.AddRoleReq{Name: "admin"},
 				&pb.FndRolesReq{
@@ -64,21 +67,24 @@ func userSvcAddAndFndRoleFn(ctx context.Context, conn *grpc.ClientConn, clnt pb.
 		for _, tt := range tests {
 			_, err := clnt.AddRole(ctx, tt.addReq)
 			if err != nil {
-				t.Fatal(err)
+				t.Fatalf("%s: adding role %v: %v", tt.desc, tt.want, err)
 			}
 
 			r, err := clnt.FndRoles(ctx, tt.fndReq)
+			if err != nil {
+				t.Fatalf("%s: finding role %v: %v", tt.desc, tt.want, err)
+			}
 
 			if len(r.Items) == 0 {
-				t.Fatal("got: no items, want: one item")
+				t.Fatalf("%s: got: no items, want: %s", tt.desc, tt.want)
 			}
 
 			if len(r.Items) > 1 {
-				t.Fatalf("got: %+v, want: %s", r, tt.want)
+				t.Fatalf("%s: got: %+v, want: %s", tt.desc, r, tt.want)
 			}
 
 			if got := r.Items[0].Name; got != tt.want {
-				t.Fatalf("got: %v, want: %s", got, tt.want)
+				t.Fatalf("%s: got: %v, want: %s", tt.desc, got, tt.want)
 			}
 		}
 	}
