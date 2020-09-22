@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/OpenEugene/openboard/back/internal/pb"
+	timestamp "github.com/golang/protobuf/ptypes/timestamp"
 	"google.golang.org/grpc"
 )
 
@@ -221,8 +222,8 @@ func userSvcAddAndFndUsersFn(ctx context.Context, conn *grpc.ClientConn, clnt pb
 				unsetUntestedFields(got.Roles[i])
 			}
 
-			if reflect.DeepEqual(got, tc.want) {
-				t.Fatalf("%s: got: %v, want: %v", tc.desc, got, tc.want)
+			if !reflect.DeepEqual(got, tc.want) {
+				t.Fatalf("%s: got: %#v, want: %#v", tc.desc, got, tc.want)
 			}
 
 			gotUserID, err := userSvcFndUser(ctx, conn, clnt, tc.fndUserReq)
@@ -393,8 +394,8 @@ func postSvcAddAndFndPostsFn(ctx context.Context, conn *grpc.ClientConn, clnt pb
 			// Unset fields that aren't being tested.
 			unsetUntestedFields(got)
 
-			if reflect.DeepEqual(got, tc.want) {
-				t.Errorf("got: %v, want: %v", got, tc.want)
+			if !reflect.DeepEqual(got, tc.want) {
+				t.Errorf("got: %#v, want: %#v", got, tc.want)
 			}
 
 			gotPostID, err := postSvcFndPost(ctx, conn, clnt, tc.fndReq)
@@ -461,8 +462,8 @@ func postSvcEdtPostFn(ctx context.Context, conn *grpc.ClientConn, clnt pb.PostCl
 
 		unsetUntestedFields(got)
 
-		if reflect.DeepEqual(got, want) {
-			t.Fatalf("got: %v, want: %v", got, want)
+		if !reflect.DeepEqual(got, want) {
+			t.Fatalf("got: %#v, want: %#v", got, want)
 		}
 	}
 }
@@ -514,31 +515,52 @@ func postSvcDelPostFn(ctx context.Context, conn *grpc.ClientConn, clnt pb.PostCl
 }
 
 func unsetUntestedFields(item interface{}) {
-	t := reflect.TypeOf(item)
+	val := reflect.Indirect(reflect.ValueOf(item))
+	if val.Kind() != reflect.Struct {
+		return
+	}
 
-	switch t.String() {
-	case "*pb.User":
-		itm := item.(*pb.User)
+	strFldNames := []string{"Id"}
+	for _, name := range strFldNames {
+		fv := val.FieldByName(name)
+		if fv.IsValid() && fv.Kind() == reflect.String && fv.CanSet() {
+			fv.SetString("")
+		}
+	}
 
-		itm.XXX_unrecognized = []byte{}
-		itm.XXX_sizecache = 0
-		itm.Id = ""
-	case "*pb.RoleResp":
-		itm := item.(*pb.RoleResp)
+	byteFldNames := []string{"XXX_unrecognized"}
+	b := new([]byte)
+	bt := reflect.TypeOf(b)
 
-		itm.XXX_unrecognized = []byte{}
-		itm.XXX_sizecache = 0
-		itm.Id = ""
-	case "*pb.PostResp":
-		itm := item.(*pb.PostResp)
+	for _, name := range byteFldNames {
+		fv := val.FieldByName(name)
+		if fv.IsValid() && fv.Type() == bt && fv.CanSet() {
+			fv.Set(reflect.Zero(bt))
+		}
+	}
 
-		itm.Slug = ""
-		itm.Created = nil
-		itm.Updated = nil
-		itm.Deleted = nil
-		itm.Blocked = nil
-		itm.XXX_unrecognized = []byte{}
-		itm.XXX_sizecache = 0
-		itm.Id = ""
+	timeFldNames := []string{
+		"LastLogin",
+		"Created",
+		"Updated",
+		"Deleted",
+		"Blocked",
+	}
+	t := new(timestamp.Timestamp)
+	tt := reflect.TypeOf(t)
+
+	for _, name := range timeFldNames {
+		fv := val.FieldByName(name)
+		if fv.IsValid() && fv.Type() == tt && fv.CanSet() {
+			fv.Set(reflect.Zero(tt))
+		}
+	}
+
+	intFieldNames := []string{"XXX_sizecache"}
+	for _, name := range intFieldNames {
+		fv := val.FieldByName(name)
+		if fv.IsValid() && fv.Kind() == reflect.Int && fv.CanSet() {
+			fv.SetInt(0)
+		}
 	}
 }
