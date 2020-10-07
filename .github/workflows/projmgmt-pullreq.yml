@@ -11,4 +11,4 @@ jobs:
       - uses: alex-page/github-project-automation-plus@v0.2.4
         with:
           project: Change Management
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          repo-token: ${{ secrets.GH_TOKEN }}
