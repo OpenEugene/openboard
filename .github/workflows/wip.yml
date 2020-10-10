@@ -1,0 +1,97 @@
+name: Manage WIP workflow
+on:
+  push:
+    branches:
+      - '**-[0-9]+'
+jobs:
+  build:
+    name: WIP it
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+
+      - name: Set branch name envvar
+        run: |
+          echo "::set-env name=BRANCH_NAME::${GITHUB_REF#refs/heads/}"
+
+      - name: Set branch issue envvar
+        run: |
+          issue="${BRANCH_NAME##*-}"
+          ! [[ "${issue}" =~ ^[0-9]+$ ]] && >&2 echo "issue num not parsed" && exit 1
+          echo "::set-env name=BRANCH_ISSUE::${issue}"
+
+      - name: Setup/update WIP pull requests and related issues
+        run: |
+          set -e
+
+          echo branch issue: "${BRANCH_ISSUE}" # debug
+
+          infoFile="commits_info"
+          git log \
+            --left-right \
+            --graph \
+            --cherry-pick \
+            --oneline \
+            --pretty=format:%s \
+            origin/master..origin/"${BRANCH_NAME}" >> "${infoFile}"
+          echo >> "${infoFile}" # add missing newline
+          tac "${infoFile}" > "rev_${infoFile}" && mv "rev_${infoFile}" "${infoFile}" # reverse data
+
+          cat "${infoFile}" # debug
+
+          wipLineNum="$(cat "${infoFile}" | grep "^> WIP" -n | head -n 1 | cut -d: -f1)"
+          nowipLineNum="$(cat "${infoFile}" | grep "^> NOWIP" -n | head -n 1 | cut -d: -f1)"
+          prList="$(hub pr list --head "${BRANCH_NAME}" --state=open --format="%i %t")"
+          prCt="$(echo "${prList}" | wc -l)"
+
+          echo wip:"${wipLineNum}" nowip:"${nowipLineNum}" # debug
+          echo pr list...                                  # debug
+          echo "${prList}"                                 # debug
+
+          echo "${prCt} existing pr(s) for the branch issue number ${BRANCH_ISSUE}" # debug
+
+          case "${prCt}" in
+          0)
+            prTitle="$(hub issue show --format="%t" "${BRANCH_ISSUE}")"
+            if [[ -z "${nowipLineNum}" || "${nowipLineNum}" -le "${wipLineNum}" ]]; then
+              prTitle="WIP: ${prTitle}"
+            fi
+
+            echo pr title: "${prTitle}" # debug
+
+            hub pull-request \
+              --message "${prTitle}"
+              --message "Closes #${BRANCH_ISSUE}"
+
+            echo github actor: "${GITHUB_ACTOR}" # debug
+
+            hub issue update "${BRANCH_ISSUE}" \
+              --assignee "${GITHUB_ACTOR}"
+            ;;
+
+          1)
+            if [[ -n "${nowipLineNum}" && "${nowipLineNum}" -gt "${wipLineNum}" ]]; then
+              prTitle="$(echo "${prList}" | cut -d" " -f2-)"
+              if [[ "${prTitle}" =~ ^WIP: ]]; then
+                prIssue="$(echo "${prList}" | grep -o "#[0-9]*" | tr -d "#")"
+                prTitle="${prTitle#WIP:}"
+                prTitle="${prTitle# }"
+                prBody="$(hub pr list --head "${BRANCH_NAME}" --state=open --format="%b")"
+
+                echo pr title: "${prTitle}" # debug
+                echo pr body: "${prBody}"   # debug
+
+                hub issue update "${prIssue}" \
+                  --message "${prTitle}" \
+                  --message "${prBody}"
+              fi
+            fi
+            ;;
+
+          *)
+            echo "multiple PRs were found based on the same branch"
+            echo "taking no action"
+            ;;
+          esac
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
