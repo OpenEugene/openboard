@@ -41,12 +41,12 @@ jobs:
 
           wipLineNum="$(cat "${infoFile}" | grep "^> WIP" -n | head -n 1 | cut -d: -f1)"
           nowipLineNum="$(cat "${infoFile}" | grep "^> NOWIP" -n | head -n 1 | cut -d: -f1)"
-          prList="$(hub pr list --head "${BRANCH_NAME}" --state=open --format="%i %t")"
-          prCt="$(echo "${prList}" | wc -l)"
+          prList="$(hub pr list --head "${BRANCH_NAME}" --state=open --format="%i %t\n")"
+          prCt="$(echo -ne "${prList}" | wc -l)"
 
           echo wip:"${wipLineNum}" nowip:"${nowipLineNum}" # debug
           echo pr list...                                  # debug
-          echo "${prList}"                                 # debug
+          echo -ne "${prList}"                             # debug
 
           echo "${prCt} existing pr(s) for the branch issue number ${BRANCH_ISSUE}" # debug
 
@@ -71,9 +71,9 @@ jobs:
 
           1)
             if [[ -n "${nowipLineNum}" && "${nowipLineNum}" -gt "${wipLineNum}" ]]; then
-              prTitle="$(echo "${prList}" | cut -d" " -f2-)"
+              prTitle="$(echo -ne "${prList}" | cut -d" " -f2-)"
               if [[ "${prTitle}" =~ ^WIP: ]]; then
-                prIssue="$(echo "${prList}" | grep -o "#[0-9]*" | tr -d "#")"
+                prIssue="$(echo -ne "${prList}" | grep -o "#[0-9]*" | tr -d "#")"
                 prTitle="${prTitle#WIP:}"
                 prTitle="${prTitle# }"
                 prBody="$(hub pr list --head "${BRANCH_NAME}" --state=open --format="%b")"
