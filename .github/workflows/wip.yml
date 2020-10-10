@@ -10,6 +10,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - uses: actions/checkout@v2
+        with:
+          ref: main
+
       - name: Set branch name envvar
         run: |
           echo "::set-env name=BRANCH_NAME::${GITHUB_REF#refs/heads/}"
