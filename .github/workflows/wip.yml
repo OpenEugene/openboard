@@ -24,7 +24,7 @@ jobs:
         run: |
           set -e
 
-          echo branch issue: "${BRANCH_ISSUE}" # debug
+          echo "branch issue: ${BRANCH_ISSUE}" # debug
 
           infoFile="commits_info"
           git log \
@@ -44,9 +44,9 @@ jobs:
           prList="$(hub pr list --head "${BRANCH_NAME}" --state=open --format="%i %t\n")"
           prCt="$(echo -ne "${prList}" | wc -l)"
 
-          echo wip:"${wipLineNum}" nowip:"${nowipLineNum}" # debug
-          echo pr list...                                  # debug
-          echo -ne "${prList}"                             # debug
+          echo "wip:${wipLineNum} nowip:${nowipLineNum}" # debug
+          echo pr list...                                # debug
+          echo -ne "${prList}"                           # debug
 
           echo "${prCt} existing pr(s) for the branch issue number ${BRANCH_ISSUE}" # debug
 
@@ -57,14 +57,16 @@ jobs:
               prTitle="WIP: ${prTitle}"
             fi
 
-            echo pr title: "${prTitle}" # debug
+            echo "pr title: ${prTitle}" # debug
+
+            git rev-parse --symbolic-full-name HEAD # debug
 
             hub pull-request \
               --base origin/main
               --message "${prTitle}" \
               --message "Closes #${BRANCH_ISSUE}"
 
-            echo github actor: "${GITHUB_ACTOR}" # debug
+            echo "github actor: ${GITHUB_ACTOR}" # debug
 
             hub issue update "${BRANCH_ISSUE}" \
               --assignee "${GITHUB_ACTOR}"
@@ -79,8 +81,8 @@ jobs:
                 prTitle="${prTitle# }"
                 prBody="$(hub pr list --head "${BRANCH_NAME}" --state=open --format="%b")"
 
-                echo pr title: "${prTitle}" # debug
-                echo pr body: "${prBody}"   # debug
+                echo "pr title: ${prTitle}" # debug
+                echo "pr body: ${prBody}"   # debug
 
                 hub issue update "${prIssue}" \
                   --message "${prTitle}" \
