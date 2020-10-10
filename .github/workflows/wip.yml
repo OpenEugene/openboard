@@ -60,7 +60,8 @@ jobs:
             echo pr title: "${prTitle}" # debug
 
             hub pull-request \
-              --message "${prTitle}"
+              --base origin/main
+              --message "${prTitle}" \
               --message "Closes #${BRANCH_ISSUE}"
 
             echo github actor: "${GITHUB_ACTOR}" # debug
