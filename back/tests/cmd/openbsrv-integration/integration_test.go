@@ -3,11 +3,12 @@ package integrationTests
 import (
 	"context"
 	"fmt"
-	"github.com/OpenEugene/openboard/back/internal/pb"
-	"github.com/golang/protobuf/ptypes/timestamp"
-	"google.golang.org/grpc"
 	"reflect"
 	"testing"
+
+	"github.com/OpenEugene/openboard/back/internal/pb"
+	timestamp "github.com/golang/protobuf/ptypes/timestamp"
+	"google.golang.org/grpc"
 )
 
 func TestClientServices(t *testing.T) {
@@ -34,38 +35,109 @@ func TestClientServices(t *testing.T) {
 
 func userSvcAddAndFndRoleFn(ctx context.Context, conn *grpc.ClientConn, clnt pb.UserSvcClient) func(*testing.T) {
 	return func(t *testing.T) {
-		want := "testRole"
-
-		_, err := clnt.AddRole(ctx, &pb.AddRoleReq{Name: want})
-		if err != nil {
-			t.Fatal(err)
+		tests := []struct {
+			desc   string
+			want   string
+			addReq *pb.AddRoleReq
+			fndReq *pb.FndRolesReq
+		}{
+			{
+				"add and find user role",
+				"user",
+				&pb.AddRoleReq{Name: "user"},
+				&pb.FndRolesReq{
+					RoleIds:   []string{},
+					RoleNames: []string{"user"},
+					Limit:     100,
+					Lapse:     0,
+				},
+			},
+			{
+				"add and find admin role",
+				"admin",
+				&pb.AddRoleReq{Name: "admin"},
+				&pb.FndRolesReq{
+					RoleIds:   []string{},
+					RoleNames: []string{"admin"},
+					Limit:     100,
+					Lapse:     0,
+				},
+			},
 		}
 
-		r, err := clnt.FndRoles(ctx, &pb.FndRolesReq{
-			RoleIds:   []string{},
-			RoleNames: []string{want},
-			Limit:     100,
-			Lapse:     0,
-		})
+		for _, tt := range tests {
+			_, err := clnt.AddRole(ctx, tt.addReq)
+			if err != nil {
+				t.Fatalf("%s: adding role %v: %v", tt.desc, tt.want, err)
+			}
 
-		if len(r.Items) != 1 {
-			t.Fatalf("got: no items, want: %s", want)
-		}
+			r, err := clnt.FndRoles(ctx, tt.fndReq)
+			if err != nil {
+				t.Fatalf("%s: finding role %v: %v", tt.desc, tt.want, err)
+			}
 
-		if got := r.Items[0].Name; got != want {
-			t.Fatalf("got: %v, want: %s", got, want)
+			if len(r.Items) == 0 {
+				t.Fatalf("%s: got: no items, want: %s", tt.desc, tt.want)
+			}
+
+			if len(r.Items) > 1 {
+				t.Fatalf("%s: got: %+v, want: %s", tt.desc, r, tt.want)
+			}
+
+			if got := r.Items[0].Name; got != tt.want {
+				t.Fatalf("%s: got: %v, want: %s", tt.desc, got, tt.want)
+			}
 		}
 	}
 }
 
+func roleID(ctx context.Context, conn *grpc.ClientConn, clnt pb.UserSvcClient, req *pb.FndRolesReq) (string, error) {
+	r, err := clnt.FndRoles(ctx, req)
+	if err != nil {
+		return "", err
+	}
+
+	if len(r.Items) == 0 {
+		return "", nil
+	}
+
+	return r.Items[0].Id, nil
+}
+
 func userSvcAddAndFndUsersFn(ctx context.Context, conn *grpc.ClientConn, clnt pb.UserSvcClient) func(*testing.T) {
 	return func(t *testing.T) {
+		fndAdminRoleIdReq := &pb.FndRolesReq{
+			RoleIds:   []string{},
+			RoleNames: []string{"admin"},
+			Limit:     100,
+			Lapse:     0,
+		}
+
+		fndUserRoleIdReq := &pb.FndRolesReq{
+			RoleIds:   []string{},
+			RoleNames: []string{"user"},
+			Limit:     100,
+			Lapse:     0,
+		}
+
+		adminRoleID, err := roleID(ctx, conn, clnt, fndAdminRoleIdReq)
+		if err != nil {
+			t.Fatalf("retrieving role ID from role name: %v", err)
+		}
+
+		userRoleID, err := roleID(ctx, conn, clnt, fndUserRoleIdReq)
+		if err != nil {
+			t.Fatalf("retrieving role ID from role name: %v", err)
+		}
+
 		tests := []struct {
-			addReq *pb.AddUserReq
-			want   *pb.User
-			fndReq pb.FndUsersReq
+			desc       string
+			addUserReq *pb.AddUserReq
+			want       *pb.User
+			fndUserReq pb.FndUsersReq
 		}{
 			{
+				"Add and find user A",
 				&pb.AddUserReq{
 					Username:    "test username A",
 					Email:       "user_a@email.com",
@@ -75,6 +147,7 @@ func userSvcAddAndFndUsersFn(ctx context.Context, conn *grpc.ClientConn, clnt pb
 					FullName:    "test user full name A",
 					Avatar:      "test user avatar A",
 					Password:    "test user password A",
+					RoleIds:     []string{userRoleID},
 				},
 				&pb.User{
 					Username:    "test username A",
@@ -84,6 +157,7 @@ func userSvcAddAndFndUsersFn(ctx context.Context, conn *grpc.ClientConn, clnt pb
 					AltmailHold: false,
 					FullName:    "test user full name A",
 					Avatar:      "test user avatar A",
+					Roles:       []*pb.RoleResp{{Name: "user"}},
 				},
 				pb.FndUsersReq{
 					RoleIds:     []string{},
@@ -96,6 +170,7 @@ func userSvcAddAndFndUsersFn(ctx context.Context, conn *grpc.ClientConn, clnt pb
 				},
 			},
 			{
+				"Add and find user B",
 				&pb.AddUserReq{
 					Username:    "test username B",
 					Email:       "userB@email.com",
@@ -105,6 +180,7 @@ func userSvcAddAndFndUsersFn(ctx context.Context, conn *grpc.ClientConn, clnt pb
 					FullName:    "test user full name B",
 					Avatar:      "test user avatar B",
 					Password:    "test user password B",
+					RoleIds:     []string{userRoleID, adminRoleID},
 				},
 				&pb.User{
 					Username:    "test username B",
@@ -114,6 +190,10 @@ func userSvcAddAndFndUsersFn(ctx context.Context, conn *grpc.ClientConn, clnt pb
 					AltmailHold: false,
 					FullName:    "test user full name B",
 					Avatar:      "test user avatar B",
+					Roles: []*pb.RoleResp{
+						{Name: "user"},
+						{Name: "admin"},
+					},
 				},
 				pb.FndUsersReq{
 					RoleIds:     []string{},
@@ -128,7 +208,7 @@ func userSvcAddAndFndUsersFn(ctx context.Context, conn *grpc.ClientConn, clnt pb
 		}
 
 		for _, tc := range tests {
-			r, err := clnt.AddUser(ctx, tc.addReq)
+			r, err := clnt.AddUser(ctx, tc.addUserReq)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -136,16 +216,17 @@ func userSvcAddAndFndUsersFn(ctx context.Context, conn *grpc.ClientConn, clnt pb
 			got := r.Item
 			wantUserID := got.Id
 
-			// Unset fields that aren't being tested.
-			got.Id = ""
-			got.XXX_unrecognized = []byte{}
-			got.XXX_sizecache = 0
+			unsetUntestedFields(got)
 
-			if reflect.DeepEqual(got, tc.want) {
-				t.Fatalf("got: %v, want: %v", got, tc.want)
+			for i := 0; i < len(got.Roles); i++ {
+				unsetUntestedFields(got.Roles[i])
 			}
 
-			gotUserID, err := userSvcFndUser(ctx, conn, clnt, tc.fndReq)
+			if !reflect.DeepEqual(got, tc.want) {
+				t.Fatalf("%s: got: %#v, want: %#v", tc.desc, got, tc.want)
+			}
+
+			gotUserID, err := userSvcFndUser(ctx, conn, clnt, tc.fndUserReq)
 			if err != nil {
 				t.Errorf("unable to find user: %v", err)
 			}
@@ -311,17 +392,10 @@ func postSvcAddAndFndPostsFn(ctx context.Context, conn *grpc.ClientConn, clnt pb
 			wantPostID := got.Id
 
 			// Unset fields that aren't being tested.
-			got.Id = ""
-			got.Slug = ""
-			got.Created = nil
-			got.Updated = nil
-			got.Deleted = nil
-			got.Blocked = nil
-			got.XXX_unrecognized = []byte{}
-			got.XXX_sizecache = 0
+			unsetUntestedFields(got)
 
-			if reflect.DeepEqual(got, tc.want) {
-				t.Errorf("got: %v, want: %v", got, tc.want)
+			if !reflect.DeepEqual(got, tc.want) {
+				t.Errorf("got: %#v, want: %#v", got, tc.want)
 			}
 
 			gotPostID, err := postSvcFndPost(ctx, conn, clnt, tc.fndReq)
@@ -329,7 +403,6 @@ func postSvcAddAndFndPostsFn(ctx context.Context, conn *grpc.ClientConn, clnt pb
 				t.Error(err)
 			}
 
-			t.Logf("got: %s, want: %s", gotPostID, wantPostID)
 			if gotPostID != wantPostID {
 				t.Fatalf("got: %s, want: %s", gotPostID, wantPostID)
 			}
@@ -387,18 +460,10 @@ func postSvcEdtPostFn(ctx context.Context, conn *grpc.ClientConn, clnt pb.PostCl
 
 		got := r
 
-		// Unset fields that aren't being tested.
-		got.Id = ""
-		got.Slug = ""
-		got.Created = &timestamp.Timestamp{}
-		got.Updated = &timestamp.Timestamp{}
-		got.Deleted = &timestamp.Timestamp{}
-		got.Blocked = &timestamp.Timestamp{}
-		got.XXX_unrecognized = []byte{}
-		got.XXX_sizecache = 0
+		unsetUntestedFields(got)
 
-		if reflect.DeepEqual(got, want) {
-			t.Fatalf("got: %v, want: %v", got, want)
+		if !reflect.DeepEqual(got, want) {
+			t.Fatalf("got: %#v, want: %#v", got, want)
 		}
 	}
 }
@@ -422,7 +487,7 @@ func postSvcDelPostFn(ctx context.Context, conn *grpc.ClientConn, clnt pb.PostCl
 		if err != nil {
 			t.Error(err)
 		}
-		t.Log(fndResp)
+
 		if fndResp.Posts[0].Deleted != nil {
 			t.Fatalf(
 				"expected post %s deleted_at to be nil, got %v",
@@ -445,6 +510,57 @@ func postSvcDelPostFn(ctx context.Context, conn *grpc.ClientConn, clnt pb.PostCl
 		if fndResp.Posts[0].Deleted == nil {
 			t.Fatalf("expected post %s deleted_at to not be nil", fndResp.Posts[0].Id)
 			t.Fail()
+		}
+	}
+}
+
+func unsetUntestedFields(item interface{}) {
+	val := reflect.Indirect(reflect.ValueOf(item))
+	if val.Kind() != reflect.Struct {
+		return
+	}
+
+	strFldNames := []string{"Id"}
+	for _, name := range strFldNames {
+		fv := val.FieldByName(name)
+		if fv.IsValid() && fv.Kind() == reflect.String && fv.CanSet() {
+			fv.SetString("")
+		}
+	}
+
+	byteFldNames := []string{"XXX_unrecognized"}
+	b := new([]byte)
+	bt := reflect.TypeOf(b)
+
+	for _, name := range byteFldNames {
+		fv := val.FieldByName(name)
+		if fv.IsValid() && fv.Type() == bt && fv.CanSet() {
+			fv.Set(reflect.Zero(bt))
+		}
+	}
+
+	timeFldNames := []string{
+		"LastLogin",
+		"Created",
+		"Updated",
+		"Deleted",
+		"Blocked",
+	}
+	t := new(timestamp.Timestamp)
+	tt := reflect.TypeOf(t)
+
+	for _, name := range timeFldNames {
+		fv := val.FieldByName(name)
+		if fv.IsValid() && fv.Type() == tt && fv.CanSet() {
+			fv.Set(reflect.Zero(tt))
+		}
+	}
+
+	intFieldNames := []string{"XXX_sizecache"}
+	for _, name := range intFieldNames {
+		fv := val.FieldByName(name)
+		if fv.IsValid() && fv.Kind() == reflect.Int && fv.CanSet() {
+			fv.SetInt(0)
 		}
 	}
 }
