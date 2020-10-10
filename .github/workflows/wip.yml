@@ -73,7 +73,7 @@ jobs:
             echo "github actor: ${GITHUB_ACTOR}" # debug
 
             hub issue update "${BRANCH_ISSUE}" \
-              -a "-${GITHUB_ACTOR}"
+              -a "${GITHUB_ACTOR}"
             ;;
 
           1)
