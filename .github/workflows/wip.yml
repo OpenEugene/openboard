@@ -16,13 +16,13 @@ jobs:
 
       - name: Set branch name envvar
         run: |
-          echo "::set-env name=BRANCH_NAME::${GITHUB_REF#refs/heads/}"
+          echo "BRANCH_NAME=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
 
       - name: Set branch issue envvar
         run: |
           issue="${BRANCH_NAME##*-}"
           ! [[ "${issue}" =~ ^[0-9]+$ ]] && >&2 echo "issue num not parsed" && exit 1
-          echo "::set-env name=BRANCH_ISSUE::${issue}"
+          echo "BRANCH_ISSUE=${issue}" >> $GITHUB_ENV
 
       - name: Setup/update WIP pull requests and related issues
         run: |
@@ -102,4 +102,4 @@ jobs:
             ;;
           esac
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
