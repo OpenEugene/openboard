@@ -66,6 +66,7 @@ jobs:
             git rev-parse --symbolic-full-name HEAD # debug
 
             hub pull-request \
+              --assign "${GITHUB_ACTOR}" \
               --base main \
               --message "${prTitle}" \
               --message "Closes #${BRANCH_ISSUE}"
