@@ -1,4 +1,4 @@
-name: Manage pull requests for project
+name: Manage pull requests for project (set initiated)
 
 on:
   pull_request:

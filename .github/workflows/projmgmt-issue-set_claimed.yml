@@ -1,0 +1,15 @@
+name: Manage issues for project (set claimed)
+
+on:
+  issues:
+    types: [assigned]
+
+jobs:
+  automate-project-columns:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: alex-page/github-project-automation-plus@v0.2.4
+        with:
+          project: Issue Qualification
+          column: Claimed
+          repo-token: ${{ secrets.GH_TOKEN }}

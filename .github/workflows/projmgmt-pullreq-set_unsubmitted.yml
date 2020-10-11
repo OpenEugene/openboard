@@ -1,8 +1,8 @@
-name: Manage issues for project
+name: Manage pull requests for project (set submitted)
 
 on:
-  issues:
-    types: [assigned]
+  pull_request:
+    types: [review_requested_removed]
 
 jobs:
   automate-project-columns:
@@ -10,6 +10,6 @@ jobs:
     steps:
       - uses: alex-page/github-project-automation-plus@v0.2.4
         with:
-          project: Issue Qualification
-          column: Claimed
+          project: Change Management
+          column: Initiated
           repo-token: ${{ secrets.GH_TOKEN }}
