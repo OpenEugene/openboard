@@ -1,4 +1,4 @@
-name: Manage pull requests for project (set submitted)
+name: Manage pull requests for project (set unsubmitted)
 
 on:
   pull_request:
