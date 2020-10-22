@@ -1,4 +1,4 @@
-name: Manage pull requests for project
+name: Manage pull requests for project (set initiated)
 
 on:
   pull_request:
@@ -11,4 +11,5 @@ jobs:
       - uses: alex-page/github-project-automation-plus@v0.2.4
         with:
           project: Change Management
+          column: Initiated
           repo-token: ${{ secrets.GH_TOKEN }}

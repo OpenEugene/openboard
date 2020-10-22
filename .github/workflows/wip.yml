@@ -8,23 +8,27 @@ jobs:
     name: WIP it
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
+        with:
+          ref: main
+
+      - uses: actions/checkout@v2
 
       - name: Set branch name envvar
         run: |
-          echo "::set-env name=BRANCH_NAME::${GITHUB_REF#refs/heads/}"
+          echo "BRANCH_NAME=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
 
       - name: Set branch issue envvar
         run: |
           issue="${BRANCH_NAME##*-}"
           ! [[ "${issue}" =~ ^[0-9]+$ ]] && >&2 echo "issue num not parsed" && exit 1
-          echo "::set-env name=BRANCH_ISSUE::${issue}"
+          echo "BRANCH_ISSUE=${issue}" >> $GITHUB_ENV
 
       - name: Setup/update WIP pull requests and related issues
         run: |
           set -e
 
-          echo branch issue: "${BRANCH_ISSUE}" # debug
+          echo "branch issue: ${BRANCH_ISSUE}" # debug
 
           infoFile="commits_info"
           git log \
@@ -33,7 +37,7 @@ jobs:
             --cherry-pick \
             --oneline \
             --pretty=format:%s \
-            origin/master..origin/"${BRANCH_NAME}" >> "${infoFile}"
+            origin/main..origin/"${BRANCH_NAME}" >> "${infoFile}"
           echo >> "${infoFile}" # add missing newline
           tac "${infoFile}" > "rev_${infoFile}" && mv "rev_${infoFile}" "${infoFile}" # reverse data
 
@@ -41,12 +45,12 @@ jobs:
 
           wipLineNum="$(cat "${infoFile}" | grep "^> WIP" -n | head -n 1 | cut -d: -f1)"
           nowipLineNum="$(cat "${infoFile}" | grep "^> NOWIP" -n | head -n 1 | cut -d: -f1)"
-          prList="$(hub pr list --head "${BRANCH_NAME}" --state=open --format="%i %t")"
-          prCt="$(echo "${prList}" | wc -l)"
+          prList="$(hub pr list --head "${BRANCH_NAME}" --state=open --format="%i %t\n")"
+          prCt="$(echo -ne "${prList}" | wc -l)"
 
-          echo wip:"${wipLineNum}" nowip:"${nowipLineNum}" # debug
-          echo pr list...                                  # debug
-          echo "${prList}"                                 # debug
+          echo "wip:${wipLineNum} nowip:${nowipLineNum}" # debug
+          echo pr list...                                # debug
+          echo -ne "${prList}"                           # debug
 
           echo "${prCt} existing pr(s) for the branch issue number ${BRANCH_ISSUE}" # debug
 
@@ -57,29 +61,33 @@ jobs:
               prTitle="WIP: ${prTitle}"
             fi
 
-            echo pr title: "${prTitle}" # debug
+            echo "pr title: ${prTitle}" # debug
+
+            git rev-parse --symbolic-full-name HEAD # debug
 
             hub pull-request \
-              --message "${prTitle}"
+              --assign "${GITHUB_ACTOR}" \
+              --base main \
+              --message "${prTitle}" \
               --message "Closes #${BRANCH_ISSUE}"
 
-            echo github actor: "${GITHUB_ACTOR}" # debug
+            echo "github actor: ${GITHUB_ACTOR}" # debug
 
             hub issue update "${BRANCH_ISSUE}" \
-              --assignee "${GITHUB_ACTOR}"
+              -a "${GITHUB_ACTOR}"
             ;;
 
           1)
             if [[ -n "${nowipLineNum}" && "${nowipLineNum}" -gt "${wipLineNum}" ]]; then
-              prTitle="$(echo "${prList}" | cut -d" " -f2-)"
+              prTitle="$(echo -ne "${prList}" | cut -d" " -f2-)"
               if [[ "${prTitle}" =~ ^WIP: ]]; then
-                prIssue="$(echo "${prList}" | grep -o "#[0-9]*" | tr -d "#")"
+                prIssue="$(echo -ne "${prList}" | grep -o "#[0-9]*" | tr -d "#")"
                 prTitle="${prTitle#WIP:}"
                 prTitle="${prTitle# }"
                 prBody="$(hub pr list --head "${BRANCH_NAME}" --state=open --format="%b")"
 
-                echo pr title: "${prTitle}" # debug
-                echo pr body: "${prBody}"   # debug
+                echo "pr title: ${prTitle}" # debug
+                echo "pr body: ${prBody}"   # debug
 
                 hub issue update "${prIssue}" \
                   --message "${prTitle}" \
@@ -94,4 +102,4 @@ jobs:
             ;;
           esac
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
