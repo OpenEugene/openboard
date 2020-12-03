@@ -1,13 +1,9 @@
 package artifact_tests
 
 import (
-	"context"
-	"fmt"
 	"reflect"
 
-	"github.com/OpenEugene/openboard/back/internal/pb"
 	timestamp "github.com/golang/protobuf/ptypes/timestamp"
-	"google.golang.org/grpc"
 )
 
 func unsetUntestedFields(item interface{}) {
@@ -59,40 +55,4 @@ func unsetUntestedFields(item interface{}) {
 			fv.SetInt(0)
 		}
 	}
-}
-
-func roleID(ctx context.Context, conn *grpc.ClientConn, clnt pb.UserSvcClient, req *pb.FndRolesReq) (string, error) {
-	r, err := clnt.FndRoles(ctx, req)
-	if err != nil {
-		return "", err
-	}
-
-	if len(r.Items) == 0 {
-		return "", nil
-	}
-
-	return r.Items[0].Id, nil
-}
-
-func userSvcFndUser(ctx context.Context, conn *grpc.ClientConn, clnt pb.UserSvcClient, req pb.FndUsersReq) (string, error) {
-	r, err := clnt.FndUsers(ctx, &req)
-	if err != nil {
-		return "", fmt.Errorf("unable to find user: %w", err)
-	}
-	if len(r.Items) > 0 {
-		return r.Items[0].Id, nil
-	}
-	return "", nil
-}
-
-func postSvcFndPost(ctx context.Context, conn *grpc.ClientConn, clnt pb.PostClient, req *pb.FndPostsReq) (string, error) {
-	postID, err := clnt.FndPosts(ctx, req)
-	if err != nil {
-		return "", fmt.Errorf("Unable to find post: %w", err)
-	}
-
-	if len(postID.Posts) > 0 {
-		return postID.Posts[0].Id, nil
-	}
-	return "", nil
 }
