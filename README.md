@@ -2,7 +2,7 @@
 
 An open source version of Switchboard.
 
-***Join us first and third Wednesday evenings for sprint wrap-up/planning, and each Tuesday evening for check-in. [EUG-Go](https://www.meetup.com/eug-go)***
+***Join us first and third Wednesday evenings for sprint wrap & plan, and each Tuesday evening for check-in. [EUG-Go](https://www.meetup.com/eug-go)***
 
 
 ## Overview
