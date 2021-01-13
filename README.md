@@ -8,17 +8,15 @@ An open source version of Switchboard.
 
 ## Overview
 
-- The front end is written in Elm
+- The [Front End](https://github.com/OpenEugene/openboard/tree/master/front) is 
+written in Elm
   - Produces assets in the form of JavaScript artifacts
-- The back end is written in Go
+- The [Back End](https://github.com/OpenEugene/openboard/tree/master/back) is 
+written in Go
   - Produces an executable (*nix/Win) managing multiple servers
     - gRPC API server component
     - JSON/HTTP API server component
     - Front end asset server component
-
-[Front End](https://github.com/OpenEugene/openboard/tree/master/front)
-
-[Back End](https://github.com/OpenEugene/openboard/tree/master/back)
 
 ## Community
 
