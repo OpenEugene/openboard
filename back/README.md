@@ -1,6 +1,8 @@
 # openboard/back
 
-## Getting Started (Easy Mode)
+## Getting Started
+
+### Easy Mode
 
 The following scripts should be working for Bash on Linux, WSL, and Darwin. When
 installing the database, the suggested defaults for this project are:
@@ -13,19 +15,21 @@ dbname = "openeug_openb_dev", and dbuser = "openeug_openbdev".
 ```
 
 ```shell
-# container setup (database); skip if using mariadb local install
+# database container setup (optional - skip if using mariadb "local install")
 pushd ./tools/iso/ >/dev/null
 ./dev up # subcommands [up|dn|ip|clean] (default: up)
 popd >/dev/null
 ```
 
-## Getting Started (Normal Mode)
+### Normal Mode
 
 - [Install Go](https://golang.org/doc/install)
 - [Install Tools](./tools/install-tools)
 - [Install MariaDB (>=10.2.22)](https://www.google.com/search?q=install+mariadb+stable+on)
 
-## Protobuf/protoc (Advanced Mode; Optional)
+### Advanced Options
+
+#### Protobuf/protoc
 
 Protocol buffers are Google's language-neutral, platform-neutral, extensible
 mechanism for serializing structured data.
@@ -74,14 +78,4 @@ about usage and flags (e.g. -dbname, -dbuser, etc.).
 
 ## Contributing
 
-### Please be sure to:
-
-- Communicate before opening a PR.
-- Run gometalinter and fix raised errors/warnings.
-  - gometalinter install directions are highly dependent on choice of dev
-  environment.
-  - If gometalinter suggests odd/wrong fixes, please communicate before applying
-  them.
-- Run tests and fix incorrect structure/behavior as needed.
-- Add new passing tests when useful.
-- Generate code when modifying protobufs (`./gengo` from the root back dir).
+[Start here](https://github.com/OpenEugene/openboard/blob/main/CONTRIBUTING.md)

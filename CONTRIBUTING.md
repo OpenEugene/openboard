@@ -1,62 +1,79 @@
-# Contribution Guidelines 
+## Welcome
 
-First off, thank you for considering contributing to Openboard. It's people like you that make projects like this possible!
+### Please & Thank You
 
-Following these guidelines helps to communicate that you respect the time of the developers managing and developing this open source project. In return, they should reciprocate that respect in addressing your issue, assessing changes, and helping you finalize your pull requests.
+First off, thank you for considering contributing to Openboard. It's people
+like you that make projects like this possible!
 
-### What kind of contributions are we looking for?
+Following this guide helps to communicate that you respect the time of the 
+developers managing and developing this open source project. In return, they 
+should reciprocate that respect in addressing your issue, assessing changes, 
+and helping you finalize your pull requests.
 
-All sorts of them! In our current stage, we will definitely need help from folks with UI/UX chops and developers of all skill levels. In later stages, we 
-will need contributions for creating/improving documentation and marketing help. Reach out to any of the contributors for this project to see how you can help!
+## Accountability
 
-### Ground Rules
+Openboard is a project utilizing and teaching [Go](https://golang.org) and 
+[Elm](https://elm-lang.org). This project is part of the 
+[OpenEugene](http://openeugene.org) collective, and our meetings are part of 
+the [EugeneTech](https://eugenetech.org) community. Therefore, we align 
+ourselves with the codes of conduct put forth by those orgs/communities.
 
-* Create issues for any major changes and enhancements that you wish to make. Discuss things transparently and get community feedback.
-* Keep feature versions as small as possible, preferably one new feature per version.
-* Be welcoming to newcomers and encourage diverse new contributors from all backgrounds. See the [Python Community Code of Conduct](https://www.python.org/psf/codeofconduct/).
+- OpenEugene Code of Conduct
+- EugeneTech Code of Conduct
+- [Go Community Code of Conduct](https://golang.org/conduct)
+- [Elm Community Spaces Code of Conduct](https://github.com/elm-community/discussions/blob/master/code-of-conduct.md)
 
+## Getting Started (Tools and Building)
 
-### Never made a pull request to an open source project before? 
-Here are a couple of friendly tutorials: http://makeapullrequest.com/ and http://www.firsttimersonly.com/
+[Openboard Readme](https://github.com/OpenEugene/openboard/blob/main/README.md)
 
-### Getting started
+## Contributing
 
-Please read about our git branching model: https://nvie.com/posts/a-successful-git-branching-model/
-* Tl;dr: please create any new features off the develop branch!
+### General
 
-For something that is bigger than a one or two line fix:
+We would appreciate that most contributions to this project be made by attending
+our sprint wrap & plan and/or check-ins. See the
+[README](https://github.com/OpenEugene/openboard/blob/main/README.md) for more 
+information. Contributing from forks has not yet been tested regarding our
+automated tracking mechanisms.
 
-1. Create your own fork of the code
-2. Do the changes in your fork
-3. If you like the change and think the project could use it:
-    * Be sure you have followed the code style for the project.
-    * Sign the Contributor License Agreement, CLA, with the jQuery Foundation.
-    * Note the jQuery Foundation Code of Conduct.
-    * Send a pull request indicating that you have a CLA on file.
+### Reporting
 
-Small contributions such as fixing spelling errors, where the content is small enough to not be considered intellectual property, can be submitted by a 
-contributor as a patch.
+- "Issues" contains requested corrections and improvements.
+- "Pull Requests" contains mutations that each directly resolve "Issues"
 
-As a rule of thumb, changes are obvious fixes if they do not introduce any new functionality or creative thinking. As long as the change does not affect functionality, some likely examples include the following:
-* Spelling / grammar fixes
-* Typo correction, white space and formatting changes
-* Comment clean up
-* Bug fixes that change default return values or error codes stored in constants
+### Tracking
 
-### How to report a bug
+#### [Issue Qualification](https://github.com/OpenEugene/openboard/projects/3)
 
-_If you find a security vulnerability, do NOT open an issue. Contact one of the contributors instead._
+When an Issue is:
+- up for consideration, it is added to the "Proposed" column
+- accepted to be resolved, it is moved to the "Accepted" column
+- actively being resolved, it is moved to the "Claimed" column
+- fully resolved, it is moved to the "Resolved" column
 
-When filing an issue, make sure to answer these five questions:
-1. What version of Go/Elm are you using?
-2. What operating system and processor architecture are you using?
-3. What did you do?
-4. What did you expect to see?
-5. What did you see instead?
+*Most of these steps are automated. The only step that is often performed
+manually is the first step where an issue is added to the "Proposed" column.
 
-### How to suggest a feature or enhancement
+#### [Change Management](https://github.com/OpenEugene/openboard/projects/1)
 
-We welcome any suggestions for improvement! Please open an issue and add a 'improvement' tag to it.
+When a PR is:
+- created, it is added to the "Initiated" column
+- ready for review, it is added to the "Submitted" column
+- closed, it is added to the "Finished" column
 
-### Community
-If you would like to discuss anything pertaining this project, join the [Eugene Tech Slack](http://eugslack.com) and the #openboard channel.
+*All of these steps are automated.
+
+#### Automation Notes
+
+PR Creation, Issue Association, and Tracking:
+A Branch that has the suffix "-{issue_number}" (e.g. "my_branch-123") and is
+pushed to the project will automatically have a PR opened that is associated 
+with the relevant Issue. The PR title is derived from the Issue title. The PR is
+automatically added to the "Change Management" project.
+
+WIP Convenience:
+A Branch that contains a commit message that has the prefix "WIP" will have its
+PR title prefixed with "WIP: " (e.g. "WIP: Fix some bug"). A Branch that
+contains a commit message that has the prefix "NOWIP" and also has an existing
+PR tracking it will cause the PR title "WIP: " prefix to be trimmed.
