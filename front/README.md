@@ -14,7 +14,7 @@ Then you should have the `elm` command available. To compile the application run
 
 ## Get started
 
-You can serve up the frontend on it's own, or use spin the whole stack up together (see top level README)
+You can serve up the frontend on its own, or use spin the whole stack up together (see top level README)
 
 ```
 npm i -g elm-live

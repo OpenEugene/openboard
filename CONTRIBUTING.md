@@ -47,7 +47,7 @@ automated tracking mechanisms.
 #### [Issue Qualification](https://github.com/OpenEugene/openboard/projects/3)
 
 When an Issue is:
-- up for consideration, it is added to the "Propsed" column
+- up for consideration, it is added to the "Proposed" column
 - accepted to be resolved, it is moved to the "Accepted" column
 - actively being resolved, it is moved to the "Claimed" column
 - fully resolved, it is moved to the "Resolved" column
@@ -73,7 +73,7 @@ with the relevant Issue. The PR title is derived from the Issue title. The PR is
 automatically added to the "Change Management" project.
 
 WIP Convenience:
-A Branch that contains a commit message that has the prefix "WIP" will have it's
+A Branch that contains a commit message that has the prefix "WIP" will have its
 PR title prefixed with "WIP: " (e.g. "WIP: Fix some bug"). A Branch that
 contains a commit message that has the prefix "NOWIP" and also has an existing
 PR tracking it will cause the PR title "WIP: " prefix to be trimmed.
