@@ -79,7 +79,7 @@ func (s *UserDB) upsertUser(ctx cx, sid string, x *pb.AddUserReq, y *pb.UserResp
 		return err
 	}
 
-	// Add entries to role table for every role
+	// Add entries to user_role table for every role
 	for _, rid := range x.RoleIds {
 		_, err = stmt.Exec(&id, rid)
 		if err != nil {
@@ -283,8 +283,25 @@ func (s *UserDB) upsertRole(ctx cx, sid string, x *pb.AddRoleReq, y *pb.RoleResp
 		return err
 	}
 
-	y.Id = id.String()
-	y.Name = x.Name
+	// Execute another query that will return the role fields.
+	req := pb.FndRolesReq{
+		RoleIds:   []string{},
+		RoleNames: []string{x.Name},
+		Limit:     1,
+		Lapse:     0,
+	}
+	resp := pb.RolesResp{}
+	if err = s.findRoles(ctx, &req, &resp); err != nil {
+		return err
+	}
+
+	if resp.Items == nil {
+		return errors.New("upserted role not found")
+	}
+
+	// There is only one role (Item) expected to be found.
+	y.Id = resp.Items[0].Id
+	y.Name = resp.Items[0].Name
 
 	return nil
 }
