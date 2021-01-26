@@ -5,8 +5,8 @@ import (
 	"database/sql"
 
 	"github.com/OpenEugene/openboard/back/internal/pb"
-	"github.com/codemodus/sqlo"
 	"github.com/codemodus/uidgen"
+	"github.com/jmoiron/sqlx"
 )
 
 var _ pb.UserSvcServer = &UserDB{}
@@ -14,7 +14,7 @@ var _ pb.UserSvcServer = &UserDB{}
 // UserDB encapsulates dependencies and data required to implement the
 // pb.UserServer interface.
 type UserDB struct {
-	db  *sqlo.SQLO
+	db  *sqlx.DB
 	drv string
 	ug  *uidgen.UIDGen
 }
@@ -22,7 +22,7 @@ type UserDB struct {
 // New returns a pointer to a UserDB instance or an error.
 func New(relDB *sql.DB, driver string, offset uint64) (*UserDB, error) {
 	db := UserDB{
-		db:  sqlo.New(relDB),
+		db:  sqlx.NewDb(relDB, driver),
 		drv: driver,
 		ug:  uidgen.New(offset, uidgen.VARCHAR26),
 	}
