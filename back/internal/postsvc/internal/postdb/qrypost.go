@@ -32,18 +32,16 @@ func (s *PostDB) upsertType(ctx cx, sid string, x *pb.AddTypeReq, y *pb.TypeResp
 		return fmt.Errorf("invalid uid")
 	}
 
-	stmt, err := s.db.Prepare("INSERT INTO `type` (type_id, name) VALUES (?, ?) ON DUPLICATE KEY UPDATE type_id = ?, name = ?")
-	if err != nil {
-		return err
-	}
-
-	_, err = stmt.Exec(&id, x.Name, &id, x.Name)
+	_, err := s.db.Exec("INSERT INTO `type` (type_id, name) VALUES (?, ?) ON DUPLICATE KEY UPDATE type_id = ?, name = ?", &id, x.Name, &id, x.Name)
 	if err != nil {
 		return err
 	}
 
 	y.Id = id.String()
-	y.Name = x.Name
+	e := s.db.QueryRow("SELECT name FROM `type` where type_id = ?", y.Id).Scan(&y.Name)
+	if e != nil {
+		return e
+	}
 
 	return nil
 }
@@ -90,20 +88,18 @@ func (s *PostDB) upsertPost(ctx cx, sid string, x *pb.AddPostReq, y *pb.PostResp
 		return fmt.Errorf("invalid uid")
 	}
 
-	stmt, err := s.db.Prepare("INSERT INTO post (post_id, type_id, slug, title, body) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE post_id = ?, type_id = ?, slug = ?, title = ?, body = ?")
-	if err != nil {
-		return err
-	}
+	_, err := s.db.Exec(`
+		INSERT INTO post (post_id, type_id, slug, title, body)
+		VALUES (?, ?, ?, ?, ?) 
+		ON DUPLICATE KEY UPDATE post_id = ?, type_id = ?, slug = ?, title = ?, body = ?`,
+		&id, x.TypeId, "", x.Title, x.Body, &id, x.TypeId, "", x.Title, x.Body)
 
-	_, err = stmt.Exec(&id, x.TypeId, "", x.Title, x.Body, &id, x.TypeId, "", x.Title, x.Body)
 	if err != nil {
 		return err
 	}
 
 	y.Id = id.String()
-	y.TypeId = x.TypeId
-	y.Title = x.Title
-	y.Body = x.Body
+	s.db.QueryRow("SELECT type_id, title, body FROM post WHERE post_id = ?", y.Id).Scan(&y.TypeId, &y.Title, &y.Body)
 
 	return nil
 }
@@ -111,7 +107,12 @@ func (s *PostDB) upsertPost(ctx cx, sid string, x *pb.AddPostReq, y *pb.PostResp
 // TODO: make it such that if given a list of multiple keywords, we can search the
 // title and body for those keywords.
 func (s *PostDB) findPosts(ctx cx, x *pb.FndPostsReq, y *pb.PostsResp) error {
-	selStmt, err := s.db.Prepare("SELECT post_id, type_id, slug, title, body, created_at, updated_at, deleted_at FROM post WHERE title LIKE ? OR body LIKE ?")
+	selStmt, err := s.db.Prepare(`
+		SELECT post_id, type_id, slug, title, body, 
+			created_at, updated_at, deleted_at 
+		FROM post WHERE title LIKE ? OR body LIKE ?
+		LIMIT ? OFFSET ?
+	`)
 	if err != nil {
 		return err
 	}
@@ -120,6 +121,8 @@ func (s *PostDB) findPosts(ctx cx, x *pb.FndPostsReq, y *pb.PostsResp) error {
 	rows, err := selStmt.Query(
 		"%"+x.Keywords[0]+"%",
 		"%"+x.Keywords[0]+"%",
+		x.Limit,
+		x.Lapse,
 	)
 	if err != nil {
 		return err

@@ -76,6 +76,8 @@ message FndPostsReq {
 	google.protobuf.Timestamp created = 2;
 	google.protobuf.Timestamp updated = 3;
 	google.protobuf.Timestamp deleted = 4;
+	uint32 limit = 5;
+	uint32 lapse = 6;
 }
 
 message RmvPostReq {
