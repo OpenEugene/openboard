@@ -104,7 +104,7 @@ func (s *UserDB) upsertUser(ctx cx, sid string, x *pb.AddUserReq, y *pb.UserResp
 		return err
 	}
 
-	if resp.Items == nil {
+	if len(resp.Items) == 0 {
 		return errors.New("expected user to be found, but found none")
 	}
 
@@ -296,7 +296,7 @@ func (s *UserDB) upsertRole(ctx cx, sid string, x *pb.AddRoleReq, y *pb.RoleResp
 		return err
 	}
 
-	if resp.Items == nil {
+	if len(resp.Items) == 0 {
 		return errors.New("upserted role not found")
 	}
 
