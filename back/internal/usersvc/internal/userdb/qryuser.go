@@ -330,7 +330,6 @@ func (s *UserDB) findRoles(ctx cx, x *pb.FndRolesReq, y *pb.RolesResp) error {
 		return err
 	}
 
-	query = s.db.Rebind(query)
 	rows, err := s.db.Query(query, args...)
 	if err != nil {
 		return err
@@ -357,7 +356,6 @@ func (s *UserDB) findRoles(ctx cx, x *pb.FndRolesReq, y *pb.RolesResp) error {
 		return err
 	}
 
-	query = s.db.Rebind(query)
 	err = s.db.QueryRow(query, args...).Scan(&y.Total)
 	if err != nil {
 		return err
