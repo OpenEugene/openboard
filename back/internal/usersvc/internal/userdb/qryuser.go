@@ -34,6 +34,11 @@ func (s *UserDB) upsertUser(ctx cx, sid string, x *pb.AddUserReq, y *pb.UserResp
 		return fmt.Errorf("invalid uid")
 	}
 
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+
 	qry := `
 		INSERT INTO user (
 			user_id, username, email, email_hold, altmail, altmail_hold, full_name, avatar, password
@@ -49,7 +54,8 @@ func (s *UserDB) upsertUser(ctx cx, sid string, x *pb.AddUserReq, y *pb.UserResp
 			avatar = ?, 
 			password = ?
 	`
-	_, err := s.db.Exec(
+	_, err = tx.ExecContext(
+		ctx,
 		qry,
 		&id,
 		x.Username,
@@ -71,14 +77,19 @@ func (s *UserDB) upsertUser(ctx cx, sid string, x *pb.AddUserReq, y *pb.UserResp
 		x.Password,
 	)
 	if err != nil {
+		tx.Rollback()
 		return err
 	}
 
 	qry = "INSERT into user_role (user_id, role_id) VALUES "
 	vals, args := buildValsAndArgs(id.String(), x.RoleIds)
-
-	_, err = s.db.Exec(qry+vals, args...)
+	_, err = tx.ExecContext(ctx, qry+vals, args...)
 	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	if err := tx.Commit(); err != nil {
 		return err
 	}
 
