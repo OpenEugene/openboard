@@ -10,6 +10,7 @@ import (
 	"github.com/OpenEugene/openboard/back/internal/pb"
 	"github.com/codemodus/uidgen"
 	"github.com/go-sql-driver/mysql"
+	"github.com/jmoiron/sqlx"
 )
 
 type cx = context.Context
@@ -79,7 +80,7 @@ func (s *UserDB) upsertUser(ctx cx, sid string, x *pb.AddUserReq, y *pb.UserResp
 		return err
 	}
 
-	// Add entries to role table for every role
+	// Add entries to user_role table for every role
 	for _, rid := range x.RoleIds {
 		_, err = stmt.Exec(&id, rid)
 		if err != nil {
@@ -103,7 +104,7 @@ func (s *UserDB) upsertUser(ctx cx, sid string, x *pb.AddUserReq, y *pb.UserResp
 		return err
 	}
 
-	if resp.Items == nil {
+	if len(resp.Items) == 0 {
 		return errors.New("expected user to be found, but found none")
 	}
 
@@ -283,35 +284,57 @@ func (s *UserDB) upsertRole(ctx cx, sid string, x *pb.AddRoleReq, y *pb.RoleResp
 		return err
 	}
 
-	y.Id = id.String()
-	y.Name = x.Name
+	// Execute another query that will return the role fields.
+	req := pb.FndRolesReq{
+		RoleIds:   []string{},
+		RoleNames: []string{x.Name},
+		Limit:     1,
+		Lapse:     0,
+	}
+	resp := pb.RolesResp{}
+	if err = s.findRoles(ctx, &req, &resp); err != nil {
+		return err
+	}
+
+	if len(resp.Items) == 0 {
+		return errors.New("upserted role not found")
+	}
+
+	// There is only one role (Item) expected to be found.
+	y.Id = resp.Items[0].Id
+	y.Name = resp.Items[0].Name
 
 	return nil
 }
 
 func (s *UserDB) findRoles(ctx cx, x *pb.FndRolesReq, y *pb.RolesResp) error {
-	var roleIDs, roleNames string
+	req := *x
+	roleIds := req.RoleIds
+	roleNames := req.RoleNames
 
-	// TODO: enable search of more than one role ID
-	if len(x.RoleIds) > 0 {
-		roleIDs = x.RoleIds[0]
+	if len(roleIds) == 0 {
+		roleIds = []string{""}
 	}
-	// TODO: enable search of more than one role name
-	if len(x.RoleNames) > 0 {
-		roleNames = x.RoleNames[0]
+	if len(roleNames) == 0 {
+		roleNames = []string{""}
 	}
 
 	qry := `
-		SELECT role_id, role_name 
-		FROM role 
-		WHERE role_id = ? OR role_name = ? LIMIT ? OFFSET ?
+		SELECT role_id, role_name
+		FROM role
+		WHERE role_id IN (?) OR role_name IN (?) LIMIT ? OFFSET ?;
 	`
 
-	rows, err := s.db.Query(qry, roleIDs, roleNames, x.Limit, x.Lapse)
-	defer rows.Close()
+	query, args, err := sqlx.In(qry, roleIds, roleNames, x.Limit, x.Lapse)
 	if err != nil {
 		return err
 	}
+
+	rows, err := s.db.Query(query, args...)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
 
 	for rows.Next() {
 		r := pb.RoleResp{}
@@ -322,16 +345,18 @@ func (s *UserDB) findRoles(ctx cx, x *pb.FndRolesReq, y *pb.RolesResp) error {
 
 		y.Items = append(y.Items, &r)
 	}
-
 	if err = rows.Err(); err != nil {
 		return err
 	}
 
-	err = s.db.QueryRow(
-		"SELECT COUNT(*) FROM role WHERE role_id = ? OR role_name = ?",
-		roleIDs,
-		roleNames,
-	).Scan(&y.Total)
+	qry = "SELECT COUNT(*) FROM role WHERE role_id IN (?) OR role_name IN (?);"
+
+	query, args, err = sqlx.In(qry, roleIds, roleNames)
+	if err != nil {
+		return err
+	}
+
+	err = s.db.QueryRow(query, args...).Scan(&y.Total)
 	if err != nil {
 		return err
 	}
