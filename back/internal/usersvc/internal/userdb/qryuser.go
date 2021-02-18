@@ -34,6 +34,11 @@ func (s *UserDB) upsertUser(ctx cx, sid string, x *pb.AddUserReq, y *pb.UserResp
 		return fmt.Errorf("invalid uid")
 	}
 
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+
 	qry := `
 		INSERT INTO user (
 			user_id, username, email, email_hold, altmail, altmail_hold, full_name, avatar, password
@@ -49,7 +54,8 @@ func (s *UserDB) upsertUser(ctx cx, sid string, x *pb.AddUserReq, y *pb.UserResp
 			avatar = ?, 
 			password = ?
 	`
-	_, err := s.db.Exec(
+	_, err = tx.ExecContext(
+		ctx,
 		qry,
 		&id,
 		x.Username,
@@ -71,21 +77,20 @@ func (s *UserDB) upsertUser(ctx cx, sid string, x *pb.AddUserReq, y *pb.UserResp
 		x.Password,
 	)
 	if err != nil {
+		tx.Rollback()
 		return err
 	}
 
-	// Add role and user to user_role join table.
-	stmt, err := s.db.Prepare("INSERT into user_role (user_id, role_id) VALUES (?, ?)")
+	qry = "INSERT into user_role (user_id, role_id) VALUES "
+	vals, args := buildValsAndArgs(id.String(), x.RoleIds)
+	_, err = tx.ExecContext(ctx, qry+vals, args...)
 	if err != nil {
+		tx.Rollback()
 		return err
 	}
 
-	// Add entries to user_role table for every role
-	for _, rid := range x.RoleIds {
-		_, err = stmt.Exec(&id, rid)
-		if err != nil {
-			return err
-		}
+	if err := tx.Commit(); err != nil {
+		return err
 	}
 
 	// Execute another query that will return the user fields.
@@ -112,6 +117,25 @@ func (s *UserDB) upsertUser(ctx cx, sid string, x *pb.AddUserReq, y *pb.UserResp
 	y.Item = resp.Items[0]
 
 	return nil
+}
+
+// buildValsAndArgs enables adding all the role IDs for the user ID being added.
+// The values returned have bindvar pairs for each userId/roleID pair in args.
+func buildValsAndArgs(uid string, rids []string) (string, []interface{}) {
+	vals := "(?, ?)"
+
+	args := make([]interface{}, len(rids)*2)
+	args[0] = uid
+	args[1] = rids[0]
+
+	for i, rid := range rids[1:] {
+		vals += ", (?, ?)"
+
+		args[i*2+2] = uid
+		args[i*2+3] = rid
+	}
+
+	return vals, args
 }
 
 func (s *UserDB) deleteUser(ctx cx, sid string) error {
