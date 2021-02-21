@@ -78,4 +78,4 @@ about usage and flags (e.g. -dbname, -dbuser, etc.).
 
 ## Contributing
 
-[Start here](https://github.com/OpenEugene/openboard/blob/main/CONTRIBUTING.md)
+[Start here](https://github.com/OpenEugene/openboard/blob/main/docs/CONTRIBUTING.md)
