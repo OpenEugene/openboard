@@ -5,6 +5,8 @@
 - [Programming with Mosh - What is Git?](https://youtu.be/2ReR1YJrNOM)
 - [Paul Programming - What is Git?](https://youtu.be/OqmSzXDrJBk)
 
+The first video is "Git in principle", and the second is "Git in practice".
+
 The second video seems to imply that Git is centralized, which is in opposition
 to the description given in the first video. git is not dependent on a central
 repository, rather, releases are. It is common for projects to be "forked" (i.e.
@@ -16,8 +18,9 @@ repository for the improvements to be released publicly.
 
 - [Git - Getting Started](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
 
-It is preferable to use Git version 2.28 or higher since it permits configuring
-`init.defaultBranch` which allows for using user-defined branches as default. 
+Side note: It is preferable to use Git version 2.28 or higher since it permits
+configuring `init.defaultBranch` which allows for using user-defined branches
+as default. 
 
 ### Configuration
 
