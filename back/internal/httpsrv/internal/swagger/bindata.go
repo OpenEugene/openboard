@@ -60,9 +60,16 @@ var _apidocsSwaggerJson = []byte(`{
     "description": "auth semantics:\n\n Add{T}(s)    (Add{T}(s)Req)    returns {T}(s)Resp // POST\n Ovr{T}(s)    (Ovr{T}(s)Req)    returns {T}(s)Resp // PUT\n Mod{T}(s)    (Mod{T}(s)Req)    returns {T}(s)Resp // PATCH\n Get{T}       (Get{T}Req)       returns {T}Resp    // GET\n Fnd{T}s      (Fnd{T}sReq)      returns {T}sResp   // GET\n Rmv{T}(s)    (Rmv{T}(s)Req)    returns EmptyResp  // DELETE\n Unr{T}       (Unr{T}Req)       returns {T}Resp    // PATCH",
     "version": "version not set"
   },
-  "schemes": [
-    "http",
-    "https"
+  "tags": [
+    {
+      "name": "Auth"
+    },
+    {
+      "name": "UserSvc"
+    },
+    {
+      "name": "Post"
+    }
   ],
   "consumes": [
     "application/json"
@@ -73,12 +80,18 @@ var _apidocsSwaggerJson = []byte(`{
   "paths": {
     "/auth": {
       "post": {
-        "operationId": "AddAuth",
+        "operationId": "Auth_AddAuth",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/pbAuthResp"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
             }
           }
         },
@@ -99,12 +112,18 @@ var _apidocsSwaggerJson = []byte(`{
     },
     "/auth/{token}": {
       "delete": {
-        "operationId": "RmvAuth",
+        "operationId": "Auth_RmvAuth",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/pbRmvAuthResp"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
             }
           }
         },
@@ -123,12 +142,18 @@ var _apidocsSwaggerJson = []byte(`{
     },
     "/post": {
       "post": {
-        "operationId": "AddPost",
+        "operationId": "Post_AddPost",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/pbPostResp"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
             }
           }
         },
@@ -149,12 +174,18 @@ var _apidocsSwaggerJson = []byte(`{
     },
     "/post/{id}": {
       "delete": {
-        "operationId": "RmvPost",
+        "operationId": "Post_RmvPost",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/pbRmvPostResp"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
             }
           }
         },
@@ -171,12 +202,18 @@ var _apidocsSwaggerJson = []byte(`{
         ]
       },
       "put": {
-        "operationId": "OvrPost",
+        "operationId": "Post_OvrPost",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/pbPostResp"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
             }
           }
         },
@@ -203,12 +240,18 @@ var _apidocsSwaggerJson = []byte(`{
     },
     "/posts": {
       "get": {
-        "operationId": "FndPosts",
+        "operationId": "Post_FndPosts",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/pbPostsResp"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
             }
           }
         },
@@ -252,12 +295,18 @@ var _apidocsSwaggerJson = []byte(`{
     },
     "/roles": {
       "get": {
-        "operationId": "FndRoles",
+        "operationId": "UserSvc_FndRoles",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/pbRolesResp"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
             }
           }
         },
@@ -304,12 +353,18 @@ var _apidocsSwaggerJson = []byte(`{
     },
     "/type": {
       "post": {
-        "operationId": "AddType",
+        "operationId": "Post_AddType",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/pbTypeResp"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
             }
           }
         },
@@ -330,12 +385,18 @@ var _apidocsSwaggerJson = []byte(`{
     },
     "/types": {
       "get": {
-        "operationId": "FndTypes",
+        "operationId": "Post_FndTypes",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/pbTypesResp"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
             }
           }
         },
@@ -362,12 +423,18 @@ var _apidocsSwaggerJson = []byte(`{
     },
     "/user": {
       "post": {
-        "operationId": "AddUser",
+        "operationId": "UserSvc_AddUser",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/pbUserResp"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
             }
           }
         },
@@ -388,12 +455,18 @@ var _apidocsSwaggerJson = []byte(`{
     },
     "/user/{id}": {
       "delete": {
-        "operationId": "RmvUser",
+        "operationId": "UserSvc_RmvUser",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/pbRmvUserResp"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
             }
           }
         },
@@ -410,12 +483,18 @@ var _apidocsSwaggerJson = []byte(`{
         ]
       },
       "put": {
-        "operationId": "OvrUser",
+        "operationId": "UserSvc_OvrUser",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/pbUserResp"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
             }
           }
         },
@@ -442,12 +521,18 @@ var _apidocsSwaggerJson = []byte(`{
     },
     "/users": {
       "get": {
-        "operationId": "FndUsers",
+        "operationId": "UserSvc_FndUsers",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/pbUsersResp"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
             }
           }
         },
@@ -472,8 +557,7 @@ var _apidocsSwaggerJson = []byte(`{
             "name": "emailHold",
             "in": "query",
             "required": false,
-            "type": "boolean",
-            "format": "boolean"
+            "type": "boolean"
           },
           {
             "name": "altmail",
@@ -485,8 +569,7 @@ var _apidocsSwaggerJson = []byte(`{
             "name": "altmailHold",
             "in": "query",
             "required": false,
-            "type": "boolean",
-            "format": "boolean"
+            "type": "boolean"
           },
           {
             "name": "createdFirst",
@@ -506,8 +589,7 @@ var _apidocsSwaggerJson = []byte(`{
             "name": "createdDesc",
             "in": "query",
             "required": false,
-            "type": "boolean",
-            "format": "boolean"
+            "type": "boolean"
           },
           {
             "name": "limit",
@@ -531,12 +613,18 @@ var _apidocsSwaggerJson = []byte(`{
     },
     "/voucher": {
       "post": {
-        "operationId": "AddVoucher",
+        "operationId": "Auth_AddVoucher",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/pbAddVoucherResp"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
             }
           }
         },
@@ -600,15 +688,13 @@ var _apidocsSwaggerJson = []byte(`{
           "type": "string"
         },
         "emailHold": {
-          "type": "boolean",
-          "format": "boolean"
+          "type": "boolean"
         },
         "altmail": {
           "type": "string"
         },
         "altmailHold": {
-          "type": "boolean",
-          "format": "boolean"
+          "type": "boolean"
         },
         "fullName": {
           "type": "string"
@@ -631,15 +717,13 @@ var _apidocsSwaggerJson = []byte(`{
       "type": "object",
       "properties": {
         "notify": {
-          "type": "boolean",
-          "format": "boolean"
+          "type": "boolean"
         },
         "email": {
           "type": "string"
         },
         "password": {
-          "type": "boolean",
-          "format": "boolean"
+          "type": "boolean"
         }
       }
     },
@@ -801,15 +885,13 @@ var _apidocsSwaggerJson = []byte(`{
           "type": "string"
         },
         "emailHold": {
-          "type": "boolean",
-          "format": "boolean"
+          "type": "boolean"
         },
         "altmail": {
           "type": "string"
         },
         "altmailHold": {
-          "type": "boolean",
-          "format": "boolean"
+          "type": "boolean"
         },
         "fullName": {
           "type": "string"
@@ -867,6 +949,36 @@ var _apidocsSwaggerJson = []byte(`{
           "format": "int64"
         }
       }
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "typeUrl": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string",
+          "format": "byte"
+        }
+      }
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
     }
   }
 }
@@ -882,7 +994,7 @@ func apidocsSwaggerJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "apidocs.swagger.json", size: 17820, mode: os.FileMode(420), modTime: time.Unix(1613967383, 0)}
+	info := bindataFileInfo{name: "apidocs.swagger.json", size: 20834, mode: os.FileMode(420), modTime: time.Unix(1613975236, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
