@@ -13,128 +13,120 @@ syntax = "proto3";
 //  Unr{T}       (Unr{T}Req)       returns {T}Resp    // PATCH
 package pb;
 
+option go_package = ".;pb";
+
 import "google/api/annotations.proto";
 import "google/protobuf/timestamp.proto";
 
 message RoleResp {
-    string id = 1;
-    string name = 2;
+  string id = 1;
+  string name = 2;
 }
 
-message AddRoleReq {
-    string name = 1;
-}
+message AddRoleReq { string name = 1; }
 
 message RolesResp {
-    repeated RoleResp items = 1;
-    uint32 total = 2;
+  repeated RoleResp items = 1;
+  uint32 total = 2;
 }
 
 message FndRolesReq {
-    repeated string roleIds = 1;
-    repeated string roleNames = 2;
-    uint32 limit = 3;
-    uint32 lapse = 4;
+  repeated string roleIds = 1;
+  repeated string roleNames = 2;
+  uint32 limit = 3;
+  uint32 lapse = 4;
 }
 
 message User {
-    string id = 1;
-    string username = 2;
-    string email = 3;
-    bool emailHold = 4;
-    string altmail = 5;
-    bool altmailHold = 6;
-    string fullName = 7;
-    string avatar = 8;
-    repeated RoleResp roles = 9;
-    google.protobuf.Timestamp lastLogin = 10;
-    google.protobuf.Timestamp created = 11;
-    google.protobuf.Timestamp updated = 12;
-    google.protobuf.Timestamp deleted = 13;
-    google.protobuf.Timestamp blocked = 14;
+  string id = 1;
+  string username = 2;
+  string email = 3;
+  bool emailHold = 4;
+  string altmail = 5;
+  bool altmailHold = 6;
+  string fullName = 7;
+  string avatar = 8;
+  repeated RoleResp roles = 9;
+  google.protobuf.Timestamp lastLogin = 10;
+  google.protobuf.Timestamp created = 11;
+  google.protobuf.Timestamp updated = 12;
+  google.protobuf.Timestamp deleted = 13;
+  google.protobuf.Timestamp blocked = 14;
 }
 
-message UserResp {
-    User item = 1;
-}
+message UserResp { User item = 1; }
 
 message AddUserReq {
-    string username = 1;
-    string email = 2;
-    bool emailHold = 3;
-    string altmail = 4;
-    bool altmailHold = 5;
-    string fullName = 6;
-    string avatar = 7;
-    string password = 8;
-    repeated string roleIds = 9;
+  string username = 1;
+  string email = 2;
+  bool emailHold = 3;
+  string altmail = 4;
+  bool altmailHold = 5;
+  string fullName = 6;
+  string avatar = 7;
+  string password = 8;
+  repeated string roleIds = 9;
 }
 
 message OvrUserReq {
-    string id = 1;
-    AddUserReq req = 2;
+  string id = 1;
+  AddUserReq req = 2;
 }
 
 message UsersResp {
-    repeated User items = 1;
-    uint32 total = 2;
+  repeated User items = 1;
+  uint32 total = 2;
 }
 
 message FndUsersReq {
-    repeated string roleIds = 1;
-    string email = 2;
-    bool emailHold = 3;
-    string altmail = 4;
-    bool altmailHold = 5;
-    google.protobuf.Timestamp createdFirst = 6;
-    google.protobuf.Timestamp createdFinal = 7;
-    bool createdDesc = 8;
-    uint32 limit = 9;
-    uint32 lapse = 10;
+  repeated string roleIds = 1;
+  string email = 2;
+  bool emailHold = 3;
+  string altmail = 4;
+  bool altmailHold = 5;
+  google.protobuf.Timestamp createdFirst = 6;
+  google.protobuf.Timestamp createdFinal = 7;
+  bool createdDesc = 8;
+  uint32 limit = 9;
+  uint32 lapse = 10;
 }
 
-message RmvUserResp {
+message RmvUserResp {}
 
-}
-
-message RmvUserReq {
-    string id = 1;
-}
+message RmvUserReq { string id = 1; }
 
 service UserSvc {
-    rpc AddRole(AddRoleReq) returns (RoleResp) {
+  rpc AddRole(AddRoleReq) returns (RoleResp) {}
 
-    }
+  rpc FndRoles(FndRolesReq) returns (RolesResp) {
+    option (google.api.http) = {
+      get : "/roles"
+    };
+  }
 
-    rpc FndRoles(FndRolesReq) returns (RolesResp) {
-        option(google.api.http) = {
-            get: "/roles"
-        };
-    }
+  rpc AddUser(AddUserReq) returns (UserResp) {
+    option (google.api.http) = {
+      post : "/user"
+      body : "*"
+    };
+  }
 
-    rpc AddUser(AddUserReq) returns (UserResp) {
-        option(google.api.http) = {
-            post: "/user"
-            body: "*"
-        };
-    }
+  rpc OvrUser(OvrUserReq) returns (UserResp) {
+    option (google.api.http) = {
+      put : "/user/{id}"
+      body : "*"
+    };
+  }
 
-    rpc OvrUser(OvrUserReq) returns (UserResp) {
-        option(google.api.http) = {
-            put: "/user/{id}"
-            body: "*"
-        };
-    }
+  rpc FndUsers(FndUsersReq) returns (UsersResp) {
+    option (google.api.http) = {
+      get : "/users"
+    };
+  }
 
-    rpc FndUsers(FndUsersReq) returns (UsersResp) {
-        option(google.api.http) = {
-            get: "/users"
-        };
-    }
-
-    rpc RmvUser(RmvUserReq) returns (RmvUserResp) {
-        option(google.api.http) = {
-            delete: "/user/{id}"
-        };
-    }
+  rpc RmvUser(RmvUserReq) returns (RmvUserResp) {
+    option (google.api.http) = {
+      delete : "/user/{id}"
+    };
+  }
 }

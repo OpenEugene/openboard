@@ -4,13 +4,17 @@ function main() {
 	local rootDir="$(dirname "${0}")"
 
 	mkdir -p "${rootDir}/.bin"
-	pushd "$_" &> /dev/null
+	pushd "$_" &>/dev/null
 	export GOBIN="${PWD}"
-	popd &> /dev/null
+	popd &>/dev/null
 
-	pushd "${rootDir}" &> /dev/null
-	go generate -tags tools "${rootDir}"
-	popd &> /dev/null
+	pushd "${rootDir}" &>/dev/null
+	go install github.com/codemodus/withdraw@v0.1.0
+	go install github.com/go-bindata/go-bindata/go-bindata@v3.1.1
+	go install github.com/golang/protobuf/protoc-gen-go@v1.3.1
+	go install github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway@v1.8.5
+	go install github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger@v1.8.5
+	popd &>/dev/null
 
 	unset GOBIN
 }
