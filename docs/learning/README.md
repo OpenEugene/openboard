@@ -1,12 +1,6 @@
 # Walk-Throughs
 
-## Git
-
-TODO: this
-
-## Github
-
-TODO: this
+- [Git](./git.md)
 
 ## go build
 

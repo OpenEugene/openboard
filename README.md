@@ -20,7 +20,7 @@ written in Go
 
 ## Community
 
-[Code of Conduct](https://github.com/OpenEugene/openboard/blob/main/docs/CODE_OF_CONDUCT.md)
-[Contributing](https://github.com/OpenEugene/openboard/blob/main/docs/CONTRIBUTING.md)
-[Authors](https://github.com/OpenEugene/openboard/blob/main/docs/AUTHORS)
-[Learning Walk-Throughs](https://github.com/OpenEugene/openboard/blob/main/docs/learning/README.md)
+[Code of Conduct](./docs/CODE_OF_CONDUCT.md)
+[Contributing](./docs/CONTRIBUTING.md)
+[Authors](./docs/AUTHORS)
+[Learning Walk-Throughs](./docs/learning/README.md)
