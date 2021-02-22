@@ -1,6 +1,6 @@
 # Git Walk-through
 
-##Introduction
+## Introduction
 
 - [Programming with Mosh - What is Git?](https://youtu.be/2ReR1YJrNOM)
 - [Paul Programming - What is Git?](https://youtu.be/OqmSzXDrJBk)
@@ -51,7 +51,7 @@ name "main" rather than "master".
 ### Interpretation
 
 A simple list of commands to start work on an issue.
-```go
+```sh
 git switch main
 git pull origin main
 git switch -c me/my_branch-123
