@@ -89,7 +89,7 @@ func (c *postClient) RmvPost(ctx context.Context, in *RmvPostReq, opts ...grpc.C
 }
 
 // PostServer is the server API for Post service.
-// All implementations must embed UnimplementedPostServer
+// All implementations should embed UnimplementedPostServer
 // for forward compatibility
 type PostServer interface {
 	AddType(context.Context, *AddTypeReq) (*TypeResp, error)
@@ -98,10 +98,9 @@ type PostServer interface {
 	FndPosts(context.Context, *FndPostsReq) (*PostsResp, error)
 	OvrPost(context.Context, *OvrPostReq) (*PostResp, error)
 	RmvPost(context.Context, *RmvPostReq) (*RmvPostResp, error)
-	mustEmbedUnimplementedPostServer()
 }
 
-// UnimplementedPostServer must be embedded to have forward compatible implementations.
+// UnimplementedPostServer should be embedded to have forward compatible implementations.
 type UnimplementedPostServer struct {
 }
 
@@ -123,7 +122,6 @@ func (UnimplementedPostServer) OvrPost(context.Context, *OvrPostReq) (*PostResp,
 func (UnimplementedPostServer) RmvPost(context.Context, *RmvPostReq) (*RmvPostResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RmvPost not implemented")
 }
-func (UnimplementedPostServer) mustEmbedUnimplementedPostServer() {}
 
 // UnsafePostServer may be embedded to opt out of forward compatibility for this service.
 // Use of this interface is not recommended, as added methods to PostServer will

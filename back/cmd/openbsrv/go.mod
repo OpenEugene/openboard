@@ -10,8 +10,6 @@ require (
 	github.com/codemodus/sigmon/v2 v2.0.1
 	github.com/codemodus/sqlmig v0.2.3
 	github.com/go-sql-driver/mysql v1.5.0
-	github.com/grpc-ecosystem/grpc-gateway/v2 v2.2.0 // indirect
-	github.com/jmoiron/sqlx v1.3.1 // indirect
 )
 
 replace github.com/OpenEugene/openboard/back/internal => ../../internal

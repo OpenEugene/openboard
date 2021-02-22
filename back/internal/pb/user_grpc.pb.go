@@ -89,7 +89,7 @@ func (c *userSvcClient) RmvUser(ctx context.Context, in *RmvUserReq, opts ...grp
 }
 
 // UserSvcServer is the server API for UserSvc service.
-// All implementations must embed UnimplementedUserSvcServer
+// All implementations should embed UnimplementedUserSvcServer
 // for forward compatibility
 type UserSvcServer interface {
 	AddRole(context.Context, *AddRoleReq) (*RoleResp, error)
@@ -98,10 +98,9 @@ type UserSvcServer interface {
 	OvrUser(context.Context, *OvrUserReq) (*UserResp, error)
 	FndUsers(context.Context, *FndUsersReq) (*UsersResp, error)
 	RmvUser(context.Context, *RmvUserReq) (*RmvUserResp, error)
-	mustEmbedUnimplementedUserSvcServer()
 }
 
-// UnimplementedUserSvcServer must be embedded to have forward compatible implementations.
+// UnimplementedUserSvcServer should be embedded to have forward compatible implementations.
 type UnimplementedUserSvcServer struct {
 }
 
@@ -123,7 +122,6 @@ func (UnimplementedUserSvcServer) FndUsers(context.Context, *FndUsersReq) (*User
 func (UnimplementedUserSvcServer) RmvUser(context.Context, *RmvUserReq) (*RmvUserResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RmvUser not implemented")
 }
-func (UnimplementedUserSvcServer) mustEmbedUnimplementedUserSvcServer() {}
 
 // UnsafeUserSvcServer may be embedded to opt out of forward compatibility for this service.
 // Use of this interface is not recommended, as added methods to UserSvcServer will

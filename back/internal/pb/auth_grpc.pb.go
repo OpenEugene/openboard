@@ -59,16 +59,15 @@ func (c *authClient) AddVoucher(ctx context.Context, in *AddVoucherReq, opts ...
 }
 
 // AuthServer is the server API for Auth service.
-// All implementations must embed UnimplementedAuthServer
+// All implementations should embed UnimplementedAuthServer
 // for forward compatibility
 type AuthServer interface {
 	AddAuth(context.Context, *AddAuthReq) (*AuthResp, error)
 	RmvAuth(context.Context, *RmvAuthReq) (*RmvAuthResp, error)
 	AddVoucher(context.Context, *AddVoucherReq) (*AddVoucherResp, error)
-	mustEmbedUnimplementedAuthServer()
 }
 
-// UnimplementedAuthServer must be embedded to have forward compatible implementations.
+// UnimplementedAuthServer should be embedded to have forward compatible implementations.
 type UnimplementedAuthServer struct {
 }
 
@@ -81,7 +80,6 @@ func (UnimplementedAuthServer) RmvAuth(context.Context, *RmvAuthReq) (*RmvAuthRe
 func (UnimplementedAuthServer) AddVoucher(context.Context, *AddVoucherReq) (*AddVoucherResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddVoucher not implemented")
 }
-func (UnimplementedAuthServer) mustEmbedUnimplementedAuthServer() {}
 
 // UnsafeAuthServer may be embedded to opt out of forward compatibility for this service.
 // Use of this interface is not recommended, as added methods to AuthServer will
