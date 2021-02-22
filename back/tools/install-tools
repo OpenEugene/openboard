@@ -6,6 +6,7 @@ function main() {
 	mkdir -p "${rootDir}/.bin"
 	pushd "$_" &>/dev/null
 	export GOBIN="${PWD}"
+	rm ./*
 	popd &>/dev/null
 
 	pushd "${rootDir}" &>/dev/null
