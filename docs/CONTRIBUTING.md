@@ -25,7 +25,7 @@ ourselves with the codes of conduct put forth by those orgs/communities.
 
 ## Getting Started (Tools and Building)
 
-[Openboard Readme](https://github.com/OpenEugene/openboard/blob/main/README.md)
+- [Openboard Readme](../README.md)
 
 ## Contributing
 
@@ -33,7 +33,7 @@ ourselves with the codes of conduct put forth by those orgs/communities.
 
 We would appreciate that most contributions to this project be made by attending
 our sprint wrap & plan and/or check-ins. See the
-[README](https://github.com/OpenEugene/openboard/blob/main/README.md) for more 
+[README](../README.md) for more
 information. Contributing from forks has not yet been tested regarding our
 automated tracking mechanisms.
 

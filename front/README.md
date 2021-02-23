@@ -39,4 +39,4 @@ To generate type aliases, encoders and decoders run `./genelm`. This will read a
 
 ## Contributing
 
-[Start here](https://github.com/OpenEugene/openboard/blob/main/CONTRIBUTING.md)
+- [Start here](../docs/CONTRIBUTING.md)
