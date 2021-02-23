@@ -78,4 +78,4 @@ about usage and flags (e.g. -dbname, -dbuser, etc.).
 
 ## Contributing
 
-[Start here](../docs/CONTRIBUTING.md)
+- [Start here](../docs/CONTRIBUTING.md)
