@@ -8,19 +8,14 @@
 The first video is "Git in principle", and the second is "Git in practice".
 
 The second video seems to imply that Git is centralized, which is in opposition
-to the description given in the first video. git is not dependent on a central
-repository, rather, releases are. It is common for projects to be "forked" (i.e.
-a copy of the repo is created under another organization/namespace), then
-modified, then have selected modifications "pulled" into the original
-repository for the improvements to be released publicly.
+to the description given in the first video. Centralized version control tools
+only permit one user to handle a portion of code at a time. Git is a distributed
+version control tool. Many users can operate on a Git project simultaneously,
+and the resulting changes are brought together into one place.
 
 ### Installation
 
 - [Git - Getting Started](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
-
-Side note: It is preferable to use Git version 2.28 or higher since it permits
-configuring `init.defaultBranch` which allows for using user-defined branches
-as default. 
 
 ### Configuration
 
@@ -53,18 +48,23 @@ name "main" rather than "master".
 
 ### Interpretation
 
-A simple list of commands to start work on an issue.
+A simple list of commands to start work on an issue:
 ```sh
 git switch main
 git pull origin main
-git switch -c me/my_branch-123
+git switch -c my_branch-123
 # make change(s)
 git add .
 git commit -m"Make specific change"
-git push -u origin me/my_branch-123
+git push -u origin my_branch-123
 ```
 
-Afterward, if additional commits are made, only `git push` is necessary since
-the upstream will have been set. Also, it may be useful to run `git remote prune
-origin` after `git switch main` to ensure that the references to remote branches
-are cleaned up.
+Additional commits can be added:
+```sh
+git add .
+git commit -m"Fix some mistake"
+git push
+```
+
+It may be useful to run `git remote prune origin` after `git pull origin main`
+to ensure that the references to remote branches are cleaned up.
