@@ -18,8 +18,8 @@ Openboard is a project utilizing and teaching [Go](https://golang.org) and
 the [EugeneTech](https://eugenetech.org) community. Therefore, we align 
 ourselves with the codes of conduct put forth by those orgs/communities.
 
-- OpenEugene Code of Conduct
-- EugeneTech Code of Conduct
+- [EugeneTech Policies](https://github.com/EugTech/policies)
+- [OpenEugene Code of Conduct (via CFA)](https://brigade.codeforamerica.org/about/code-of-conduct)
 - [Go Community Code of Conduct](https://golang.org/conduct)
 - [Elm Community Spaces Code of Conduct](https://github.com/elm-community/discussions/blob/master/code-of-conduct.md)
 
