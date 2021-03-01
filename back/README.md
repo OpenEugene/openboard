@@ -15,10 +15,10 @@ dbname = "openeug_openb_dev", and dbuser = "openeug_openbdev".
 ```
 
 ```shell
-# database container setup (optional - skip if using mariadb "local install")
-pushd ./tools/iso/ >/dev/null
+# alternate database setup via container (optional - skip if using mariadb "local install")
+pushd ./tools/iso/
 ./dev up # subcommands [up|dn|ip|clean] (default: up)
-popd >/dev/null
+popd
 ```
 
 ### Normal Mode
