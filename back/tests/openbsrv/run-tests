@@ -7,9 +7,9 @@ main() {
 	}
 	trap "runDeferreds" EXIT RETURN
 
-	local command="openbsrv"
 	local rootDir="$(dirname "${0}")"
 	pushd "${rootDir}" >/dev/null && rootDir="${PWD}" && popd >/dev/null || exit 1
+	local command="$(basename "${rootDir}")"
 	local projectDir="${rootDir}/../../cmd/${command}"
 	local buildDir="${rootDir}/build"
 	local buildFile="${buildDir}/${command}-test"
@@ -26,7 +26,6 @@ main() {
 	pushd "${rootDir}" >/dev/null
 	deferreds+=("popd >/dev/null")
 	go test -v
-	sleep 6
 }
 
 main ${@}
