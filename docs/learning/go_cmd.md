@@ -4,28 +4,28 @@
 
 - [The Go Project](https://golang.org/project)
 
-### Installation
+## Installation
 
 - [Download and Install](https://golang.org/doc/install)
 
-### Operation
+## Operation
 
-#### The Basics
+### The Basics
 
 - [Go Tour](https://tour.golang.org)
 - [Tutorial: Get started with Go](https://golang.org/doc/tutorial/getting-started)
 - [Tutorial: Create a Go Module](https://golang.org/doc/tutorial/create-module)
 
-#### A Little More
+### A Little More
 
 - [Writing Web Applications](https://golang.org/doc/articles/wiki)
 - [How to Write Go Code](https://golang.org/doc/code)
 
-#### Specifics
+### Specifics
 
 - [Command go](https://golang.org/cmd/go)
 
-##### `go mod`
+#### `go mod`
 
 Used to manage the module namespace of your project, as well as the list of
 modules that your module is dependent on. 
@@ -36,7 +36,7 @@ Start your project:
 go mod init github.com/OpenEugene/openboard
 ```
 
-##### `go get` and `mod` again
+#### `go get` and `mod` again
 
 Used to obtain code from a given module to be added to your own module.
 
@@ -55,7 +55,7 @@ Ensure dependencies are recorded properly:
 go mod tidy
 ```
 
-##### `go test`
+#### `go test`
 
 Used to run tests using the standard library test framework. Files with the
 suffix `_test.go` will be picked up for handling.
@@ -66,7 +66,7 @@ Run tests:
 go test # can be run with -v to see more info
 ```
 
-##### `go run`
+#### `go run`
 
 Used to build and run a temporary executable of your application.
 
@@ -76,7 +76,7 @@ Build and run:
 go run .
 ```
 
-##### `go build`
+#### `go build`
 
 Used to build an executable of your application.
 
@@ -86,7 +86,7 @@ Build:
 go build -o ./build/myproject
 ```
 
-##### `go install`
+#### `go install`
 
 Used to install an executable directly from a repository.
 

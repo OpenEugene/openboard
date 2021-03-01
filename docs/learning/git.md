@@ -13,11 +13,11 @@ only permit one user to handle a portion of code at a time. Git is a distributed
 version control tool. Many users can operate on a Git project simultaneously,
 and the resulting changes are brought together into one place.
 
-### Installation
+## Installation
 
 - [Git - Getting Started](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
 
-### Configuration
+## Configuration
 
 - [Git - Customizing Git](https://git-scm.com/book/en/v2/Customizing-Git-Git-Configuration) 
 
@@ -25,7 +25,7 @@ The most pertinent information is in the "Git Configuration" section only. Feel
 free to read further for more details and advanced configuration. The email and
 username you select will show up in publicly available git commit histories.
 
-### Operation
+## Operation
 
 - [Udacity - Git Workflow](https://youtu.be/3a2x1iJFJWc)
 - [Kev The Dev - Easy Overview](https://youtu.be/7dYHRI55wxo)
@@ -46,7 +46,7 @@ give notices to use `git switch` in the relevant cases and those messages can be
 seen in the video. Lastly, it is currently preferred to use the default branch
 name "main" rather than "master".
 
-### Interpretation
+## Interpretation
 
 A simple list of commands to start work on an issue:
 ```sh
@@ -69,7 +69,7 @@ git push
 It may be useful to run `git remote prune origin` after `git pull origin main`
 to ensure that the references to remote branches are cleaned up.
 
-### Visualization
+## Visualization
 
 Git, as a command line interface (CLI) tool, is easy to interact with for those
 who are comfortable working from a terminal. However, it can be useful, not
