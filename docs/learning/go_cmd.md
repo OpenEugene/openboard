@@ -91,11 +91,15 @@ go build -o ./build/myproject
 
 Used to install an executable directly from a repository.
 
-Install from source:
+Install from source and run:
 
 ```sh
 go install github.com/OpenEugene/openboard/back/cmd/openbsrv@latest
+openbsrv
 ```
+
+You will need to be sure that the install location is in your PATH environment
+variable.
 
 > Executables are installed in the directory named by the GOBIN environment
 > variable, which defaults to $GOPATH/bin or $HOME/go/bin if the GOPATH
