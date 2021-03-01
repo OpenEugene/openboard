@@ -70,7 +70,7 @@ go test # can be run with -v to see more info
 
 Used to build and run a temporary executable of your application.
 
-Build and run:
+Build and run (temporary):
 
 ```sh
 go run .
@@ -80,10 +80,11 @@ go run .
 
 Used to build an executable of your application.
 
-Build:
+Build and run (persistent):
 
 ```sh
 go build -o ./build/myproject
+./myproject
 ```
 
 #### > `go install`
@@ -93,7 +94,7 @@ Used to install an executable directly from a repository.
 Install from source:
 
 ```sh
-go install github.com/OpenEugene/openboard@latest
+go install github.com/OpenEugene/openboard/back/cmd/openbsrv@latest
 ```
 
 > Executables are installed in the directory named by the GOBIN environment
