@@ -4,13 +4,13 @@ function main() {
 	local rootDir="$(dirname "${0}")"
 
 	mkdir -p "${rootDir}/.bin"
-	pushd "$_" &> /dev/null
+	pushd "$_" &>/dev/null
 	export GOBIN="${PWD}"
-	popd &> /dev/null
+	popd &>/dev/null
 
-	pushd "${rootDir}" &> /dev/null
+	pushd "${rootDir}" &>/dev/null
 	go generate -tags tools "${rootDir}"
-	popd &> /dev/null
+	popd &>/dev/null
 
 	unset GOBIN
 }
