@@ -18,4 +18,9 @@ Usage of openbsrv:
         database user (default "openeug_openbdev")
   -frontdir string
         front public assets directory (default "../../../front/public")
-```
+  -migrate
+        migrate up
+  -rollback
+        migrate dn
+  -skipsrv
+        skip server run
