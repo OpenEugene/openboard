@@ -71,9 +71,10 @@ to ensure that the references to remote branches are cleaned up.
 
 ## Visualization
 
+- [Git GUIs](https://git-scm.com/downloads/guis)
+
 Git, as a command line interface (CLI) tool, is easy to interact with for those
 who are comfortable working from a terminal. However, it can be useful, not
 just for learners, to have clear visual represenations of the data being
 operated on. Many graphical user interface (GUI) programs are available that
 leverage the Git CLI as their "engine".
-[Git GUIs](https://git-scm.com/downloads/guis)
