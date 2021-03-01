@@ -8,13 +8,13 @@ The following scripts should be working for Bash on Linux, WSL, and Darwin. When
 installing the database, the suggested defaults for this project are:
 dbname = "openeug_openb_dev", and dbuser = "openeug_openbdev".
 
-```shell
+```sh
 ./tools/install-go
 ./tools/install-tools
 ./tools/install-mariadb # local install (optional)
 ```
 
-```shell
+```sh
 # alternate database setup via container (optional - skip if using mariadb "local install")
 pushd ./tools/iso/
 ./dev up # subcommands [up|dn|ip|clean] (default: up)
@@ -39,7 +39,7 @@ mechanism for serializing structured data.
 [Install From
 Source](https://github.com/protocolbuffers/protobuf/blob/master/src/README.md)
 
-```shell
+```sh
 # may require changes for your OS/ENV
 git clone https://github.com/protocolbuffers/protobuf.git
 cd protobuf
@@ -59,18 +59,33 @@ endpoints. gRPC endpoints can be accessed directly, or via an HTTP gateway on
 port 4243. In order to view the API endpoints, please visit
 http://localhost:4243/v/docs. The frontend assets are served on port 4244.
 
-```shell
-repo="OpenEugene/openboard"
-cd {your_source_dir}
-mkdir -p ${repo}
-cd $_
-git clone https://github.com/${repo} .
+### Clone
 
-cd back/cmd/openbsrv
-go build -o {your_bin_dir}/openbsrv
+```sh
+cd {your_source_code_dir}
+mkdir -p OpenEugene/openboard
+cd $_ # "go into" newly created directory
+git clone https://github.com/OpenEugene/openboard .
+```
 
-# only include the database address if not 127.0.0.1/localhost.
-openbsrv -frontdir=../../../front/public/ --dbpass={your_dbpass} --dbaddr={your_dbaddr}
+### Build and Execute
+
+```sh
+go build
+./openbsrv -frontdir=../../../front/public/ --dbpass={your_dbpass}
+# be careful not to add/commit the executable
+```
+
+### Run Tests
+
+A convenience script has been provided to build and run the executable, and also
+run the end-to-end tests.
+
+From the cmd/openbsrv directory:
+
+```sh
+cd ../../tests/openbsrv
+./run-tests
 ```
 
 Please refer to the [openbsrv readme](./cmd/openbsrv/README.md) for more details
