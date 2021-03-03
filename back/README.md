@@ -80,7 +80,7 @@ git clone https://github.com/OpenEugene/openboard .
 cd back/cmd/openbsrv
 go build
 ./openbsrv --dbpass={your_dbpass} --migrate
-# be careful not to add/commit the executable
+# be careful not to git add/commit the executable
 ```
 
 Please refer to the [openbsrv readme](./cmd/openbsrv/README.md) for more details
