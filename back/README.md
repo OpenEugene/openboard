@@ -64,32 +64,53 @@ http://localhost:4243/v/docs. The frontend assets are served on port 4244.
 ```sh
 cd {your_source_code_dir}
 mkdir -p OpenEugene/openboard
-cd $_ # "go into" newly created directory
+cd OpenEugene/openboard
 git clone https://github.com/OpenEugene/openboard .
 ```
 
 ### Build and Execute
 
 ```sh
+# from {project_root}
+cd back/cmd/openbsrv
 go build
-./openbsrv -frontdir=../../../front/public/ --dbpass={your_dbpass}
+./openbsrv --dbpass={your_dbpass} --migrate
 # be careful not to add/commit the executable
-```
-
-### Run Tests
-
-A convenience script has been provided to build and run the executable, and also
-run the end-to-end tests.
-
-From the cmd/openbsrv directory:
-
-```sh
-cd ../../tests/openbsrv
-./run-tests
 ```
 
 Please refer to the [openbsrv readme](./cmd/openbsrv/README.md) for more details
 about usage and flags (e.g. -dbname, -dbuser, etc.).
+
+### Database Migration Management
+
+```sh
+# from {project_root}
+cd back/cmd/openbsrv
+./openbsrv --dbpass={your_dbpass} --rollback
+^C # Ctrl-C will send the system signal "SIGINT" and halts the program
+./openbsrv --dbpass={your_dbpass} --migrate
+```
+
+### Run Tests
+
+#### Unit Tests
+
+None at this time.
+
+#### Surface Tests
+
+None at this time.
+
+#### End-to-end Tests
+
+A convenience script has been provided to build and run the executable, and also
+run the end-to-end tests.
+
+```sh
+# from {project_root}
+cd back/tests/openbsrv
+./run-tests
+```
 
 ## Contributing
 
