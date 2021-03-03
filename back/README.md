@@ -9,14 +9,17 @@ installing the database, the suggested defaults for this project are:
 dbname = "openeug_openb_dev", and dbuser = "openeug_openbdev".
 
 ```sh
-./tools/install-go
-./tools/install-tools
-./tools/install-mariadb # local install (optional)
+# from {project_root}
+cd back/tools
+./install-go
+./install-tools
+./install-mariadb # local install (optional)
 ```
 
 ```sh
 # alternate database setup via container (optional - skip if using mariadb "local install")
-pushd ./tools/iso/
+# from {project_root}
+pushd back/tools/iso/
 ./dev up # subcommands [up|dn|ip|clean] (default: up)
 popd
 ```
@@ -41,8 +44,10 @@ Source](https://github.com/protocolbuffers/protobuf/blob/master/src/README.md)
 
 ```sh
 # may require changes for your OS/ENV
-git clone https://github.com/protocolbuffers/protobuf.git
-cd protobuf
+cd {your_source_code_dir}
+mkdir -p github.com/protocolbuffers/protobuf
+cd github.com/protocolbuffers/protobuf
+git clone https://github.com/protocolbuffers/protobuf.git .
 git submodule update --init --recursive
 ./autogen.sh
 ./configure
@@ -63,8 +68,8 @@ http://localhost:4243/v/docs. The frontend assets are served on port 4244.
 
 ```sh
 cd {your_source_code_dir}
-mkdir -p OpenEugene/openboard
-cd OpenEugene/openboard
+mkdir -p github.com/OpenEugene/openboard
+cd github.com/OpenEugene/openboard
 git clone https://github.com/OpenEugene/openboard .
 ```
 
