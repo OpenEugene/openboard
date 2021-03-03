@@ -13,11 +13,12 @@ dbname = "openeug_openb_dev", and dbuser = "openeug_openbdev".
 cd back/tools
 ./install-go
 ./install-tools
-./install-mariadb # local install (optional)
+./install-mariadb # container-based alternative below
 ```
 
 ```sh
-# alternate database setup via container (optional - skip if using mariadb "local install")
+# database container setup (skip if using the "./install-mariadb" script above)
+# installs docker and docker-compose
 # from {project_root}
 cd back/tools/iso/
 ./dev up # subcommands [up|dn|ip|clean] (default: up)
