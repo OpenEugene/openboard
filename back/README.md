@@ -19,9 +19,8 @@ cd back/tools
 ```sh
 # alternate database setup via container (optional - skip if using mariadb "local install")
 # from {project_root}
-pushd back/tools/iso/
+cd back/tools/iso/
 ./dev up # subcommands [up|dn|ip|clean] (default: up)
-popd
 ```
 
 ### Normal Mode
