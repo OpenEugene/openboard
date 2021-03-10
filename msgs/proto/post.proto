@@ -13,114 +13,108 @@ syntax = "proto3";
 //  Unr{T}       (Unr{T}Req)       returns {T}Resp    // PATCH
 package pb;
 
+option go_package = ".;pb";
+
 import "google/api/annotations.proto";
 import "google/protobuf/timestamp.proto";
 
-message CommentResp {
+message CommentResp {}
 
-}
-
-message AddCommentResp {
-
-}
+message AddCommentResp {}
 
 message TypeResp {
-	string id = 1;
-	string name = 2;
+  string id = 1;
+  string name = 2;
 }
 
-message AddTypeReq {
-	string name = 1;
-}
+message AddTypeReq { string name = 1; }
 
 message TypesResp {
-	repeated TypeResp items = 1;
-	uint32 total = 2;
+  repeated TypeResp items = 1;
+  uint32 total = 2;
 }
 
 message FndTypesReq {
-	uint32 limit = 1;
-	uint32 lapse = 2;
+  uint32 limit = 1;
+  uint32 lapse = 2;
 }
 
 message PostResp {
-	string id = 1;
-	string slug = 2;
-	string title = 3;
-	string body = 4;
-	string typeId = 5;
-	google.protobuf.Timestamp created = 6;
-    google.protobuf.Timestamp updated = 7;
-    google.protobuf.Timestamp deleted = 8;
-    google.protobuf.Timestamp blocked = 9;
+  string id = 1;
+  string slug = 2;
+  string title = 3;
+  string body = 4;
+  string typeId = 5;
+  google.protobuf.Timestamp created = 6;
+  google.protobuf.Timestamp updated = 7;
+  google.protobuf.Timestamp deleted = 8;
+  google.protobuf.Timestamp blocked = 9;
 }
 
 message AddPostReq {
-	string title = 1;
-	string body = 2;
-	string typeId = 3;
+  string title = 1;
+  string body = 2;
+  string typeId = 3;
 }
 
 message OvrPostReq {
-	string id = 1;
-	AddPostReq req = 2;
+  string id = 1;
+  AddPostReq req = 2;
 }
 
 message PostsResp {
-	repeated PostResp posts = 1;
-	uint32 total = 2;
+  repeated PostResp posts = 1;
+  uint32 total = 2;
 }
 
 message FndPostsReq {
-	repeated string keywords = 1;
-	google.protobuf.Timestamp created = 2;
-	google.protobuf.Timestamp updated = 3;
-	google.protobuf.Timestamp deleted = 4;
+  repeated string keywords = 1;
+  google.protobuf.Timestamp created = 2;
+  google.protobuf.Timestamp updated = 3;
+  google.protobuf.Timestamp deleted = 4;
 }
 
-message RmvPostReq {
-	string id = 1;
-}
+message RmvPostReq { string id = 1; }
 
 message RmvPostResp {}
 
 service Post {
-	rpc AddType(AddTypeReq) returns (TypeResp) {
-		option(google.api.http) = {
-            post: "/type"
-            body: "*"
-        };
-	}
+  rpc AddType(AddTypeReq) returns (TypeResp) {
+    option (google.api.http) = {
+      post : "/type"
+      body : "*"
+    };
+  }
 
-	rpc FndTypes(FndTypesReq) returns (TypesResp) {
-		option(google.api.http) = {
-            get: "/types"
-        };
-	}
+  rpc FndTypes(FndTypesReq) returns (TypesResp) {
+    option (google.api.http) = {
+      get : "/types"
+    };
+  }
 
-	rpc AddPost(AddPostReq) returns (PostResp) {
-		option(google.api.http) = {
-            post: "/post"
-            body: "*"
-        };
-	};
+  rpc AddPost(AddPostReq) returns (PostResp) {
+    option (google.api.http) = {
+      post : "/post"
+      body : "*"
+    };
+  };
 
-	rpc FndPosts(FndPostsReq) returns (PostsResp) {
-		option(google.api.http) = {
-			get: "/posts"
-		};
-	}
+  rpc FndPosts(FndPostsReq) returns (PostsResp) {
+    option (google.api.http) = {
+      get : "/posts"
+    };
+  }
 
-	rpc OvrPost(OvrPostReq) returns (PostResp) {
-		option(google.api.http) = {
-			put: "/post/{id}"
-			body: "*"
-		};
-	}
+  rpc OvrPost(OvrPostReq) returns (PostResp) {
+    option (google.api.http) = {
+      put : "/post/{id}"
+      body : "*"
+    };
+  }
 
-	rpc RmvPost(RmvPostReq) returns (RmvPostResp) {
-		option(google.api.http) = {
-			delete: "/post/{id}"
-		};
-	}
+  rpc RmvPost(RmvPostReq) returns (RmvPostResp) {
+    option (google.api.http) = {
+      delete : "/post/{id}"
+    };
+  }
 }

@@ -14,7 +14,7 @@ import (
 	"github.com/codemodus/mixmux"
 	"github.com/codemodus/swagui"
 	"github.com/codemodus/swagui/suidata3"
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc"
 )
 

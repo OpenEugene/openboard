@@ -13,53 +13,47 @@ syntax = "proto3";
 //  Unr{T}       (Unr{T}Req)       returns {T}Resp    // PATCH
 package pb;
 
+option go_package = ".;pb";
+
 import "google/api/annotations.proto";
 
-message AuthResp {
-    string token = 1;
-}
+message AuthResp { string token = 1; }
 
 message AddAuthReq {
-    string username = 1;
-    string password = 2;
+  string username = 1;
+  string password = 2;
 }
 
-message RmvAuthResp {
+message RmvAuthResp {}
 
-}
+message RmvAuthReq { string token = 1; }
 
-message RmvAuthReq {
-    string token = 1;
-}
-
-message AddVoucherResp {
-
-}
+message AddVoucherResp {}
 
 message AddVoucherReq {
-    bool notify = 1;
-    string email = 2;
-    bool password = 3;
+  bool notify = 1;
+  string email = 2;
+  bool password = 3;
 }
 
 service Auth {
-    rpc AddAuth(AddAuthReq) returns (AuthResp) {
-        option(google.api.http) = {
-            post: "/auth"
-            body: "*"
-        };
-    }
+  rpc AddAuth(AddAuthReq) returns (AuthResp) {
+    option (google.api.http) = {
+      post : "/auth"
+      body : "*"
+    };
+  }
 
-    rpc RmvAuth(RmvAuthReq) returns (RmvAuthResp) {
-        option(google.api.http) = {
-            delete: "/auth/{token}"
-        };
-    }
+  rpc RmvAuth(RmvAuthReq) returns (RmvAuthResp) {
+    option (google.api.http) = {
+      delete : "/auth/{token}"
+    };
+  }
 
-    rpc AddVoucher(AddVoucherReq) returns (AddVoucherResp) {
-        option(google.api.http) = {
-            post: "/voucher"
-            body: "*"
-        };
-    }
+  rpc AddVoucher(AddVoucherReq) returns (AddVoucherResp) {
+    option (google.api.http) = {
+      post : "/voucher"
+      body : "*"
+    };
+  }
 }

@@ -20,17 +20,6 @@ func unsetUntestedFields(item interface{}) {
 		}
 	}
 
-	byteFldNames := []string{"XXX_unrecognized"}
-	b := new([]byte)
-	bt := reflect.TypeOf(b)
-
-	for _, name := range byteFldNames {
-		fv := val.FieldByName(name)
-		if fv.IsValid() && fv.Type() == bt && fv.CanSet() {
-			fv.Set(reflect.Zero(bt))
-		}
-	}
-
 	timeFldNames := []string{
 		"LastLogin",
 		"Created",
@@ -45,14 +34,6 @@ func unsetUntestedFields(item interface{}) {
 		fv := val.FieldByName(name)
 		if fv.IsValid() && fv.Type() == tt && fv.CanSet() {
 			fv.Set(reflect.Zero(tt))
-		}
-	}
-
-	intFieldNames := []string{"XXX_sizecache"}
-	for _, name := range intFieldNames {
-		fv := val.FieldByName(name)
-		if fv.IsValid() && fv.Kind() == reflect.Int && fv.CanSet() {
-			fv.SetInt(0)
 		}
 	}
 }

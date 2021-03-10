@@ -3,11 +3,11 @@ package main_test
 import (
 	"context"
 	"fmt"
-	"reflect"
 	"testing"
 
 	"github.com/OpenEugene/openboard/back/internal/pb"
 	"google.golang.org/grpc"
+	"google.golang.org/protobuf/proto"
 )
 
 func TestPostClientServices(t *testing.T) {
@@ -22,6 +22,7 @@ func TestPostClientServices(t *testing.T) {
 	postClnt := pb.NewPostClient(conn)
 	t.Run("Add type", postSvcAddAndFndTypesFn(ctx, conn, postClnt))
 	t.Run("Add and find posts", postSvcAddAndFndPostsFn(ctx, conn, postClnt))
+	t.Run("Find all posts", postSvcFindAllPosts(ctx, conn, postClnt))
 	t.Run("Add, find and edit post", postSvcEdtPostFn(ctx, conn, postClnt))
 	t.Run("Find and delete post", postSvcDelPostFn(ctx, conn, postClnt))
 }
@@ -134,7 +135,7 @@ func postSvcAddAndFndPostsFn(ctx context.Context, conn *grpc.ClientConn, clnt pb
 			// Unset fields that aren't being tested.
 			unsetUntestedFields(got)
 
-			if !reflect.DeepEqual(got, tc.want) {
+			if !proto.Equal(got, tc.want) {
 				t.Errorf("got: %#v, want: %#v", got, tc.want)
 			}
 
@@ -190,7 +191,7 @@ func postSvcEdtPostFn(ctx context.Context, conn *grpc.ClientConn, clnt pb.PostCl
 
 		unsetUntestedFields(got)
 
-		if !reflect.DeepEqual(got, want) {
+		if !proto.Equal(got, want) {
 			t.Fatalf("got: %#v, want: %#v", got, want)
 		}
 	}
@@ -252,4 +253,53 @@ func postSvcFndPost(ctx context.Context, conn *grpc.ClientConn, clnt pb.PostClie
 		return postID.Posts[0].Id, nil
 	}
 	return "", nil
+}
+
+func postsContain(resp *pb.PostsResp, post *pb.PostResp) bool {
+	for _, j := range resp.Posts {
+		if j.Title == post.Title && j.Body == post.Body && j.TypeId == post.TypeId {
+			return true
+		}
+	}
+	return false
+}
+
+func postSvcFindAllPosts(ctx context.Context, conn *grpc.ClientConn, clnt pb.PostClient) func(*testing.T) {
+	return func(t *testing.T) {
+		tests := []struct {
+			fndReq *pb.FndPostsReq
+			want   *pb.PostsResp
+		}{
+			{
+				&pb.FndPostsReq{Keywords: []string{}},
+				&pb.PostsResp{
+					Posts: []*pb.PostResp{
+						{
+							Title:  "test title postA first",
+							Body:   "test body of first post",
+							TypeId: "2",
+						},
+						{
+							Title:  "test title postB second",
+							Body:   "test body of second postB",
+							TypeId: "3",
+						},
+					},
+				},
+			},
+		}
+
+		for _, tc := range tests {
+			resp, err := clnt.FndPosts(ctx, tc.fndReq)
+			if err != nil {
+				t.Errorf("unexpected error: %v", err)
+			}
+
+			for _, post := range tc.want.Posts {
+				if !postsContain(resp, post) {
+					t.Errorf("couldn't find post with title: %s", post.Title)
+				}
+			}
+		}
+	}
 }
