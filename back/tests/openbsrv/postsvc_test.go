@@ -3,11 +3,11 @@ package main_test
 import (
 	"context"
 	"fmt"
-	"reflect"
 	"testing"
 
 	"github.com/OpenEugene/openboard/back/internal/pb"
 	"google.golang.org/grpc"
+	"google.golang.org/protobuf/proto"
 )
 
 func TestPostClientServices(t *testing.T) {
@@ -134,7 +134,7 @@ func postSvcAddAndFndPostsFn(ctx context.Context, conn *grpc.ClientConn, clnt pb
 			// Unset fields that aren't being tested.
 			unsetUntestedFields(got)
 
-			if !reflect.DeepEqual(got, tc.want) {
+			if !proto.Equal(got, tc.want) {
 				t.Errorf("got: %#v, want: %#v", got, tc.want)
 			}
 
@@ -190,7 +190,7 @@ func postSvcEdtPostFn(ctx context.Context, conn *grpc.ClientConn, clnt pb.PostCl
 
 		unsetUntestedFields(got)
 
-		if !reflect.DeepEqual(got, want) {
+		if !proto.Equal(got, want) {
 			t.Fatalf("got: %#v, want: %#v", got, want)
 		}
 	}

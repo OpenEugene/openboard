@@ -3,11 +3,11 @@ package main_test
 import (
 	"context"
 	"fmt"
-	"reflect"
 	"testing"
 
 	"github.com/OpenEugene/openboard/back/internal/pb"
 	"google.golang.org/grpc"
+	"google.golang.org/protobuf/proto"
 )
 
 func TestClientServices(t *testing.T) {
@@ -113,7 +113,7 @@ func userSvcAddAndFndUsersFn(ctx context.Context, conn *grpc.ClientConn, clnt pb
 			desc       string
 			addUserReq *pb.AddUserReq
 			want       *pb.User
-			fndUserReq pb.FndUsersReq
+			fndUserReq *pb.FndUsersReq
 		}{
 			{
 				"Add and find user A",
@@ -138,7 +138,7 @@ func userSvcAddAndFndUsersFn(ctx context.Context, conn *grpc.ClientConn, clnt pb
 					Avatar:      "test user avatar A",
 					Roles:       []*pb.RoleResp{{Name: "user"}},
 				},
-				pb.FndUsersReq{
+				&pb.FndUsersReq{
 					RoleIds:     []string{},
 					Email:       "user_a@email.com",
 					EmailHold:   false,
@@ -174,7 +174,7 @@ func userSvcAddAndFndUsersFn(ctx context.Context, conn *grpc.ClientConn, clnt pb
 						{Name: "admin"},
 					},
 				},
-				pb.FndUsersReq{
+				&pb.FndUsersReq{
 					RoleIds:     []string{},
 					Email:       "userB@email.com",
 					EmailHold:   false,
@@ -201,7 +201,7 @@ func userSvcAddAndFndUsersFn(ctx context.Context, conn *grpc.ClientConn, clnt pb
 				unsetUntestedFields(got.Roles[i])
 			}
 
-			if !reflect.DeepEqual(got, tc.want) {
+			if !proto.Equal(got, tc.want) {
 				t.Fatalf("%s: got: %#v, want: %#v", tc.desc, got, tc.want)
 			}
 
@@ -218,7 +218,7 @@ func userSvcAddAndFndUsersFn(ctx context.Context, conn *grpc.ClientConn, clnt pb
 
 func userSvcDelUserFn(ctx context.Context, conn *grpc.ClientConn, clnt pb.UserSvcClient) func(*testing.T) {
 	return func(t *testing.T) {
-		req := pb.FndUsersReq{
+		req := &pb.FndUsersReq{
 			RoleIds:     []string{},
 			Email:       "user_a@email.com",
 			EmailHold:   false,
@@ -242,7 +242,7 @@ func userSvcDelUserFn(ctx context.Context, conn *grpc.ClientConn, clnt pb.UserSv
 			t.Error(err)
 		}
 
-		resp, err := clnt.FndUsers(ctx, &req)
+		resp, err := clnt.FndUsers(ctx, req)
 		if err != nil {
 			t.Error(err)
 		}
@@ -267,8 +267,8 @@ func roleID(ctx context.Context, conn *grpc.ClientConn, clnt pb.UserSvcClient, r
 	return r.Items[0].Id, nil
 }
 
-func userSvcFndUser(ctx context.Context, conn *grpc.ClientConn, clnt pb.UserSvcClient, req pb.FndUsersReq) (string, error) {
-	r, err := clnt.FndUsers(ctx, &req)
+func userSvcFndUser(ctx context.Context, conn *grpc.ClientConn, clnt pb.UserSvcClient, req *pb.FndUsersReq) (string, error) {
+	r, err := clnt.FndUsers(ctx, req)
 	if err != nil {
 		return "", fmt.Errorf("unable to find user: %w", err)
 	}
