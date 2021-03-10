@@ -1,0 +1,31 @@
+#! /usr/bin/env bash
+
+main() {
+	local deferreds=()
+	function runDeferreds() {
+		for deferred in "${deferreds[@]}"; do eval ${deferred}; done
+	}
+	trap "runDeferreds" EXIT RETURN
+
+	local rootDir="$(dirname "${0}")"
+	pushd "${rootDir}" >/dev/null && rootDir="${PWD}" && popd >/dev/null || exit 1
+	local command="$(basename "${rootDir}")"
+	local projectDir="${rootDir}/../../cmd/${command}"
+	local buildDir="${rootDir}/build"
+	local buildFile="${buildDir}/${command}-test"
+
+	pushd "${projectDir}" >/dev/null
+	deferreds+=("popd >/dev/null")
+	go build -o "${buildFile}" || exit 1
+	deferreds+=("rm \"${buildFile}\"")
+
+	"${buildFile}" ${@} -rollback -skipsrv || exit 1
+	"${buildFile}" ${@} -migrate &
+	deferreds+=("kill %1")
+
+	pushd "${rootDir}" >/dev/null
+	deferreds+=("popd >/dev/null")
+	go test -v
+}
+
+main ${@}

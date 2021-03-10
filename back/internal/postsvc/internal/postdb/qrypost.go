@@ -118,11 +118,16 @@ func (s *PostDB) findPosts(ctx cx, x *pb.FndPostsReq, y *pb.PostsResp) error {
 	}
 	defer selStmt.Close()
 
+	var like string
+	if len(x.Keywords) > 0 {
+		like = x.Keywords[0]
+	}
+
 	rows, err := selStmt.Query(
-		"%"+x.Keywords[0]+"%",
-		"%"+x.Keywords[0]+"%",
+		"%"+like+"%",
+		"%"+like+"%",
 		x.Limit,
-		x.Lapse,
+		x.Lapse
 	)
 	if err != nil {
 		return err
@@ -152,8 +157,8 @@ func (s *PostDB) findPosts(ctx cx, x *pb.FndPostsReq, y *pb.PostsResp) error {
 
 	err = s.db.QueryRow(
 		"SELECT COUNT(*) FROM post WHERE title LIKE ? OR body LIKE ?",
-		"%"+x.Keywords[0]+"%",
-		"%"+x.Keywords[0]+"%",
+		"%"+like+"%",
+		"%"+like+"%",
 	).Scan(&y.Total)
 	if err != nil {
 		return err
