@@ -8,17 +8,20 @@ The following scripts should be working for Bash on Linux, WSL, and Darwin. When
 installing the database, the suggested defaults for this project are:
 dbname = "openeug_openb_dev", and dbuser = "openeug_openbdev".
 
-```shell
-./tools/install-go
-./tools/install-tools
-./tools/install-mariadb # local install (optional)
+```sh
+# from {project_root}
+cd back/tools
+./install-go
+./install-tools
+./install-mariadb # container-based alternative below
 ```
 
-```shell
-# database container setup (optional - skip if using mariadb "local install")
-pushd ./tools/iso/ >/dev/null
+```sh
+# database container setup (skip if using the "./install-mariadb" script above)
+# installs docker and docker-compose
+# from {project_root}
+cd back/tools/iso/
 ./dev up # subcommands [up|dn|ip|clean] (default: up)
-popd >/dev/null
 ```
 
 ### Normal Mode
@@ -39,10 +42,12 @@ mechanism for serializing structured data.
 [Install From
 Source](https://github.com/protocolbuffers/protobuf/blob/master/src/README.md)
 
-```shell
+```sh
 # may require changes for your OS/ENV
-git clone https://github.com/protocolbuffers/protobuf.git
-cd protobuf
+cd {your_source_code_dir}
+mkdir -p github.com/protocolbuffers/protobuf
+cd github.com/protocolbuffers/protobuf
+git clone https://github.com/protocolbuffers/protobuf.git .
 git submodule update --init --recursive
 ./autogen.sh
 ./configure
@@ -59,22 +64,58 @@ endpoints. gRPC endpoints can be accessed directly, or via an HTTP gateway on
 port 4243. In order to view the API endpoints, please visit
 http://localhost:4243/v/docs. The frontend assets are served on port 4244.
 
-```shell
-repo="OpenEugene/openboard"
-cd {your_source_dir}
-mkdir -p ${repo}
-cd $_
-git clone https://github.com/${repo} .
+### Clone
 
+```sh
+cd {your_source_code_dir}
+mkdir -p github.com/OpenEugene/openboard
+cd github.com/OpenEugene/openboard
+git clone https://github.com/OpenEugene/openboard .
+```
+
+### Build and Execute
+
+```sh
+# from {project_root}
 cd back/cmd/openbsrv
-go build -o {your_bin_dir}/openbsrv
-
-# only include the database address if not 127.0.0.1/localhost.
-openbsrv -frontdir=../../../front/public/ --dbpass={your_dbpass} --dbaddr={your_dbaddr}
+go build
+./openbsrv --dbpass={your_dbpass} --migrate
+# be careful not to git add/commit the executable
 ```
 
 Please refer to the [openbsrv readme](./cmd/openbsrv/README.md) for more details
 about usage and flags (e.g. -dbname, -dbuser, etc.).
+
+### Database Migration Management
+
+```sh
+# from {project_root}
+cd back/cmd/openbsrv
+./openbsrv --dbpass={your_dbpass} --rollback
+^C # Ctrl-C will send the system signal "SIGINT" and halts the program
+./openbsrv --dbpass={your_dbpass} --migrate
+```
+
+### Run Tests
+
+#### Unit Tests
+
+None at this time.
+
+#### Surface Tests
+
+None at this time.
+
+#### End-to-end Tests
+
+A convenience script has been provided to build and run the executable, and also
+run the end-to-end tests.
+
+```sh
+# from {project_root}
+cd back/tests/openbsrv
+./run-tests
+```
 
 ## Contributing
 

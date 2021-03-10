@@ -4,9 +4,8 @@ function main() {
 	local rootDir="$(dirname "${0}")"
 
 	mkdir -p "${rootDir}/.bin"
-	pushd "$_" &>/dev/null
+	pushd "$_" &>/dev/null && rm ./*
 	export GOBIN="${PWD}"
-	rm ./*
 	popd &>/dev/null
 
 	pushd "${rootDir}" &>/dev/null
@@ -17,8 +16,6 @@ function main() {
 	go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway@v2.2.0
 	go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2@v2.2.0
 	popd &>/dev/null
-
-	unset GOBIN
 }
 
 main

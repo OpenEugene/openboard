@@ -27,6 +27,7 @@ func run() error {
 		dbport    = ":3306"
 		migrate   bool
 		rollback  bool
+		skipsrv   bool
 		frontDir  = "../../../front/public"
 		migTblPfx = "mig_"
 	)
@@ -38,6 +39,7 @@ func run() error {
 	flag.StringVar(&dbport, "dbport", dbport, "database port")
 	flag.BoolVar(&migrate, "migrate", migrate, "migrate up")
 	flag.BoolVar(&rollback, "rollback", rollback, "migrate dn")
+	flag.BoolVar(&skipsrv, "skipsrv", skipsrv, "skip server run")
 	flag.StringVar(&frontDir, "frontdir", frontDir, "front public assets directory")
 	flag.Parse()
 
@@ -68,6 +70,11 @@ func run() error {
 		fmt.Println(migType+":", mres)
 	}
 
+	if skipsrv {
+		fmt.Println("servers will not be run; exiting")
+		return nil
+	}
+
 	hsrv, err := newHTTPSrv(":4242", ":4243", nil)
 	if err != nil {
 		return err
@@ -88,9 +95,5 @@ func run() error {
 
 	fmt.Println("to gracefully stop the application, send signal like TERM (CTRL-C) or HUP")
 
-	if err := m.serve(); err != nil {
-		return err
-	}
-
-	return fmt.Errorf("not a real error; demonstrating output")
+	return m.serve()
 }
