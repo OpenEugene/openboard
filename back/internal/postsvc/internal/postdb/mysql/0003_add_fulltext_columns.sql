@@ -5,5 +5,5 @@ ALTER TABLE post ADD FULLTEXT(title);
 
 -- +migrate Down
 
-ALTER TABLE post DROP INDEX body;
-ALTER TABLE post DROP INDEX title;
+ALTER TABLE post DROP INDEX IF EXISTS body;
+ALTER TABLE post DROP INDEX IF EXISTS title;

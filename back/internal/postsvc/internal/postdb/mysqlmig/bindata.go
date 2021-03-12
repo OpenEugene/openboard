@@ -125,8 +125,8 @@ ALTER TABLE post ADD FULLTEXT(title);
 
 -- +migrate Down
 
-ALTER TABLE post DROP INDEX body;
-ALTER TABLE post DROP INDEX title;
+ALTER TABLE post DROP INDEX IF EXISTS body;
+ALTER TABLE post DROP INDEX IF EXISTS title;
 `)
 
 func _0003_add_fulltext_columnsSqlBytes() ([]byte, error) {
@@ -139,7 +139,7 @@ func _0003_add_fulltext_columnsSql() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "0003_add_fulltext_columns.sql", size: 179, mode: os.FileMode(436), modTime: time.Unix(1615527362, 0)}
+	info := bindataFileInfo{name: "0003_add_fulltext_columns.sql", size: 199, mode: os.FileMode(436), modTime: time.Unix(1615528009, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
