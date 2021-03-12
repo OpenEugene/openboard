@@ -3,6 +3,7 @@ package postdb
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/OpenEugene/openboard/back/internal/altr"
@@ -108,23 +109,20 @@ func (s *PostDB) upsertPost(ctx cx, sid string, x *pb.AddPostReq, y *pb.PostResp
 	return nil
 }
 
-// TODO: make it such that if given a list of multiple keywords, we can search the
-// title and body for those keywords.
 func (s *PostDB) findPosts(ctx cx, x *pb.FndPostsReq, y *pb.PostsResp) error {
-	selStmt, err := s.db.Prepare("SELECT post_id, type_id, slug, title, body, created_at, updated_at, deleted_at FROM post WHERE title LIKE ? OR body LIKE ?")
+	selStmt, err := s.db.Prepare("SELECT post_id, type_id, slug, title, body, created_at, updated_at, deleted_at FROM post " +
+		"WHERE (MATCH body AGAINST (? IN NATURAL LANGUAGE MODE)) OR (MATCH title AGAINST (? IN NATURAL LANGUAGE MODE)) or (?='')")
 	if err != nil {
 		return err
 	}
 	defer selStmt.Close()
 
-	var like string
-	if len(x.Keywords) > 0 {
-		like = x.Keywords[0]
-	}
+	like := strings.Join(x.Keywords, " ")
 
 	rows, err := selStmt.Query(
-		"%"+like+"%",
-		"%"+like+"%",
+		like,
+		like,
+		like,
 	)
 	if err != nil {
 		return err
