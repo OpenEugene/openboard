@@ -37,10 +37,11 @@ jobs:
             --cherry-pick \
             --oneline \
             --pretty=format:%s \
-            origin/main..origin/"${BRANCH_NAME}" >> "${infoFile}"
+            origin/main...origin/"${BRANCH_NAME}" >> "${infoFile}"
           echo >> "${infoFile}" # add missing newline
-          tac "${infoFile}" > "rev_${infoFile}" && mv "rev_${infoFile}" "${infoFile}" # reverse data
+          cat "${infoFile}" # debug
 
+          tac "${infoFile}" > "rev_${infoFile}" && mv "rev_${infoFile}" "${infoFile}" # reverse data
           cat "${infoFile}" # debug
 
           wipLineNum="$(cat "${infoFile}" | grep "^> WIP" -n | head -n 1 | cut -d: -f1)"
