@@ -8,12 +8,6 @@ jobs:
     name: WIP it
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-        with:
-          ref: main
-
-      - uses: actions/checkout@v2
-
       - name: Set branch name envvar
         run: |
           echo "BRANCH_NAME=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
@@ -23,6 +17,16 @@ jobs:
           issue="${BRANCH_NAME##*-}"
           ! [[ "${issue}" =~ ^[0-9]+$ ]] && >&2 echo "issue num not parsed" && exit 1
           echo "BRANCH_ISSUE=${issue}" >> $GITHUB_ENV
+
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 128
+          ref: main
+
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          ref: ${{ github.sha }}
 
       - name: Setup/update WIP pull requests and related issues
         run: |
