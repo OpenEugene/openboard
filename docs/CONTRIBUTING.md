@@ -44,6 +44,9 @@ automated tracking mechanisms.
 
 ### Tracking
 
+Issues and Pull Requests are tracked using Kanban boards. Board automation is
+provided in both cases.
+
 #### [Issue Qualification](https://github.com/OpenEugene/openboard/projects/3)
 
 When an Issue is:
@@ -64,15 +67,15 @@ When a PR is:
 
 *All of these steps are automated.
 
-#### Automation Notes
+### Automation
 
-PR Creation, Issue Association, and Tracking:
+#### Pull Request Creation
 A Branch that has the suffix "-{issue_number}" (e.g. "my_branch-123") and is
 pushed to the project will automatically have a PR opened that is associated 
 with the relevant Issue. The PR title is derived from the Issue title. The PR is
 automatically added to the "Change Management" project.
 
-WIP Convenience:
+#### WIP Convenience
 A Branch that contains a commit message that has the prefix "WIP" will have its
 PR title prefixed with "WIP: " (e.g. "WIP: Fix some bug"). A Branch that
 contains a commit message that has the prefix "NOWIP" and also has an existing
