@@ -296,6 +296,11 @@ func postSvcFindAllPosts(ctx context.Context, conn *grpc.ClientConn, clnt pb.Pos
 				t.Errorf("unexpected error: %v", err)
 			}
 
+			if len(tc.want.Posts) != len(resp.Posts) {
+				t.Errorf("mismatch between response length and post length, "+
+					"want: %d got: %d", len(tc.want.Posts), len(resp.Posts))
+			}
+
 			for _, post := range tc.want.Posts {
 				if !postsContain(resp, post) {
 					t.Errorf("couldn't find post with title: %s", post.Title)
