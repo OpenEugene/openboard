@@ -57,7 +57,7 @@ jobs:
           case "${prCt}" in
           0)
             prTitle="$(hub issue show --format="%t" "${BRANCH_ISSUE}")"
-            if [[ -z "${nowipLineNum}" || "${nowipLineNum}" -lt "${wipLineNum}" ]]; then
+            if [[ -n "${wipLineNum}" || "${nowipLineNum}" -lt "${wipLineNum}" ]]; then
               prTitle="WIP: ${prTitle}"
             fi
 
