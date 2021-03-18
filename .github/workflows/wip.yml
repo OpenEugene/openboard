@@ -8,12 +8,6 @@ jobs:
     name: WIP it
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-        with:
-          ref: main
-
-      - uses: actions/checkout@v2
-
       - name: Set branch name envvar
         run: |
           echo "BRANCH_NAME=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
@@ -23,6 +17,16 @@ jobs:
           issue="${BRANCH_NAME##*-}"
           ! [[ "${issue}" =~ ^[0-9]+$ ]] && >&2 echo "issue num not parsed" && exit 1
           echo "BRANCH_ISSUE=${issue}" >> $GITHUB_ENV
+
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 128
+          ref: main
+
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          ref: ${{ github.sha }}
 
       - name: Setup/update WIP pull requests and related issues
         run: |
@@ -39,12 +43,12 @@ jobs:
             --pretty=format:%s \
             origin/main..origin/"${BRANCH_NAME}" >> "${infoFile}"
           echo >> "${infoFile}" # add missing newline
-          tac "${infoFile}" > "rev_${infoFile}" && mv "rev_${infoFile}" "${infoFile}" # reverse data
 
+          tac "${infoFile}" > "rev_${infoFile}" && mv "rev_${infoFile}" "${infoFile}" # reverse data
           cat "${infoFile}" # debug
 
-          wipLineNum="$(cat "${infoFile}" | grep "^> WIP" -n | head -n 1 | cut -d: -f1)"
-          nowipLineNum="$(cat "${infoFile}" | grep "^> NOWIP" -n | head -n 1 | cut -d: -f1)"
+          wipLineNum="$(cat "${infoFile}" | grep "^> WIP" -n | tail -n 1 | cut -d: -f1)"
+          nowipLineNum="$(cat "${infoFile}" | grep "^> NOWIP" -n | tail -n 1 | cut -d: -f1)"
           prList="$(hub pr list --head "${BRANCH_NAME}" --state=open --format="%i %t\n")"
           prCt="$(echo -ne "${prList}" | wc -l)"
 
@@ -57,7 +61,7 @@ jobs:
           case "${prCt}" in
           0)
             prTitle="$(hub issue show --format="%t" "${BRANCH_ISSUE}")"
-            if [[ -z "${nowipLineNum}" || "${nowipLineNum}" -le "${wipLineNum}" ]]; then
+            if [[ -n "${wipLineNum}" && "${nowipLineNum}" -lt "${wipLineNum}" ]]; then
               prTitle="WIP: ${prTitle}"
             fi
 
@@ -78,21 +82,35 @@ jobs:
             ;;
 
           1)
+            prTitle="$(echo -ne "${prList}" | cut -d" " -f2-)"
+            prIssue="$(echo -ne "${prList}" | grep -o "#[0-9]*" | tr -d "#")"
+            shouldChange=false
+
             if [[ -n "${nowipLineNum}" && "${nowipLineNum}" -gt "${wipLineNum}" ]]; then
-              prTitle="$(echo -ne "${prList}" | cut -d" " -f2-)"
               if [[ "${prTitle}" =~ ^WIP: ]]; then
-                prIssue="$(echo -ne "${prList}" | grep -o "#[0-9]*" | tr -d "#")"
+                shouldChange=true
                 prTitle="${prTitle#WIP:}"
                 prTitle="${prTitle# }"
-                prBody="$(hub pr list --head "${BRANCH_NAME}" --state=open --format="%b")"
-
-                echo "pr title: ${prTitle}" # debug
-                echo "pr body: ${prBody}"   # debug
-
-                hub issue update "${prIssue}" \
-                  --message "${prTitle}" \
-                  --message "${prBody}"
               fi
+            elif [[ -n "${wipLineNum}" && "${nowipLineNum}" -lt "${wipLineNum}" ]]; then
+              prTitle="$(echo -ne "${prList}" | cut -d" " -f2-)"
+              if [[ ! "${prTitle}" =~ ^WIP: ]]; then
+                shouldChange=true
+                prTitle="WIP: ${prTitle}"
+              fi
+            fi
+
+            if ${shouldChange}; then
+              echo "shouldChange: ${shouldChange}" # debug
+
+              prBody="$(hub pr list --head "${BRANCH_NAME}" --state=open --format="%b")"
+
+              echo "pr title: ${prTitle}" # debug
+              echo "pr body: ${prBody}"   # debug
+
+              hub issue update "${prIssue}" \
+                --message "${prTitle}" \
+                --message "${prBody}"
             fi
             ;;
 
