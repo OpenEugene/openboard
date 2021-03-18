@@ -110,8 +110,15 @@ func (s *PostDB) upsertPost(ctx cx, sid string, x *pb.AddPostReq, y *pb.PostResp
 }
 
 func (s *PostDB) findPosts(ctx cx, x *pb.FndPostsReq, y *pb.PostsResp) error {
-	selStmt, err := s.db.Prepare("SELECT post_id, type_id, slug, title, body, created_at, updated_at, deleted_at FROM post " +
-		"WHERE (MATCH body AGAINST (? IN NATURAL LANGUAGE MODE)) OR (MATCH title AGAINST (? IN NATURAL LANGUAGE MODE)) or (?='')")
+	selStmt, err := s.db.Prepare(`
+SELECT post_id, type_id, slug, title, body, created_at, updated_at, deleted_at
+FROM post
+WHERE (MATCH body AGAINST (? IN NATURAL LANGUAGE MODE)) OR
+(MATCH title AGAINST (? IN NATURAL LANGUAGE MODE)) OR
+body LIKE ? OR title LIKE ?
+ORDER BY
+(MATCH body AGAINST (? IN NATURAL LANGUAGE MODE))+(MATCH body AGAINST (? IN NATURAL LANGUAGE MODE))
+DESC`)
 	if err != nil {
 		return err
 	}
@@ -121,6 +128,9 @@ func (s *PostDB) findPosts(ctx cx, x *pb.FndPostsReq, y *pb.PostsResp) error {
 
 	rows, err := selStmt.Query(
 		like,
+		like,
+		"%"+like+"%",
+		"%"+like+"%",
 		like,
 		like,
 	)
