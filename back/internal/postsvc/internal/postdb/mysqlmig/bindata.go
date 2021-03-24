@@ -2,7 +2,7 @@
 // sources:
 // mysql/0001_setup_post_table.sql
 // mysql/0002_setup_type_table.sql
-// mysql/0003_add_fulltext_columns.sql
+// mysql/0003_add_post_fulltext_cols.sql
 package mysqlmig
 
 import (
@@ -118,7 +118,7 @@ func _0002_setup_type_tableSql() (*asset, error) {
 	return a, nil
 }
 
-var __0003_add_fulltext_columnsSql = []byte(`-- +migrate Up
+var __0003_add_post_fulltext_colsSql = []byte(`-- +migrate Up
 
 ALTER TABLE post ADD FULLTEXT(body);
 ALTER TABLE post ADD FULLTEXT(title);
@@ -129,17 +129,17 @@ ALTER TABLE post DROP INDEX IF EXISTS body;
 ALTER TABLE post DROP INDEX IF EXISTS title;
 `)
 
-func _0003_add_fulltext_columnsSqlBytes() ([]byte, error) {
-	return __0003_add_fulltext_columnsSql, nil
+func _0003_add_post_fulltext_colsSqlBytes() ([]byte, error) {
+	return __0003_add_post_fulltext_colsSql, nil
 }
 
-func _0003_add_fulltext_columnsSql() (*asset, error) {
-	bytes, err := _0003_add_fulltext_columnsSqlBytes()
+func _0003_add_post_fulltext_colsSql() (*asset, error) {
+	bytes, err := _0003_add_post_fulltext_colsSqlBytes()
 	if err != nil {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "0003_add_fulltext_columns.sql", size: 199, mode: os.FileMode(436), modTime: time.Unix(1615528009, 0)}
+	info := bindataFileInfo{name: "0003_add_post_fulltext_cols.sql", size: 199, mode: os.FileMode(436), modTime: time.Unix(1615528009, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -196,9 +196,9 @@ func AssetNames() []string {
 
 // _bindata is a table, holding each asset generator, mapped to its name.
 var _bindata = map[string]func() (*asset, error){
-	"0001_setup_post_table.sql":     _0001_setup_post_tableSql,
-	"0002_setup_type_table.sql":     _0002_setup_type_tableSql,
-	"0003_add_fulltext_columns.sql": _0003_add_fulltext_columnsSql,
+	"0001_setup_post_table.sql":       _0001_setup_post_tableSql,
+	"0002_setup_type_table.sql":       _0002_setup_type_tableSql,
+	"0003_add_post_fulltext_cols.sql": _0003_add_post_fulltext_colsSql,
 }
 
 // AssetDir returns the file names below a certain
@@ -242,9 +242,9 @@ type bintree struct {
 }
 
 var _bintree = &bintree{nil, map[string]*bintree{
-	"0001_setup_post_table.sql":     &bintree{_0001_setup_post_tableSql, map[string]*bintree{}},
-	"0002_setup_type_table.sql":     &bintree{_0002_setup_type_tableSql, map[string]*bintree{}},
-	"0003_add_fulltext_columns.sql": &bintree{_0003_add_fulltext_columnsSql, map[string]*bintree{}},
+	"0001_setup_post_table.sql":       &bintree{_0001_setup_post_tableSql, map[string]*bintree{}},
+	"0002_setup_type_table.sql":       &bintree{_0002_setup_type_tableSql, map[string]*bintree{}},
+	"0003_add_post_fulltext_cols.sql": &bintree{_0003_add_post_fulltext_colsSql, map[string]*bintree{}},
 }}
 
 // RestoreAsset restores an asset under the given directory
