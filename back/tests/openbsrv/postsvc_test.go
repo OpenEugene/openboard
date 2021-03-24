@@ -25,6 +25,7 @@ func TestPostClientServices(t *testing.T) {
 	t.Run("Find all posts", postSvcFindAllPosts(ctx, conn, postClnt))
 	t.Run("Add, find and edit post", postSvcEdtPostFn(ctx, conn, postClnt))
 	t.Run("Find and delete post", postSvcDelPostFn(ctx, conn, postClnt))
+	t.Run("Find posts by keywords", postSvcKeywordSearch(ctx, conn, postClnt))
 }
 
 func postSvcAddAndFndTypesFn(ctx context.Context, conn *grpc.ClientConn, clnt pb.PostClient) func(*testing.T) {
@@ -295,9 +296,81 @@ func postSvcFindAllPosts(ctx context.Context, conn *grpc.ClientConn, clnt pb.Pos
 				t.Errorf("unexpected error: %v", err)
 			}
 
+			if len(tc.want.Posts) != len(resp.Posts) {
+				t.Errorf("mismatch between response length and post length, "+
+					"want: %d got: %d", len(tc.want.Posts), len(resp.Posts))
+			}
+
 			for _, post := range tc.want.Posts {
 				if !postsContain(resp, post) {
 					t.Errorf("couldn't find post with title: %s", post.Title)
+				}
+			}
+		}
+	}
+}
+
+func postSvcKeywordSearch(ctx context.Context, conn *grpc.ClientConn, clnt pb.PostClient) func(*testing.T) {
+	return func(t *testing.T) {
+		tests := []struct {
+			name   string
+			fndReq *pb.FndPostsReq
+			want   *pb.PostsResp
+		}{
+			{
+				"not find non-matching posts",
+				&pb.FndPostsReq{Keywords: []string{"randomgiberish"}},
+				&pb.PostsResp{
+					Posts: []*pb.PostResp{},
+				},
+			},
+			{
+				"find posts by several keywords",
+				&pb.FndPostsReq{Keywords: []string{"postB", "postD"}},
+				&pb.PostsResp{
+					Posts: []*pb.PostResp{
+						{
+							Title:  "test title postB second",
+							Body:   "test body of second postB",
+							TypeId: "3",
+						},
+						{
+							Title:  "test title postD first",
+							Body:   "test body of fourth post",
+							TypeId: "4",
+						},
+					},
+				},
+			},
+			{
+				"find keyword within parenthesis",
+				&pb.FndPostsReq{Keywords: []string{"edited"}},
+				&pb.PostsResp{
+					Posts: []*pb.PostResp{
+						{
+							Title:  "Post C (edited)",
+							Body:   "This is post C after edits.",
+							TypeId: "2",
+						},
+					},
+				},
+			},
+		}
+
+		for _, tc := range tests {
+			resp, err := clnt.FndPosts(ctx, tc.fndReq)
+			if err != nil {
+				t.Errorf("%s: unexpected error: %v", tc.name, err)
+			}
+
+			if len(tc.want.Posts) != len(resp.Posts) {
+				t.Errorf("%s: mismatch between response length and post length, "+
+					"want: %d got: %d", tc.name, len(tc.want.Posts), len(resp.Posts))
+			}
+
+			for _, post := range tc.want.Posts {
+				if !postsContain(resp, post) {
+					t.Errorf("%s: couldn't find post with title: %s", tc.name, post.Title)
 				}
 			}
 		}
