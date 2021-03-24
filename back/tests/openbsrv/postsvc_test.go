@@ -313,17 +313,19 @@ func postSvcFindAllPosts(ctx context.Context, conn *grpc.ClientConn, clnt pb.Pos
 func postSvcKeywordSearch(ctx context.Context, conn *grpc.ClientConn, clnt pb.PostClient) func(*testing.T) {
 	return func(t *testing.T) {
 		tests := []struct {
+			name   string
 			fndReq *pb.FndPostsReq
 			want   *pb.PostsResp
 		}{
 			{
-				// Test without any results
+				"not find non-matching posts",
 				&pb.FndPostsReq{Keywords: []string{"randomgiberish"}},
 				&pb.PostsResp{
 					Posts: []*pb.PostResp{},
 				},
 			},
 			{
+				"find posts by several keywords",
 				&pb.FndPostsReq{Keywords: []string{"postB", "postD"}},
 				&pb.PostsResp{
 					Posts: []*pb.PostResp{
@@ -341,6 +343,7 @@ func postSvcKeywordSearch(ctx context.Context, conn *grpc.ClientConn, clnt pb.Po
 				},
 			},
 			{
+				"find keyword within parenthesis",
 				&pb.FndPostsReq{Keywords: []string{"edited"}},
 				&pb.PostsResp{
 					Posts: []*pb.PostResp{
@@ -357,17 +360,17 @@ func postSvcKeywordSearch(ctx context.Context, conn *grpc.ClientConn, clnt pb.Po
 		for _, tc := range tests {
 			resp, err := clnt.FndPosts(ctx, tc.fndReq)
 			if err != nil {
-				t.Errorf("unexpected error: %v", err)
+				t.Errorf("%s: unexpected error: %v", tc.name, err)
 			}
 
 			if len(tc.want.Posts) != len(resp.Posts) {
-				t.Errorf("mismatch between response length and post length, "+
-					"want: %d got: %d", len(tc.want.Posts), len(resp.Posts))
+				t.Errorf("%s: mismatch between response length and post length, "+
+					"want: %d got: %d", tc.name, len(tc.want.Posts), len(resp.Posts))
 			}
 
 			for _, post := range tc.want.Posts {
 				if !postsContain(resp, post) {
-					t.Errorf("couldn't find post with title: %s", post.Title)
+					t.Errorf("%s: couldn't find post with title: %s", tc.name, post.Title)
 				}
 			}
 		}
