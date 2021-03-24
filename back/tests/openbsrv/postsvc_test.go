@@ -24,8 +24,8 @@ func TestPostClientServices(t *testing.T) {
 	t.Run("Add and find posts", postSvcAddAndFndPostsFn(ctx, conn, postClnt))
 	t.Run("Find all posts", postSvcFindAllPosts(ctx, conn, postClnt))
 	t.Run("Add, find and edit post", postSvcEdtPostFn(ctx, conn, postClnt))
-	// t.Run("Find and delete post", postSvcDelPostFn(ctx, conn, postClnt))
-	// t.Run("Find posts by keywords", postSvcKeywordSearch(ctx, conn, postClnt))
+	t.Run("Find and delete post", postSvcDelPostFn(ctx, conn, postClnt))
+	t.Run("Find posts by keywords", postSvcKeywordSearch(ctx, conn, postClnt))
 }
 
 func postSvcAddAndFndTypesFn(ctx context.Context, conn *grpc.ClientConn, clnt pb.PostClient) func(*testing.T) {
@@ -318,7 +318,7 @@ func postSvcKeywordSearch(ctx context.Context, conn *grpc.ClientConn, clnt pb.Po
 		}{
 			{
 				// Test without any results
-				&pb.FndPostsReq{Keywords: []string{"postA"}},
+				&pb.FndPostsReq{Keywords: []string{"randomgiberish"}},
 				&pb.PostsResp{
 					Posts: []*pb.PostResp{},
 				},
