@@ -3,8 +3,10 @@ package authsvc
 import (
 	"context"
 
-	"github.com/OpenEugene/openboard/back/internal/pb"
 	"google.golang.org/grpc"
+
+	"github.com/OpenEugene/openboard/back/internal/logsvc"
+	"github.com/OpenEugene/openboard/back/internal/pb"
 )
 
 var _ pb.AuthServer = &AuthSvc{}
@@ -12,12 +14,13 @@ var _ pb.AuthServer = &AuthSvc{}
 // AuthSvc ecapsulates dependencies and data required to implement the
 // pb.AuthServer interface.
 type AuthSvc struct {
+	log logsvc.LineLogger
 	// TODO: implement AuthSvc
 }
 
 // New returns a pointer to an AuthSvc instance or an error.
-func New() (*AuthSvc, error) {
-	return &AuthSvc{}, nil
+func New(log logsvc.LineLogger) (*AuthSvc, error) {
+	return &AuthSvc{log: log}, nil
 }
 
 // RegisterWithGRPCServer implements the grpcsrv.Registerable interface.
@@ -30,7 +33,7 @@ func (s *AuthSvc) RegisterWithGRPCServer(g *grpc.Server) error {
 // AddAuth implements part of the pb.AuthServer interface.
 func (s *AuthSvc) AddAuth(ctx context.Context, req *pb.AddAuthReq) (*pb.AuthResp, error) {
 	// TODO: implement AddAuth
-
+	s.log.Info("Adding authorization")
 	return nil, nil
 }
 

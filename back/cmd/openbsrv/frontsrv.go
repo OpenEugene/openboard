@@ -7,13 +7,17 @@ import (
 	"github.com/codemodus/alfred"
 	"github.com/codemodus/chain/v2"
 	"github.com/codemodus/hedrs"
+
+	"github.com/OpenEugene/openboard/back/internal/logsvc"
 )
 
 type frontSrv struct {
 	s *http.Server
+
+	log logsvc.LineLogger
 }
 
-func newFrontSrv(port, dir string, origins []string) (*frontSrv, error) {
+func newFrontSrv(log logsvc.LineLogger, port, dir string, origins []string) (*frontSrv, error) {
 	origins = append(hedrs.DefaultOrigins, origins...)
 	corsOrigins := hedrs.CORSOrigins(hedrs.NewAllowed(origins...))
 	corsMethods := hedrs.CORSMethods(hedrs.NewValues(hedrs.AllMethods...))
@@ -30,12 +34,14 @@ func newFrontSrv(port, dir string, origins []string) (*frontSrv, error) {
 			Addr:    port,
 			Handler: cmn.End(alfred.New(dir)),
 		},
+		log: log,
 	}
 
 	return &s, nil
 }
 
 func (s *frontSrv) Serve() error {
+	s.log.Info("starting frontend server on port %s", s.s.Addr)
 	if err := s.s.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		return err
 	}

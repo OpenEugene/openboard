@@ -1,8 +1,10 @@
 package main
 
 import (
-	"github.com/OpenEugene/openboard/back/internal/httpsrv"
 	"github.com/codemodus/hedrs"
+
+	"github.com/OpenEugene/openboard/back/internal/httpsrv"
+	"github.com/OpenEugene/openboard/back/internal/logsvc"
 )
 
 type httpSrv struct {
@@ -10,9 +12,11 @@ type httpSrv struct {
 
 	rpcPort  string
 	httpPort string
+
+	log logsvc.LineLogger
 }
 
-func newHTTPSrv(rpcPort, httpPort string, origins []string) (*httpSrv, error) {
+func newHTTPSrv(log logsvc.LineLogger, rpcPort, httpPort string, origins []string) (*httpSrv, error) {
 	hs, err := httpsrv.New(hedrs.DefaultOrigins)
 	if err != nil {
 		return nil, err
@@ -22,6 +26,7 @@ func newHTTPSrv(rpcPort, httpPort string, origins []string) (*httpSrv, error) {
 		s:        hs,
 		rpcPort:  rpcPort,
 		httpPort: httpPort,
+		log:      log,
 	}
 
 	return &s, nil
@@ -29,6 +34,7 @@ func newHTTPSrv(rpcPort, httpPort string, origins []string) (*httpSrv, error) {
 
 // Serve ...
 func (s *httpSrv) Serve() error {
+	s.log.Info("starting HTTP server on port %s", s.httpPort)
 	return s.s.Serve(s.rpcPort, s.httpPort)
 }
 

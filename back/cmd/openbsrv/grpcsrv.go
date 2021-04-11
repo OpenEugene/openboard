@@ -5,6 +5,7 @@ import (
 
 	"github.com/OpenEugene/openboard/back/internal/authsvc"
 	"github.com/OpenEugene/openboard/back/internal/grpcsrv"
+	"github.com/OpenEugene/openboard/back/internal/logsvc"
 	"github.com/OpenEugene/openboard/back/internal/postsvc"
 	"github.com/OpenEugene/openboard/back/internal/usersvc"
 )
@@ -14,20 +15,22 @@ type grpcSrv struct {
 
 	port string
 	svcs []interface{}
+
+	log logsvc.LineLogger
 }
 
-func newGRPCSrv(port string, db *sql.DB, drvr string) (*grpcSrv, error) {
-	auth, err := authsvc.New()
+func newGRPCSrv(log logsvc.LineLogger, port string, db *sql.DB, drvr string) (*grpcSrv, error) {
+	auth, err := authsvc.New(log)
 	if err != nil {
 		return nil, err
 	}
 
-	user, err := usersvc.New(db, drvr, 123456)
+	user, err := usersvc.New(log, db, drvr, 123456)
 	if err != nil {
 		return nil, err
 	}
 
-	post, err := postsvc.New(db, drvr, 123456)
+	post, err := postsvc.New(log, db, drvr, 123456)
 	if err != nil {
 		return nil, err
 	}
@@ -49,6 +52,7 @@ func newGRPCSrv(port string, db *sql.DB, drvr string) (*grpcSrv, error) {
 		s:    gs,
 		port: port,
 		svcs: svcs,
+		log:  log,
 	}
 
 	return &s, nil
@@ -59,6 +63,7 @@ func (s *grpcSrv) services() []interface{} {
 }
 
 func (s *grpcSrv) Serve() error {
+	s.log.Info("starting gRPC server on port %s", s.port)
 	return s.s.Serve(s.port)
 }
 

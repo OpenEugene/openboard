@@ -3,21 +3,32 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log"
 	"os"
 	"path"
 
 	"github.com/codemodus/sigmon/v2"
+
+	"github.com/OpenEugene/openboard/back/internal/logsvc"
 )
 
+var dbgLog func(string, ...interface{})
+
 func main() {
-	if err := run(); err != nil {
+	handle := logsvc.Handle{
+		Err: os.Stderr,
+		Inf: os.Stdout,
+	}
+	srvLog := logsvc.NewServerLog(handle)
+
+	if err := run(srvLog); err != nil {
 		cmd := path.Base(os.Args[0])
-		fmt.Fprintf(os.Stderr, "%s: %s\n", cmd, err)
+		srvLog.Error("%s: %s", cmd, err)
 		os.Exit(1)
 	}
 }
 
-func run() error {
+func run(srvLog logsvc.LineLogger) error {
 	var (
 		dbdrvr    = "mysql"
 		dbname    = "openeug_openb_dev"
@@ -28,6 +39,7 @@ func run() error {
 		migrate   bool
 		rollback  bool
 		skipsrv   bool
+		debug     bool
 		frontDir  = "../../../front/public"
 		migTblPfx = "mig_"
 	)
@@ -40,6 +52,7 @@ func run() error {
 	flag.BoolVar(&migrate, "migrate", migrate, "migrate up")
 	flag.BoolVar(&rollback, "rollback", rollback, "migrate dn")
 	flag.BoolVar(&skipsrv, "skipsrv", skipsrv, "skip server run")
+	flag.BoolVar(&debug, "debug", debug, "debug true or false")
 	flag.StringVar(&frontDir, "frontdir", frontDir, "front public assets directory")
 	flag.Parse()
 
@@ -47,6 +60,18 @@ func run() error {
 	sm.Start()
 	defer sm.Stop()
 
+	if debug {
+		dLog := log.New(os.Stdout, "[debug]", log.Ldate|log.Ltime|log.Lshortfile)
+
+		// dbgLog is a package-level variable.
+		dbgLog = func(format string, as ...interface{}) {
+			dLog.Printf(format+"\n", as...)
+		}
+	}
+
+	if dbgLog != nil {
+		dbgLog("set up SQL database at %s:%s.", dbaddr, dbport)
+	}
 	db, err := newSQLDB(dbdrvr, dbCreds(dbname, dbuser, dbpass, dbaddr, dbport))
 	if err != nil {
 		return err
@@ -57,7 +82,7 @@ func run() error {
 		return err
 	}
 
-	gsrv, err := newGRPCSrv(":4242", db, dbdrvr)
+	gsrv, err := newGRPCSrv(srvLog, ":4242", db, dbdrvr)
 	if err != nil {
 		return err
 	}
@@ -67,7 +92,7 @@ func run() error {
 		if mres.HasError() {
 			return mres.ErrsErr()
 		}
-		fmt.Println(migType+":", mres)
+		srvLog.Info("%s: %s", migType, mres)
 	}
 
 	if skipsrv {
@@ -75,25 +100,25 @@ func run() error {
 		return nil
 	}
 
-	hsrv, err := newHTTPSrv(":4242", ":4243", nil)
+	hsrv, err := newHTTPSrv(srvLog, ":4242", ":4243", nil)
 	if err != nil {
 		return err
 	}
 
-	fsrv, err := newFrontSrv(":4244", frontDir, nil)
+	fsrv, err := newFrontSrv(srvLog, ":4244", frontDir, nil)
 	if err != nil {
 		return err
 	}
 
-	m := newServerMgmt(gsrv, hsrv, fsrv)
+	m := newServerMgmt(srvLog, gsrv, hsrv, fsrv)
 
 	sm.Set(func(s *sigmon.State) {
 		if err := m.stop(); err != nil {
-			fmt.Fprintln(os.Stderr, err)
+			srvLog.Error(err.Error())
 		}
 	})
 
-	fmt.Println("to gracefully stop the application, send signal like TERM (CTRL-C) or HUP")
+	srvLog.Info("to gracefully stop the application, send signal like TERM (CTRL-C) or HUP")
 
 	return m.serve()
 }
