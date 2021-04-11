@@ -8,6 +8,8 @@ import (
 	"github.com/OpenEugene/openboard/back/internal/usersvc/internal/userdb"
 	"github.com/OpenEugene/openboard/back/internal/usersvc/internal/userdb/mysqlmig"
 	"google.golang.org/grpc"
+
+	"github.com/OpenEugene/openboard/back/internal/logsvc"
 )
 
 var _ pb.UserSvcServer = &UserSvc{}
@@ -23,18 +25,20 @@ type relDb interface {
 // UserSvc encapsulates dependencies and data required to implement the
 // pb.UserServer interface.
 type UserSvc struct {
-	db relDb
+	db  relDb
+	log logsvc.LineLogger
 }
 
 // New returns a pointer to a UserSvc instance or an error.
-func New(relDb *sql.DB, driver string, offset uint64) (*UserSvc, error) {
+func New(log logsvc.LineLogger, relDb *sql.DB, driver string, offset uint64) (*UserSvc, error) {
 	db, err := userdb.New(relDb, driver, offset)
 	if err != nil {
 		return nil, err
 	}
 
 	s := UserSvc{
-		db: db,
+		db:  db,
+		log: log,
 	}
 
 	return &s, nil
@@ -59,6 +63,7 @@ func (s *UserSvc) FndRoles(ctx context.Context, req *pb.FndRolesReq) (*pb.RolesR
 
 // AddUser implements part of the pb.UserServer interface.
 func (s *UserSvc) AddUser(ctx context.Context, req *pb.AddUserReq) (*pb.UserResp, error) {
+	s.log.Info("Adding user, %s.", req.Username)
 	return s.db.AddUser(ctx, req)
 }
 

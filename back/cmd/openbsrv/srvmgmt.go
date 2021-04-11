@@ -1,10 +1,10 @@
 package main
 
 import (
-	"fmt"
-	"os"
 	"sync"
 	"time"
+
+	"github.com/OpenEugene/openboard/back/internal/logsvc"
 )
 
 type server interface {
@@ -13,12 +13,14 @@ type server interface {
 }
 
 type serverMgmt struct {
-	ss []server
+	ss  []server
+	log logsvc.LineLogger
 }
 
-func newServerMgmt(ss ...server) *serverMgmt {
+func newServerMgmt(log logsvc.LineLogger, ss ...server) *serverMgmt {
 	return &serverMgmt{
-		ss: ss,
+		ss:  ss,
+		log: log,
 	}
 }
 
@@ -32,7 +34,7 @@ func (m *serverMgmt) serve() error {
 
 			// TODO: gather returned errors
 			if err := s.Serve(); err != nil {
-				fmt.Fprintln(os.Stderr, "server error:", err)
+				m.log.Error("server error: %v", err)
 			}
 		}(s)
 
@@ -49,7 +51,7 @@ func (m *serverMgmt) stop() error {
 		go func(s server) {
 			// TODO: gather returned errors
 			if err := s.Stop(); err != nil {
-				fmt.Fprintln(os.Stderr, "stop error:", err)
+				m.log.Error("stop error: %v", err)
 			}
 		}(s)
 	}
