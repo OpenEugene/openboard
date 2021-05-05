@@ -6,8 +6,4 @@ package httpsrv
 // generate swagger.json
 //go:generate pb-sw ../../../msgs/proto/auth.proto ../../../msgs/proto/user.proto ../../../msgs/proto/post.proto
 
-// embed json
-//go:generate go-bindata -nocompress -pkg=swagger -o ./internal/swagger/bindata.go ./apidocs.swagger.json
-
-// remove json
-//go:generate withdraw ./apidocs.swagger.json
+//go:embed ./apidocs.swagger.json
