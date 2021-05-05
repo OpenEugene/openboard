@@ -70,7 +70,7 @@ jobs:
             hub pull-request \
               --assign "${GITHUB_ACTOR}" \
               --base main \
-              --head ${BRANCH_NAME}
+              --head ${BRANCH_NAME} \
               --message "${prTitle}" \
               --message "Closes #${BRANCH_ISSUE}"
 
