@@ -10,7 +10,7 @@ install-protoc() {
   local tmpDir="$(mktemp -d)"
   local zipFile="${tmpDir}/protoc.zip"
   wget -O "${zipFile}" "${path}"
-  unzip -j ${zipFile} bin/protoc
+  unzip -j ${zipFile} bin/protoc -d "${dest}"
 }
 
 main() {
