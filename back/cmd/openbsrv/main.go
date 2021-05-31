@@ -3,32 +3,31 @@ package main
 import (
 	"flag"
 	"fmt"
-	"log"
+	"io"
 	"os"
 	"path"
 
 	"github.com/codemodus/sigmon/v2"
 
-	"github.com/OpenEugene/openboard/back/internal/logsvc"
+	"github.com/OpenEugene/openboard/back/internal/dbg"
+	"github.com/OpenEugene/openboard/back/internal/log"
 )
 
-var dbgLog func(string, ...interface{})
-
 func main() {
-	handle := logsvc.Handle{
+	outs := log.Outputs{
 		Err: os.Stderr,
 		Inf: os.Stdout,
 	}
-	srvLog := logsvc.NewServerLog(handle)
+	log := log.New(outs)
 
-	if err := run(srvLog); err != nil {
+	if err := run(log); err != nil {
 		cmd := path.Base(os.Args[0])
-		srvLog.Error("%s: %s", cmd, err)
+		log.Error("%s: %s", cmd, err)
 		os.Exit(1)
 	}
 }
 
-func run(srvLog logsvc.LineLogger) error {
+func run(log *log.Log) error {
 	var (
 		dbdrvr    = "mysql"
 		dbname    = "openeug_openb_dev"
@@ -60,18 +59,14 @@ func run(srvLog logsvc.LineLogger) error {
 	sm.Start()
 	defer sm.Stop()
 
+	var w io.Writer
 	if debug {
-		dLog := log.New(os.Stdout, "[debug]", log.Ldate|log.Ltime|log.Lshortfile)
-
-		// dbgLog is a package-level variable.
-		dbgLog = func(format string, as ...interface{}) {
-			dLog.Printf(format+"\n", as...)
-		}
+		w = os.Stdout
 	}
+	dbg := dbg.New(w).Log
 
-	if dbgLog != nil {
-		dbgLog("set up SQL database at %s:%s.", dbaddr, dbport)
-	}
+	dbg("set up SQL database at %s:%s.", dbaddr, dbport)
+
 	db, err := newSQLDB(dbdrvr, dbCreds(dbname, dbuser, dbpass, dbaddr, dbport))
 	if err != nil {
 		return err
@@ -82,7 +77,7 @@ func run(srvLog logsvc.LineLogger) error {
 		return err
 	}
 
-	gsrv, err := newGRPCSrv(srvLog, ":4242", db, dbdrvr)
+	gsrv, err := newGRPCSrv(":4242", db, dbdrvr)
 	if err != nil {
 		return err
 	}
@@ -92,7 +87,7 @@ func run(srvLog logsvc.LineLogger) error {
 		if mres.HasError() {
 			return mres.ErrsErr()
 		}
-		srvLog.Info("%s: %s", migType, mres)
+		log.Info("%s: %s", migType, mres)
 	}
 
 	if skipsrv {
@@ -100,25 +95,25 @@ func run(srvLog logsvc.LineLogger) error {
 		return nil
 	}
 
-	hsrv, err := newHTTPSrv(srvLog, ":4242", ":4243", nil)
+	hsrv, err := newHTTPSrv(":4242", ":4243", nil)
 	if err != nil {
 		return err
 	}
 
-	fsrv, err := newFrontSrv(srvLog, ":4244", frontDir, nil)
+	fsrv, err := newFrontSrv(":4244", frontDir, nil)
 	if err != nil {
 		return err
 	}
 
-	m := newServerMgmt(srvLog, gsrv, hsrv, fsrv)
+	m := newServerMgmt(log, gsrv, hsrv, fsrv)
 
 	sm.Set(func(s *sigmon.State) {
 		if err := m.stop(); err != nil {
-			srvLog.Error(err.Error())
+			log.Error(err.Error())
 		}
 	})
 
-	srvLog.Info("to gracefully stop the application, send signal like TERM (CTRL-C) or HUP")
+	log.Info("to gracefully stop the application, send signal like TERM (CTRL-C) or HUP")
 
 	return m.serve()
 }
