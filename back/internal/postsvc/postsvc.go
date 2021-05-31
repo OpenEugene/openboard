@@ -6,7 +6,6 @@ import (
 
 	"google.golang.org/grpc"
 
-	"github.com/OpenEugene/openboard/back/internal/logsvc"
 	"github.com/OpenEugene/openboard/back/internal/pb"
 	"github.com/OpenEugene/openboard/back/internal/postsvc/internal/postdb"
 	"github.com/OpenEugene/openboard/back/internal/postsvc/internal/postdb/mysqlmig"
@@ -25,20 +24,18 @@ type relDB interface {
 // PostSvc encapsulates dependencies and data required to implement the
 // pb.PostServer interface.
 type PostSvc struct {
-	db  relDB
-	log logsvc.LineLogger
+	db relDB
 }
 
 // New returns a pointer to a PostSvc instance or an error.
-func New(log logsvc.LineLogger, relDb *sql.DB, driver string, offset uint64) (*PostSvc, error) {
+func New(relDb *sql.DB, driver string, offset uint64) (*PostSvc, error) {
 	db, err := postdb.New(relDb, driver, offset)
 	if err != nil {
 		return nil, err
 	}
 
 	s := PostSvc{
-		db:  db,
-		log: log,
+		db: db,
 	}
 
 	return &s, nil
@@ -46,7 +43,6 @@ func New(log logsvc.LineLogger, relDb *sql.DB, driver string, offset uint64) (*P
 
 // AddType implements part of the pb.PostServer interface.
 func (s *PostSvc) AddType(ctx context.Context, req *pb.AddTypeReq) (*pb.TypeResp, error) {
-	s.log.Info("Adding post service type, %s", req.Name)
 	return s.db.AddType(ctx, req)
 }
 

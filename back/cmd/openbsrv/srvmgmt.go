@@ -3,8 +3,6 @@ package main
 import (
 	"sync"
 	"time"
-
-	"github.com/OpenEugene/openboard/back/internal/logsvc"
 )
 
 type server interface {
@@ -12,12 +10,17 @@ type server interface {
 	Stop() error
 }
 
-type serverMgmt struct {
-	ss  []server
-	log logsvc.LineLogger
+type lineLogger interface {
+	Info(format string, as ...interface{})
+	Error(format string, as ...interface{})
 }
 
-func newServerMgmt(log logsvc.LineLogger, ss ...server) *serverMgmt {
+type serverMgmt struct {
+	ss  []server
+	log lineLogger
+}
+
+func newServerMgmt(log lineLogger, ss ...server) *serverMgmt {
 	return &serverMgmt{
 		ss:  ss,
 		log: log,
