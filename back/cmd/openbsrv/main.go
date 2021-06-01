@@ -63,10 +63,9 @@ func run(log *log.Log) error {
 	if debug {
 		w = os.Stdout
 	}
-	dbg := dbg.New(w).Log
+	dbg := dbg.New(w)
 
-	dbg("set up SQL database at %s:%s.", dbaddr, dbport)
-
+	dbg.Log("set up SQL database at %s:%s.", dbaddr, dbport)
 	db, err := newSQLDB(dbdrvr, dbCreds(dbname, dbuser, dbpass, dbaddr, dbport))
 	if err != nil {
 		return err
