@@ -1,21 +1,29 @@
 #!/usr/bin/env bash
 
 install-protoc() {
-  local dest="${1}"
-  local version="${2}"
+  local binDest="${1}"
+  local includeDest="${2}"
+  local version="${3}"
   local ostype="$([[ "${OSTYPE}" == darwin* ]] && echo osx || echo linux)"
   local arch="$(uname -m)"
   local pfmt="https://github.com/protocolbuffers/protobuf/releases/download/v%s/protoc-%s-%s-%s.zip"
   local path="$(printf "${pfmt}" "${version}" "${version}" "${ostype}" "${arch}")"
   local tmpDir="$(mktemp -d)"
   local zipFile="${tmpDir}/protoc.zip"
+
   wget -O "${zipFile}" "${path}"
-  unzip -j ${zipFile} bin/protoc -d "${dest}"
+
+  unzip -j ${zipFile} bin/protoc -d "${binDest}"
+
+  unzip ${zipFile} include/'*' -d "${includeDest}"
+  mv "${includeDest}/include/"* "${includeDest}"
+  rm -rf "${includeDest}/include"
 }
 
 main() {
   local rootDir="$(cd "$(dirname "${0}")" && echo "${PWD}")"
   local binDir="${rootDir}/.bin"
+  local includeDir="${rootDir}/.include"
 
   mkdir -p "${binDir}"
   pushd "${binDir}" &> /dev/null && rm "${binDir}/"*
@@ -28,7 +36,8 @@ main() {
   go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway@v2.2.0
   go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2@v2.2.0
 
-  install-protoc "${PWD}" 3.17.0
+  rm -rf "${includeDir}/"*
+  install-protoc "${PWD}" "${includeDir}" 3.17.0
 
   popd &> /dev/null
 }
