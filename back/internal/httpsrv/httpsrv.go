@@ -4,10 +4,11 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"io/ioutil"
 	"net/http"
 	"time"
 
-	"github.com/OpenEugene/openboard/back/internal/httpsrv/internal/swagger"
+	"github.com/OpenEugene/openboard/back/internal/httpsrv/internal/embedded"
 	"github.com/OpenEugene/openboard/back/internal/pb"
 	"github.com/codemodus/chain/v2"
 	"github.com/codemodus/hedrs"
@@ -120,7 +121,18 @@ func (s *HTTPSrv) Stop() error {
 }
 
 func swaggerHandler(start time.Time, basePath, name string) (http.Handler, error) {
-	d, err := swagger.Asset(name)
+	fs, err := embedded.NewFS()
+	if err != nil {
+		return nil, err
+	}
+
+	f, err := fs.Open("apidocs.swagger.json")
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	d, err := ioutil.ReadAll(f)
 	if err != nil {
 		return nil, err
 	}
@@ -132,7 +144,7 @@ func swaggerHandler(start time.Time, basePath, name string) (http.Handler, error
 	}
 
 	mt := start
-	i, err := swagger.AssetInfo(name)
+	i, err := f.Stat()
 	if err == nil {
 		mt = i.ModTime()
 	}
