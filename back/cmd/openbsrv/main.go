@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io"
 	"os"
 	"path"
 
@@ -14,11 +13,17 @@ import (
 )
 
 func main() {
-	outs := log.Outputs{
-		Err: os.Stderr,
-		Inf: os.Stdout,
+	config := log.Config{
+		Err: log.Output{
+			Out:    os.Stderr,
+			Prefix: "[ERROR] ",
+		},
+		Inf: log.Output{
+			Out:    os.Stdout,
+			Prefix: "[INFO] ",
+		},
 	}
-	log := log.New(outs)
+	log := log.New(config)
 
 	if err := run(log); err != nil {
 		cmd := path.Base(os.Args[0])
@@ -59,13 +64,11 @@ func run(log *log.Log) error {
 	sm.Start()
 	defer sm.Stop()
 
-	var w io.Writer
 	if debug {
-		w = os.Stdout
+		dbg.SetDebugOut(os.Stdout)
 	}
-	dbg := dbg.New(w)
 
-	dbg.Log("set up SQL database at %s:%s.", dbaddr, dbport)
+	dbg.Logf("set up SQL database at %s:%s.", dbaddr, dbport)
 	db, err := newSQLDB(dbdrvr, dbCreds(dbname, dbuser, dbpass, dbaddr, dbport))
 	if err != nil {
 		return err
