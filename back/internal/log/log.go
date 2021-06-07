@@ -5,8 +5,27 @@ import (
 	"log"
 )
 
+type Output struct {
+	Out    io.Writer
+	Prefix string
+	Flag   int
+}
+
+type Config struct {
+	Err Output
+	Inf Output
+}
+
 type Log struct {
-	err, inf *log.Logger
+	err *log.Logger
+	inf *log.Logger
+}
+
+func New(c Config) *Log {
+	return &Log{
+		inf: log.New(c.Inf.Out, c.Inf.Prefix, c.Inf.Flag),
+		err: log.New(c.Err.Out, c.Err.Prefix, c.Inf.Flag),
+	}
 }
 
 func (log *Log) Info(format string, as ...interface{}) {
@@ -15,15 +34,4 @@ func (log *Log) Info(format string, as ...interface{}) {
 
 func (log *Log) Error(format string, as ...interface{}) {
 	log.err.Printf(format+"\n", as...)
-}
-
-type Outputs struct {
-	Err, Inf io.Writer
-}
-
-func New(h Outputs) *Log {
-	return &Log{
-		inf: log.New(h.Inf, "[info] ", log.Ldate|log.Ltime),
-		err: log.New(h.Err, "[error] ", log.Ldate|log.Ltime),
-	}
 }
