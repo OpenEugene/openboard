@@ -6,44 +6,54 @@ import (
 	"sync/atomic"
 )
 
-var atomicV atomic.Value
-
-// DbgLog is thread-safe.
-type DbgLog struct {
+// dbgLog is thread-safe.
+type dbgLog struct {
 	log *log.Logger
+	out io.Writer
 }
 
-func New(out io.Writer) *DbgLog {
-	var dl DbgLog
+var atomicV atomic.Value
+var dbg = new()
 
-	if out == nil {
-		atomicV.Store(&dl)
-		return &dl
-	}
-
-	dl = DbgLog{
-		log: log.New(out, "[debug] ", log.Ldate|log.Ltime),
-	}
+func new() *dbgLog {
+	var dl dbgLog
 	atomicV.Store(&dl)
 	return &dl
 }
 
-func (l *DbgLog) Log(format string, as ...interface{}) {
-	load := atomicV.Load().(*DbgLog)
+func (dl *dbgLog) println(text string) {
+	dbg.log.Println(text)
+}
 
-	if load.log == nil {
+func (dl *dbgLog) printf(format string, as ...interface{}) {
+	dbg.log.Printf(format+"\n", as...)
+}
+
+func Log(text string) {
+	dbgLoad := atomicV.Load().(*dbgLog)
+	if dbgLoad.out == nil {
 		return
 	}
-
-	load.log.Printf(format+"\n", as...)
+	dbgLoad.println(text)
 }
 
-func (l *DbgLog) Off() {
-	l.log = nil
-	atomicV.Store(l)
+func Logf(format string, as ...interface{}) {
+	dbgLoad := atomicV.Load().(*dbgLog)
+	if dbgLoad.out == nil {
+		return
+	}
+	dbgLoad.printf(format, as...)
 }
 
-func (l *DbgLog) On(out io.Writer) {
-	l.log = log.New(out, "[debug] ", log.Ldate|log.Ltime)
-	atomicV.Store(l)
+func SetDebugOut(out io.Writer) {
+	dbgLoad := atomicV.Load().(*dbgLog)
+	dbgLoad.out = out
+
+	if out != nil {
+		dbgLoad.log = log.New(out, "", 0)
+	} else {
+		dbgLoad.log = log.Default()
+	}
+
+	atomicV.Store(dbgLoad)
 }
