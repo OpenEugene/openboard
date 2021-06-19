@@ -8,7 +8,6 @@ import (
 type Output struct {
 	Out    io.Writer
 	Prefix string
-	Flag   int
 }
 
 type Config struct {
@@ -23,8 +22,8 @@ type Log struct {
 
 func New(c Config) *Log {
 	return &Log{
-		inf: log.New(c.Inf.Out, c.Inf.Prefix, c.Inf.Flag),
-		err: log.New(c.Err.Out, c.Err.Prefix, c.Inf.Flag),
+		inf: log.New(c.Inf.Out, c.Inf.Prefix, 0),
+		err: log.New(c.Err.Out, c.Err.Prefix, 0),
 	}
 }
 
