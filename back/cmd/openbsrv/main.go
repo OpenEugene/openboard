@@ -13,26 +13,14 @@ import (
 )
 
 func main() {
-	config := log.Config{
-		Err: log.Output{
-			Out:    os.Stderr,
-			Prefix: "[ERROR] ",
-		},
-		Inf: log.Output{
-			Out:    os.Stdout,
-			Prefix: "[INFO] ",
-		},
-	}
-	log := log.New(config)
-
-	if err := run(log); err != nil {
+	if err := run(); err != nil {
 		cmd := path.Base(os.Args[0])
-		log.Error("%s: %s", cmd, err)
+		fmt.Fprintf(os.Stderr, "%s: %s\n", cmd, err)
 		os.Exit(1)
 	}
 }
 
-func run(log *log.Log) error {
+func run() error {
 	var (
 		dbdrvr    = "mysql"
 		dbname    = "openeug_openb_dev"
@@ -63,6 +51,18 @@ func run(log *log.Log) error {
 	sm := sigmon.New(nil)
 	sm.Start()
 	defer sm.Stop()
+
+	config := log.Config{
+		Err: log.Output{
+			Out:    os.Stderr,
+			Prefix: "[ERROR] ",
+		},
+		Inf: log.Output{
+			Out:    os.Stdout,
+			Prefix: "[INFO] ",
+		},
+	}
+	log := log.New(config)
 
 	if debug {
 		dbg.SetDebugOut(os.Stdout)
@@ -111,7 +111,7 @@ func run(log *log.Log) error {
 
 	sm.Set(func(s *sigmon.State) {
 		if err := m.stop(); err != nil {
-			log.Error(err.Error())
+			fmt.Fprintln(os.Stderr, err)
 		}
 	})
 

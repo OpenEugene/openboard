@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"os"
 	"sync"
 	"time"
 
@@ -34,7 +36,7 @@ func (m *serverMgmt) serve() error {
 
 			// TODO: gather returned errors
 			if err := s.Serve(); err != nil {
-				m.log.Error("server error: %v", err)
+				fmt.Fprintln(os.Stderr, "server error:", err)
 			}
 		}(s)
 
