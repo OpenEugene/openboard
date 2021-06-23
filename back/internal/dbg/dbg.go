@@ -24,8 +24,8 @@ func new() *dbgLog {
 	return &dl
 }
 
-func (dl *dbgLog) println(text string) {
-	dbg.log.Println(text)
+func (dl *dbgLog) println(as ...interface{}) {
+	dbg.log.Println(as...)
 }
 
 func (dl *dbgLog) printf(format string, as ...interface{}) {
