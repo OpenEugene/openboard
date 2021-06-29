@@ -53,7 +53,7 @@ func (m *serverMgmt) stop() error {
 		go func(s server) {
 			// TODO: gather returned errors
 			if err := s.Stop(); err != nil {
-				fmt.Fprintln(os.Stderr, err)
+				fmt.Fprintln(os.Stderr, "stop error:", err)
 			}
 		}(s)
 	}
