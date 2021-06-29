@@ -10,16 +10,17 @@ import (
 
 // dbgLog is thread-safe.
 type dbgLog struct {
-	log *log.Logger
-	out io.Writer
+	log     *log.Logger
+	atomVal atomic.Value
+	toggle  bool
 }
 
-var atomicV atomic.Value
 var dbg = new()
 
 func new() *dbgLog {
 	var dl dbgLog
-	atomicV.Store(&dl)
+
+	dl.atomVal.Store(dl.toggle)
 	return &dl
 }
 
@@ -33,32 +34,27 @@ func (dl *dbgLog) logf(format string, as ...interface{}) {
 
 // Log outputs information to help with application debugging.
 func Log(as ...interface{}) {
-	dbgLoad := atomicV.Load().(*dbgLog)
-	if dbgLoad.out == nil {
-		return
+	toggle := dbg.atomVal.Load().(bool)
+	if toggle {
+		dbg.logln(as...)
 	}
-	dbgLoad.logln(as...)
 }
 
 // Logf outputs debugging information and is able to interpret formatting verbs.
 func Logf(format string, as ...interface{}) {
-	dbgLoad := atomicV.Load().(*dbgLog)
-	if dbgLoad.out == nil {
-		return
+	toggle := dbg.atomVal.Load().(bool)
+	if toggle {
+		dbg.logf(format, as...)
 	}
-	dbgLoad.logf(format, as...)
 }
 
 // SetDebugOut allows for choosing where debug information will be written to.
 func SetDebugOut(out io.Writer) {
-	dbgLoad := atomicV.Load().(*dbgLog)
-	dbgLoad.out = out
-
 	if out != nil {
-		dbgLoad.log = log.New(out, "", 0)
-	} else {
-		dbgLoad.log = log.Default()
+		dbg.atomVal.Store(true)
+		dbg.log = log.New(out, "", 0)
+		return
 	}
 
-	atomicV.Store(dbgLoad)
+	dbg.atomVal.Store(false)
 }
