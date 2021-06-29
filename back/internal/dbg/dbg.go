@@ -1,4 +1,3 @@
-
 // Package dbg allows for outputting information that can help with debugging
 // the application.
 package dbg
@@ -24,21 +23,21 @@ func new() *dbgLog {
 	return &dl
 }
 
-func (dl *dbgLog) println(as ...interface{}) {
+func (dl *dbgLog) logln(as ...interface{}) {
 	dbg.log.Println(as...)
 }
 
-func (dl *dbgLog) printf(format string, as ...interface{}) {
+func (dl *dbgLog) logf(format string, as ...interface{}) {
 	dbg.log.Printf(format+"\n", as...)
 }
 
 // Log outputs information to help with application debugging.
-func Log(text string) {
+func Log(as ...interface{}) {
 	dbgLoad := atomicV.Load().(*dbgLog)
 	if dbgLoad.out == nil {
 		return
 	}
-	dbgLoad.println(text)
+	dbgLoad.logln(as...)
 }
 
 // Logf outputs debugging information and is able to interpret formatting verbs.
@@ -47,7 +46,7 @@ func Logf(format string, as ...interface{}) {
 	if dbgLoad.out == nil {
 		return
 	}
-	dbgLoad.printf(format, as...)
+	dbgLoad.logf(format, as...)
 }
 
 // SetDebugOut allows for choosing where debug information will be written to.
