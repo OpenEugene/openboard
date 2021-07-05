@@ -5,35 +5,35 @@ package dbg
 import (
 	"io"
 	"log"
-	"sync/atomic"
+	"sync"
 )
 
 // dbg is thread-safe.
 type dbg struct {
-	log     *log.Logger
-	atomVal atomic.Value
-	toggle  bool
+	mutex sync.Mutex
+	log   *log.Logger
 }
 
 var debug = new()
 
 func new() *dbg {
-	var d dbg
-
-	d.atomVal.Store(d.toggle)
-	return &d
+	return &dbg{}
 }
 
 func (d *dbg) logln(as ...interface{}) {
-	toggle := debug.atomVal.Load().(bool)
-	if toggle {
+	d.mutex.Lock()
+	defer d.mutex.Unlock()
+
+	if d.log != nil {
 		debug.log.Println(as...)
 	}
 }
 
 func (d *dbg) logf(format string, as ...interface{}) {
-	toggle := debug.atomVal.Load().(bool)
-	if toggle {
+	d.mutex.Lock()
+	defer d.mutex.Unlock()
+
+	if d.log != nil {
 		debug.log.Printf(format+"\n", as...)
 	}
 }
@@ -51,10 +51,8 @@ func Logf(format string, as ...interface{}) {
 // SetDebugOut allows for choosing where debug information will be written to.
 func SetDebugOut(out io.Writer) {
 	if out != nil {
-		debug.atomVal.Store(true)
+		debug.mutex.Lock()
 		debug.log = log.New(out, "", 0)
-		return
+		debug.mutex.Unlock()
 	}
-
-	debug.atomVal.Store(false)
 }
