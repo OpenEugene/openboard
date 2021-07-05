@@ -25,27 +25,27 @@ func new() *dbg {
 }
 
 func (d *dbg) logln(as ...interface{}) {
-	debug.log.Println(as...)
+	toggle := debug.atomVal.Load().(bool)
+	if toggle {
+		debug.log.Println(as...)
+	}
 }
 
 func (d *dbg) logf(format string, as ...interface{}) {
-	debug.log.Printf(format+"\n", as...)
+	toggle := debug.atomVal.Load().(bool)
+	if toggle {
+		debug.log.Printf(format+"\n", as...)
+	}
 }
 
 // Log outputs information to help with application debugging.
 func Log(as ...interface{}) {
-	toggle := debug.atomVal.Load().(bool)
-	if toggle {
-		debug.logln(as...)
-	}
+	debug.logln(as...)
 }
 
 // Logf outputs debugging information and is able to interpret formatting verbs.
 func Logf(format string, as ...interface{}) {
-	toggle := debug.atomVal.Load().(bool)
-	if toggle {
-		debug.logf(format, as...)
-	}
+	debug.logf(format, as...)
 }
 
 // SetDebugOut allows for choosing where debug information will be written to.
