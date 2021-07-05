@@ -52,9 +52,9 @@ func run() error {
 	sm.Start()
 	defer sm.Stop()
 
-	config := log.Config{
+	logCfg := log.Config{
 		Err: log.Output{
-			Out:    os.Stderr,
+			Out:    os.Stdout,
 			Prefix: "[ERROR] ",
 		},
 		Inf: log.Output{
@@ -62,7 +62,7 @@ func run() error {
 			Prefix: "[INFO] ",
 		},
 	}
-	log := log.New(config)
+	log := log.New(logCfg)
 
 	if debug {
 		dbg.SetDebugOut(os.Stdout)
@@ -107,7 +107,7 @@ func run() error {
 		return err
 	}
 
-	m := newServerMgmt(log, gsrv, hsrv, fsrv)
+	m := newServerMgmt(gsrv, hsrv, fsrv)
 
 	sm.Set(func(s *sigmon.State) {
 		if err := m.stop(); err != nil {
