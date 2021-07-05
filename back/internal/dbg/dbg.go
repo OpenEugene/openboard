@@ -10,30 +10,27 @@ import (
 
 // dbg is thread-safe.
 type dbg struct {
-	log     *log.Logger
-	atomVal atomic.Value
-	toggle  bool
+	log *log.Logger
+	// Turn on and off dbg by setting 1 and 0, respectively.
+	toggle uint32
 }
 
 var debug = new()
 
 func new() *dbg {
-	var d dbg
-
-	d.atomVal.Store(d.toggle)
-	return &d
+	return &dbg{}
 }
 
 func (d *dbg) logln(as ...interface{}) {
-	toggle := debug.atomVal.Load().(bool)
-	if toggle {
+	tog := atomic.LoadUint32(&d.toggle)
+	if tog == 1 {
 		debug.log.Println(as...)
 	}
 }
 
 func (d *dbg) logf(format string, as ...interface{}) {
-	toggle := debug.atomVal.Load().(bool)
-	if toggle {
+	tog := atomic.LoadUint32((&d.toggle))
+	if tog == 1 {
 		debug.log.Printf(format+"\n", as...)
 	}
 }
@@ -51,10 +48,10 @@ func Logf(format string, as ...interface{}) {
 // SetDebugOut allows for choosing where debug information will be written to.
 func SetDebugOut(out io.Writer) {
 	if out != nil {
-		debug.atomVal.Store(true)
+		atomic.StoreUint32(&debug.toggle, 1)
 		debug.log = log.New(out, "", 0)
 		return
 	}
 
-	debug.atomVal.Store(false)
+	atomic.StoreUint32(&debug.toggle, 0)
 }
