@@ -5,8 +5,6 @@ import (
 	"os"
 	"sync"
 	"time"
-
-	"github.com/OpenEugene/openboard/back/internal/log"
 )
 
 type server interface {
@@ -15,14 +13,12 @@ type server interface {
 }
 
 type serverMgmt struct {
-	ss  []server
-	log *log.Log
+	ss []server
 }
 
-func newServerMgmt(log *log.Log, ss ...server) *serverMgmt {
+func newServerMgmt(ss ...server) *serverMgmt {
 	return &serverMgmt{
-		ss:  ss,
-		log: log,
+		ss: ss,
 	}
 }
 
