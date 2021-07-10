@@ -19,4 +19,8 @@ func useDbgLogExample() {
 	Log("debug has been set to write to stdout")
 
 	Logf("writing various formats: %t, %s, %d", true, "word", 79)
+
+	SetDebugOut(nil)
+
+	Log("write to nothing again")
 }
