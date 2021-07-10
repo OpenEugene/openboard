@@ -50,9 +50,13 @@ func Logf(format string, as ...interface{}) {
 
 // SetDebugOut allows for choosing where debug information will be written to.
 func SetDebugOut(out io.Writer) {
+	debug.mutex.Lock()
+	defer debug.mutex.Unlock()
+
 	if out != nil {
-		debug.mutex.Lock()
 		debug.log = log.New(out, "", 0)
-		debug.mutex.Unlock()
+		return
 	}
+
+	debug.log = nil
 }
