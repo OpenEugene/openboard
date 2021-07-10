@@ -15,8 +15,6 @@ type dbg struct {
 	toggle  bool
 }
 
-var debug = new()
-
 func new() *dbg {
 	var d dbg
 
@@ -25,18 +23,20 @@ func new() *dbg {
 }
 
 func (d *dbg) logln(as ...interface{}) {
-	toggle := debug.atomVal.Load().(bool)
+	toggle := d.atomVal.Load().(bool)
 	if toggle {
-		debug.log.Println(as...)
+		d.log.Println(as...)
 	}
 }
 
 func (d *dbg) logf(format string, as ...interface{}) {
-	toggle := debug.atomVal.Load().(bool)
+	toggle := d.atomVal.Load().(bool)
 	if toggle {
-		debug.log.Printf(format+"\n", as...)
+		d.log.Printf(format+"\n", as...)
 	}
 }
+
+var debug = new()
 
 // Log outputs information to help with application debugging.
 func Log(as ...interface{}) {
