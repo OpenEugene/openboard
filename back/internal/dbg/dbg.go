@@ -14,8 +14,6 @@ type dbg struct {
 	log   *log.Logger
 }
 
-var debug = new()
-
 func new() *dbg {
 	return &dbg{}
 }
@@ -25,7 +23,7 @@ func (d *dbg) logln(as ...interface{}) {
 	defer d.mutex.Unlock()
 
 	if d.log != nil {
-		debug.log.Println(as...)
+		d.log.Println(as...)
 	}
 }
 
@@ -34,9 +32,11 @@ func (d *dbg) logf(format string, as ...interface{}) {
 	defer d.mutex.Unlock()
 
 	if d.log != nil {
-		debug.log.Printf(format+"\n", as...)
+		d.log.Printf(format+"\n", as...)
 	}
 }
+
+var debug = new()
 
 // Log outputs information to help with application debugging.
 func Log(as ...interface{}) {
