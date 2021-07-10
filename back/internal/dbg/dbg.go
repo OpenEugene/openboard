@@ -15,8 +15,6 @@ type dbg struct {
 	toggle uint32
 }
 
-var debug = new()
-
 func new() *dbg {
 	return &dbg{}
 }
@@ -24,16 +22,18 @@ func new() *dbg {
 func (d *dbg) logln(as ...interface{}) {
 	tog := atomic.LoadUint32(&d.toggle)
 	if tog == 1 {
-		debug.log.Println(as...)
+		d.log.Println(as...)
 	}
 }
 
 func (d *dbg) logf(format string, as ...interface{}) {
 	tog := atomic.LoadUint32((&d.toggle))
 	if tog == 1 {
-		debug.log.Printf(format+"\n", as...)
+		d.log.Printf(format+"\n", as...)
 	}
 }
+
+var debug = new()
 
 // Log outputs information to help with application debugging.
 func Log(as ...interface{}) {
