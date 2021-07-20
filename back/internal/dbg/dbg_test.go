@@ -1,26 +1,38 @@
 package dbg
 
 import (
-	"os"
+	"io/ioutil"
 	"testing"
 )
 
 func BenchmarkDbgUse(b *testing.B) {
-	for n := 0; n < b.N; n++ {
-		useDbgLogExample()
-	}
+	SetDebugOut(ioutil.Discard)
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			Log("")
+		}
+	})
 }
-
-func useDbgLogExample() {
-	Log("\ndebug is writing to nothing")
-
-	SetDebugOut(os.Stdout)
-
-	Log("debug has been set to write to stdout")
-
-	Logf("writing various formats: %t, %s, %d", true, "word", 79)
-
-	SetDebugOut(nil)
-
-	Log("write to nothing again")
+func BenchmarkDbgUseNil(b *testing.B) {
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			Log("")
+		}
+	})
+}
+func BenchmarkDbgSetAndUse(b *testing.B) {
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			SetDebugOut(ioutil.Discard)
+			Log("")
+		}
+	})
+}
+func BenchmarkDbgSetAndUseNil(b *testing.B) {
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			SetDebugOut(nil)
+			Log("")
+		}
+	})
 }
