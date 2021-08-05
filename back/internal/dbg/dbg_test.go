@@ -2,6 +2,7 @@ package dbg
 
 import (
 	"bytes"
+	"fmt"
 	"io/ioutil"
 	"testing"
 )
@@ -39,9 +40,9 @@ func BenchmarkDbgSetAndUseNil(b *testing.B) {
 }
 
 func TestSetOut(t *testing.T) {
-	buff := bytes.NewBuffer([]byte{})
 	Log("debug not set")
 
+	buff := bytes.NewBuffer([]byte{})
 	SetOut(buff)
 	msg := "debug set to bytes buffer"
 	Log(msg)
@@ -63,10 +64,10 @@ func TestSetOut(t *testing.T) {
 
 	SetOut(buff)
 	buff.Reset()
-	msg  = "debug set again to bytes buffer"
-	Log(msg)
+	msg = "debug set to bytes buffer, %s time"
+	Logf(msg, "second")
 	got = buff.String()
-	want = msg + "\n"
+	want = fmt.Sprintf(msg+"\n", "second")
 	if got != want {
 		t.Errorf("want: %s, got: %s", want, got)
 	}
