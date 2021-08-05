@@ -34,6 +34,18 @@ func (d *dbg) logf(format string, as ...interface{}) {
 	}
 }
 
+func (d *dbg) setOut(out io.Writer) {
+	var logr *log.Logger
+
+	if out != nil {
+		logr = log.New(out, "", 0)
+		d.atomVal.Store(logr)
+		return
+	}
+
+	d.atomVal.Store(logr)
+}
+
 var debug = new()
 
 // Log outputs information to help with application debugging.
@@ -47,14 +59,6 @@ func Logf(format string, as ...interface{}) {
 }
 
 // SetDebugOut allows for choosing where debug information will be written to.
-func SetDebugOut(out io.Writer) {
-	var logr *log.Logger
-
-	if out != nil {
-		logr = log.New(out, "", 0)
-		debug.atomVal.Store(logr)
-		return
-	}
-
-	debug.atomVal.Store(logr)
+func SetOut(out io.Writer) {
+	debug.setOut(out)
 }
