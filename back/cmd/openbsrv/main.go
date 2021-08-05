@@ -65,7 +65,7 @@ func run() error {
 	log := log.New(logCfg)
 
 	if debug {
-		dbg.SetDebugOut(os.Stdout)
+		dbg.SetOut(os.Stdout)
 	}
 
 	dbg.Logf("set up SQL database at %s:%s.", dbaddr, dbport)
