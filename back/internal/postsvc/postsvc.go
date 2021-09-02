@@ -4,10 +4,11 @@ import (
 	"context"
 	"database/sql"
 
+	"google.golang.org/grpc"
+
 	"github.com/OpenEugene/openboard/back/internal/pb"
 	"github.com/OpenEugene/openboard/back/internal/postsvc/internal/postdb"
 	"github.com/OpenEugene/openboard/back/internal/postsvc/internal/postdb/mysqlmig"
-	"google.golang.org/grpc"
 )
 
 var _ pb.PostServer = &PostSvc{}
