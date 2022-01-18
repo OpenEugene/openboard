@@ -1,6 +1,4 @@
-# User Story Workflows
-
-## Stories Slated for OpenBoard MVP
+# User Stories
 
 These stories were originally written at https://docs.google.com/spreadsheets/d/1lmktJ9qTNuslGLlE-HCsuh9S4nUrxaftqcn6jr9FNgs/edit?usp=sharing.
 
@@ -12,6 +10,8 @@ Sage's goal is to easily access the information ze seeks.
 
 The stories below are split into parts.
 Parts are ordered and indicate the stages of interaction Sage goes through when navigating the OpenBoard site.
+
+## Features Slated for OpenBoard MVP
 
 ### Community Statistics: Ask, offer, and Member Counts
 
@@ -96,7 +96,7 @@ Frontend Issue
 
 - Be able to find posts by kind (frontend task for MVP).
 
-## Stories not Slated for MVP
+## Features Not Slated for MVP
 
 ### User Authentication
 
