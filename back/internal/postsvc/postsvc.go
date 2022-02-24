@@ -3,10 +3,12 @@ package postsvc
 import (
 	"context"
 	"database/sql"
+	"io/fs"
+	"io/ioutil"
 
 	"github.com/OpenEugene/openboard/back/internal/pb"
+	"github.com/OpenEugene/openboard/back/internal/postsvc/internal/asset"
 	"github.com/OpenEugene/openboard/back/internal/postsvc/internal/postdb"
-	"github.com/OpenEugene/openboard/back/internal/postsvc/internal/postdb/mysqlmig"
 	"google.golang.org/grpc"
 )
 
@@ -81,18 +83,26 @@ func (s *PostSvc) MigrationData() (string, map[string][]byte) {
 	name := "postsvc"
 	m := make(map[string][]byte)
 
-	ids, err := mysqlmig.AssetDir("")
+	afs, err := asset.NewFS()
 	if err != nil {
 		return name, nil
 	}
 
-	for _, id := range ids {
-		d, err := mysqlmig.Asset(id)
+	sqls, err := fs.Glob(afs, "*.sql")
+	if err != nil {
+		return name, nil
+	}
+
+	for _, sql := range sqls {
+		f, err := afs.Open(sql)
 		if err != nil {
 			return name, nil
 		}
 
-		m[id] = d
+		m[sql], err = ioutil.ReadAll(f)
+		if err != nil {
+			return name, nil
+		}
 	}
 
 	return name, m
