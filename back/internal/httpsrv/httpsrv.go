@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/OpenEugene/openboard/back/internal/httpsrv/internal/embedded"
+	"github.com/OpenEugene/openboard/back/internal/httpsrv/internal/asset"
 	"github.com/OpenEugene/openboard/back/internal/pb"
 	"github.com/codemodus/chain/v2"
 	"github.com/codemodus/hedrs"
@@ -121,7 +121,7 @@ func (s *HTTPSrv) Stop() error {
 }
 
 func swaggerHandler(start time.Time, basePath, name string) (http.Handler, error) {
-	fs, err := embedded.NewFS()
+	fs, err := asset.NewFS()
 	if err != nil {
 		return nil, err
 	}
