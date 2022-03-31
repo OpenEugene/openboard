@@ -126,7 +126,7 @@ func swaggerHandler(start time.Time, basePath, name string) (http.Handler, error
 		return nil, err
 	}
 
-	f, err := fs.Open("apidocs.swagger.json")
+	f, err := fs.Open(name)
 	if err != nil {
 		return nil, err
 	}
@@ -144,9 +144,9 @@ func swaggerHandler(start time.Time, basePath, name string) (http.Handler, error
 	}
 
 	mt := start
-	i, err := f.Stat()
+	info, err := f.Stat()
 	if err == nil {
-		mt = i.ModTime()
+		mt = info.ModTime()
 	}
 
 	h := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
