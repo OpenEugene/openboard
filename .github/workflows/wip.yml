@@ -67,11 +67,10 @@ jobs:
 
             echo "pr title: ${prTitle}" # debug
 
-            git rev-parse --symbolic-full-name HEAD # debug
-
             hub pull-request \
               --assign "${GITHUB_ACTOR}" \
               --base main \
+              --head ${BRANCH_NAME} \
               --message "${prTitle}" \
               --message "Closes #${BRANCH_ISSUE}"
 

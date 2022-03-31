@@ -1,6 +1,6 @@
 module github.com/OpenEugene/openboard/back/cmd/openbsrv
 
-go 1.12
+go 1.16
 
 require (
 	github.com/OpenEugene/openboard/back/internal v0.0.0

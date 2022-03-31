@@ -1,17 +1,18 @@
 #!/usr/bin/env bash
 
 function main() {
-	local rootDir="$(dirname "${0}")"
-	local dirs=(\
-		"internal/pb" \
-		"internal/httpsrv" \
-	)
+  local rootDir="$(dirname "${0}")"
+  local embedDir=".embeds"
+  local dirs=(
+    "internal/pb"
+    "internal/httpsrv"
+  )
 
-	for dir in "${dirs[@]}"; do
-		pushd "${rootDir}/${dir}" &> /dev/null
-		go generate
-		popd &> /dev/null
-	done
+  for dir in "${dirs[@]}"; do
+    pushd "${rootDir}/${dir}" &> /dev/null
+    go generate
+    popd &> /dev/null
+  done
 }
 
 main
