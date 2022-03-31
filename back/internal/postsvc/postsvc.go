@@ -9,6 +9,7 @@ import (
 	"github.com/OpenEugene/openboard/back/internal/pb"
 	"github.com/OpenEugene/openboard/back/internal/postsvc/internal/asset"
 	"github.com/OpenEugene/openboard/back/internal/postsvc/internal/postdb"
+
 	"google.golang.org/grpc"
 )
 

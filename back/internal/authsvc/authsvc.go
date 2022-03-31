@@ -3,8 +3,9 @@ package authsvc
 import (
 	"context"
 
-	"github.com/OpenEugene/openboard/back/internal/pb"
 	"google.golang.org/grpc"
+
+	"github.com/OpenEugene/openboard/back/internal/pb"
 )
 
 var _ pb.AuthServer = &AuthSvc{}
@@ -30,7 +31,6 @@ func (s *AuthSvc) RegisterWithGRPCServer(g *grpc.Server) error {
 // AddAuth implements part of the pb.AuthServer interface.
 func (s *AuthSvc) AddAuth(ctx context.Context, req *pb.AddAuthReq) (*pb.AuthResp, error) {
 	// TODO: implement AddAuth
-
 	return nil, nil
 }
 

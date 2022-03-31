@@ -1,8 +1,9 @@
 package main
 
 import (
-	"github.com/OpenEugene/openboard/back/internal/httpsrv"
 	"github.com/codemodus/hedrs"
+
+	"github.com/OpenEugene/openboard/back/internal/httpsrv"
 )
 
 type httpSrv struct {

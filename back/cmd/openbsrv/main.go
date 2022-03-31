@@ -7,6 +7,9 @@ import (
 	"path"
 
 	"github.com/codemodus/sigmon/v2"
+
+	"github.com/OpenEugene/openboard/back/internal/dbg"
+	"github.com/OpenEugene/openboard/back/internal/log"
 )
 
 func main() {
@@ -28,6 +31,7 @@ func run() error {
 		migrate   bool
 		rollback  bool
 		skipsrv   bool
+		debug     bool
 		frontDir  = "../../../front/public"
 		migTblPfx = "mig_"
 	)
@@ -40,6 +44,7 @@ func run() error {
 	flag.BoolVar(&migrate, "migrate", migrate, "migrate up")
 	flag.BoolVar(&rollback, "rollback", rollback, "migrate dn")
 	flag.BoolVar(&skipsrv, "skipsrv", skipsrv, "skip server run")
+	flag.BoolVar(&debug, "debug", debug, "debug true or false")
 	flag.StringVar(&frontDir, "frontdir", frontDir, "front public assets directory")
 	flag.Parse()
 
@@ -47,6 +52,23 @@ func run() error {
 	sm.Start()
 	defer sm.Stop()
 
+	logCfg := log.Config{
+		Err: log.Output{
+			Out:    os.Stdout,
+			Prefix: "[ERROR] ",
+		},
+		Inf: log.Output{
+			Out:    os.Stdout,
+			Prefix: "[INFO] ",
+		},
+	}
+	log := log.New(logCfg)
+
+	if debug {
+		dbg.SetOut(os.Stdout)
+	}
+
+	dbg.Logf("set up SQL database at %s:%s.", dbaddr, dbport)
 	db, err := newSQLDB(dbdrvr, dbCreds(dbname, dbuser, dbpass, dbaddr, dbport))
 	if err != nil {
 		return err
@@ -67,7 +89,7 @@ func run() error {
 		if mres.HasError() {
 			return mres.ErrsErr()
 		}
-		fmt.Println(migType+":", mres)
+		log.Info("%s: %s", migType, mres)
 	}
 
 	if skipsrv {
@@ -93,7 +115,7 @@ func run() error {
 		}
 	})
 
-	fmt.Println("to gracefully stop the application, send signal like TERM (CTRL-C) or HUP")
+	log.Info("to gracefully stop the application, send signal like TERM (CTRL-C) or HUP")
 
 	return m.serve()
 }
